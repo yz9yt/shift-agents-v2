@@ -10,7 +10,7 @@ export const ToolCallSchema = z.object({
 });
 
 export const MessageSchema = z.object({
-  role: z.enum(["user", "assistant", "system", "tool"]),
+  role: z.enum(["user", "ai", "agent", "replay", "error"]),
   content: z.string().nullable(),
   tool_calls: z.array(ToolCallSchema).optional(),
   name: z.string().optional(),
@@ -42,6 +42,7 @@ export type BaseToolResult = {
   currentRequestRaw: string;
   error?: string;
   findings?: string;
+  pause?: boolean;
 };
 
 // Updated ToolFunction type that requires args to extend BaseToolArgs and return BaseToolResult
@@ -64,7 +65,7 @@ export type JITAgentConfig = {
   maxIterations?: number;
 };
 
-export type AgentStatus = "idle" | "thinking" | "calling-tool" | "error";
+export type AgentStatus = "paused" | "queryingAI" | "callingTools" | "sendingReplayRequest" | "error";
 
 export type OpenRouterConfig = {
   apiKey: string;
