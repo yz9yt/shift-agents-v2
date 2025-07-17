@@ -7,45 +7,73 @@ import "./styles/index.css";
 import type { FrontendSDK } from "./types";
 import App from "./views/App.vue";
 import { createPinia } from "pinia";
+import { useAgentStore } from "@/stores";
+import { createDOMManager } from "@/dom";
 
-// This is the entry point for the frontend plugin
 export const init = (sdk: FrontendSDK) => {
   const app = createApp(App);
 
-  // Load the PrimeVue component library
   app.use(PrimeVue, {
     unstyled: true,
     pt: Classic,
   });
 
-  // Create the Pinia store
   const pinia = createPinia();
   app.use(pinia);
 
-  // Provide the FrontendSDK
   app.use(SDKPlugin, sdk);
 
-  // Create the root element for the app
   const root = document.createElement("div");
   Object.assign(root.style, {
     height: "100%",
     width: "100%",
   });
 
-  // Set the ID of the root element
-  // Replace this with the value of the prefixWrap plugin in caido.config.ts
-  // This is necessary to prevent styling conflicts between plugins
-  root.id = `plugin--frontend-vue`;
+  root.id = `plugin--shift-agents`;
 
-  // Mount the app to the root element
   app.mount(root);
 
-  // Add the page to the navigation
-  // Make sure to use a unique name for the page
-  sdk.navigation.addPage("/my-plugin", {
+  sdk.navigation.addPage("/shift-agents", {
     body: root,
   });
 
-  // Add a sidebar item
-  sdk.sidebar.registerItem("My Plugin", "/my-plugin");
+  sdk.sidebar.registerItem("Shift Agents", "/shift-agents");
+
+  sdk.replay.addToSlot("topbar", {
+    type: "Button",
+    label: "Agent",
+    onClick: () => {
+      const agentStore = useAgentStore();
+      agentStore.toggleDrawer();
+    },
+  });
+
+  // TEMPORARY WORKAROUND FOR MISSING ONPAGECHANGE TYPE
+
+  // @ts-expect-error temporary workaround for missing onPageChange type
+  sdk.navigation.onPageChange = () => {};
+
+  let currentPage: string | undefined = undefined;
+  setInterval(() => {
+    const newPage = window.location.hash;
+    if (currentPage !== newPage) {
+      currentPage = newPage;
+      // @ts-expect-error temporary workaround for missing onPageChange type
+      sdk.navigation.onPageChange(newPage);
+    }
+  }, 50);
+
+  const domManager = createDOMManager(sdk);
+  domManager.drawer.start();
+  domManager.session.start();
+
+  domManager.session.onSelected((sessionId) => {
+    const agentStore = useAgentStore();
+    if (sessionId) {
+      if (!agentStore.getAgent(sessionId)) {
+        agentStore.createAgentFromSessionId(sessionId);
+      }
+      agentStore.selection.selectAgent(sessionId);
+    }
+  });
 };

@@ -1,7 +1,6 @@
 import { type Caido } from "@caido/sdk-frontend";
-import { type API } from "backend";
 
-export type FrontendSDK = Caido<API, Record<string, never>>;
+export type FrontendSDK = Caido<Record<string, never>, Record<string, never>>;
 
 export type Storage = {
   globalAgents: Agent[];
@@ -24,11 +23,11 @@ export type Tool = {
 };
 
 export enum AgentState {
-  Paused = 'paused', // Agent has been paused. This state occurs when 
-  Restarted = 'restarted',
-  Error = 'error',
-  WaitingOnAI = 'running - waiting on ai',
-  ReadyToImplementActions = 'idle - ready to implement actions', 
-  WaitingOnReplay = 'running - waiting on replay',
-  ReadyToTellAI = 'idle - ready to tell ai'
+  Paused = "paused", // Agent has been paused. This state occurs when
+  Restarted = "restarted",
+  Error = "error",
+  WaitingOnAI = "running - waiting on ai",
+  ReadyToImplementActions = "idle - ready to implement actions",
+  WaitingOnReplay = "running - waiting on replay",
+  ReadyToTellAI = "idle - ready to tell ai",
 }

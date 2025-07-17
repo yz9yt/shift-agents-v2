@@ -44,6 +44,9 @@ importers:
       '@caido/primevue':
         specifier: 0.1.2
         version: 0.1.2
+      '@vueuse/core':
+        specifier: ^13.5.0
+        version: 13.5.0(vue@3.4.37(typescript@5.5.4))
       pinia:
         specifier: ^3.0.3
         version: 3.0.3(typescript@5.5.4)(vue@3.4.37(typescript@5.5.4))
@@ -61,8 +64,8 @@ importers:
         specifier: ^0.46.0
         version: 0.46.0
       '@caido/sdk-frontend':
-        specifier: ^0.46.0
-        version: 0.46.0(@codemirror/view@6.28.1)
+        specifier: ^0.49.0
+        version: 0.49.0(@codemirror/state@6.5.2)(@codemirror/view@6.28.1)(vue@3.4.37(typescript@5.5.4))
       '@codemirror/view':
         specifier: 6.28.1
         version: 6.28.1
@@ -119,10 +122,12 @@ packages:
   '@caido/sdk-backend@0.46.0':
     resolution: {integrity: sha512-peUKW/4Nrw9WVxIahc+6KrVtxA7vsbpuJqOoBxudxq7tQJ+cV9IEqzvYoFFo8KlnrTkeUQUJvd0W4WsM3HgxEg==, tarball: https://registry.npmjs.org/@caido/sdk-backend/-/sdk-backend-0.46.0.tgz}
 
-  '@caido/sdk-frontend@0.46.0':
-    resolution: {integrity: sha512-yCSxRKiSXMVjbyvdrB2eTKCLS8ArcbSsYUgyIhGum3AmvuHwLX255mV5JV+M0FUpC1jdKaP9zhSSZandgPRqrg==, tarball: https://registry.npmjs.org/@caido/sdk-frontend/-/sdk-frontend-0.46.0.tgz}
+  '@caido/sdk-frontend@0.49.0':
+    resolution: {integrity: sha512-dvt4FzFWj4MMCtFH0XiuoEgEWmUwDsmFQo3iCZiCeZzybKpYDs2/fh1wz7/Ue/rCsHMIwqI5NtvKy5a9V0sGNg==, tarball: https://registry.npmjs.org/@caido/sdk-frontend/-/sdk-frontend-0.49.0.tgz}
     peerDependencies:
+      '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
+      vue: ^3.0.0
 
   '@caido/sdk-shared@0.1.1':
     resolution: {integrity: sha512-JAV5ajUqxZdXYPTmDEvIKBZon8I5uHq44ATj0Nj3BVpllRDUGY9kcBd+PXMD50+3lv1CvhR3/f6q24T0+4aVJQ==, tarball: https://registry.npmjs.org/@caido/sdk-shared/-/sdk-shared-0.1.1.tgz}
@@ -529,6 +534,9 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==, tarball: https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz}
 
+  '@types/web-bluetooth@0.0.21':
+    resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==, tarball: https://registry.npmjs.org/@types/web-bluetooth/-/web-bluetooth-0.0.21.tgz}
+
   '@typescript-eslint/eslint-plugin@8.26.1':
     resolution: {integrity: sha512-2X3mwqsj9Bd3Ciz508ZUtoQQYpOhU/kWoUqIf49H8Z0+Vbh6UF/y0OEYp0Q0axOGzaBGs7QxRwq0knSQ8khQNA==, tarball: https://registry.npmjs.org/@typescript-eslint/eslint-plugin/-/eslint-plugin-8.26.1.tgz}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -649,6 +657,19 @@ packages:
 
   '@vue/shared@3.5.17':
     resolution: {integrity: sha512-CabR+UN630VnsJO/jHWYBC1YVXyMq94KKp6iF5MQgZJs5I8cmjw6oVMO1oDbtBkENSHSSn/UadWlW/OAgdmKrg==, tarball: https://registry.npmjs.org/@vue/shared/-/shared-3.5.17.tgz}
+
+  '@vueuse/core@13.5.0':
+    resolution: {integrity: sha512-wV7z0eUpifKmvmN78UBZX8T7lMW53Nrk6JP5+6hbzrB9+cJ3jr//hUlhl9TZO/03bUkMK6gGkQpqOPWoabr72g==, tarball: https://registry.npmjs.org/@vueuse/core/-/core-13.5.0.tgz}
+    peerDependencies:
+      vue: ^3.5.0
+
+  '@vueuse/metadata@13.5.0':
+    resolution: {integrity: sha512-euhItU3b0SqXxSy8u1XHxUCdQ8M++bsRs+TYhOLDU/OykS7KvJnyIFfep0XM5WjIFry9uAPlVSjmVHiqeshmkw==, tarball: https://registry.npmjs.org/@vueuse/metadata/-/metadata-13.5.0.tgz}
+
+  '@vueuse/shared@13.5.0':
+    resolution: {integrity: sha512-K7GrQIxJ/ANtucxIXbQlUHdB0TPA8c+q5i+zbrjxuhJCnJ9GtBg75sBSnvmLSxHKPg2Yo8w62PWksl9kwH0Q8g==, tarball: https://registry.npmjs.org/@vueuse/shared/-/shared-13.5.0.tgz}
+    peerDependencies:
+      vue: ^3.5.0
 
   accepts@2.0.0:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==, tarball: https://registry.npmjs.org/accepts/-/accepts-2.0.0.tgz}
@@ -2520,9 +2541,11 @@ snapshots:
       '@caido/quickjs-types': 0.17.2
       '@caido/sdk-shared': 0.1.1
 
-  '@caido/sdk-frontend@0.46.0(@codemirror/view@6.28.1)':
+  '@caido/sdk-frontend@0.49.0(@codemirror/state@6.5.2)(@codemirror/view@6.28.1)(vue@3.4.37(typescript@5.5.4))':
     dependencies:
+      '@codemirror/state': 6.5.2
       '@codemirror/view': 6.28.1
+      vue: 3.4.37(typescript@5.5.4)
 
   '@caido/sdk-shared@0.1.1': {}
 
@@ -2813,6 +2836,8 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
+  '@types/web-bluetooth@0.0.21': {}
+
   '@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.31.0(jiti@2.4.2))(typescript@5.5.4))(eslint@9.31.0(jiti@2.4.2))(typescript@5.5.4)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
@@ -3011,6 +3036,19 @@ snapshots:
   '@vue/shared@3.4.37': {}
 
   '@vue/shared@3.5.17': {}
+
+  '@vueuse/core@13.5.0(vue@3.4.37(typescript@5.5.4))':
+    dependencies:
+      '@types/web-bluetooth': 0.0.21
+      '@vueuse/metadata': 13.5.0
+      '@vueuse/shared': 13.5.0(vue@3.4.37(typescript@5.5.4))
+      vue: 3.4.37(typescript@5.5.4)
+
+  '@vueuse/metadata@13.5.0': {}
+
+  '@vueuse/shared@13.5.0(vue@3.4.37(typescript@5.5.4))':
+    dependencies:
+      vue: 3.4.37(typescript@5.5.4)
 
   accepts@2.0.0:
     dependencies:
