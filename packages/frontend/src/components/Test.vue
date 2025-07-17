@@ -4,8 +4,6 @@ import { useAgentStore } from "../stores/agent";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Panel from "primevue/panel";
-import Badge from "primevue/badge";
-import Card from "primevue/card";
 
 const agentStore = useAgentStore();
 const newMessage = ref("");
@@ -14,21 +12,6 @@ const userMessages = computed(() =>
   agentStore.selectedAgent?.conversation.filter((msg) => msg.role !== "system") || []
 );
 
-const getStatusSeverity = (status: string) => {
-  switch (status) {
-    case "idle": return "success";
-    case "thinking": return "info";
-    case "calling-tool": return "warning";
-    case "error": return "danger";
-    default: return "secondary";
-  }
-};
-
-const messageClass = (role: string) => ({
-  "user-message": role === "user",
-  "assistant-message": role === "assistant",
-  "tool-message": role === "tool",
-});
 
 const sendMessage = async () => {
   if (!newMessage.value.trim() || !agentStore.selectedAgent) return;
@@ -45,35 +28,25 @@ const sendMessage = async () => {
 </script>
 
 <template>
-  <Panel class="agent-chat">
+  <Panel>
     <template #header>
-      <div class="flex align-items-center justify-content-between w-full">
-        <h3 class="m-0">{{ agentStore.selectedAgent?.name }}</h3>
-        <Badge
-          :value="agentStore.selectedAgent?.currentStatus"
-          :severity="getStatusSeverity(agentStore.selectedAgent?.currentStatus || '')"
-        />
+      <div class="flex justify-between items-center w-full">
+        <h3 class="text-lg font-semibold">{{ agentStore.selectedAgent?.name }}</h3>
+        <span class="text-sm bg-surface-700 text-white px-2 py-1 rounded">{{ agentStore.selectedAgent?.currentStatus }}</span>
       </div>
     </template>
 
-    <div class="flex flex-column gap-3">
-      <div class="messages-container" style="height: 400px; overflow-y: auto;">
-        <Card
+    <div class="space-y-4">
+      <div class="h-96 overflow-y-auto border rounded p-4 space-y-3">
+        <div
           v-for="(message, index) in userMessages"
           :key="index"
-          :class="messageClass(message.role)"
-          class="message-card"
+          class="p-3 rounded"
+          :class="message.role === 'user' ? 'bg-surface-900 text-white ml-8' : 'bg-surface-700 text-white mr-8'"
         >
-          <template #content>
-            <div class="flex flex-column gap-2">
-              <Badge
-                :value="message.role"
-                :severity="message.role === 'user' ? 'info' : 'success'"
-              />
-              <p class="m-0">{{ message.content }}</p>
-            </div>
-          </template>
-        </Card>
+          <div class="text-xs font-medium text-gray-300 mb-1">{{ message.role }}</div>
+          <div>{{ message.content }}</div>
+        </div>
       </div>
 
       <div class="flex gap-2">
@@ -88,34 +61,8 @@ const sendMessage = async () => {
           @click="sendMessage"
           :disabled="!newMessage.trim() || agentStore.selectedAgent?.currentStatus !== 'idle'"
           label="Send"
-          icon="pi pi-send"
         />
       </div>
     </div>
   </Panel>
 </template>
-
-<style scoped>
-.message-card {
-  margin-bottom: 0.75rem;
-}
-
-.user-message {
-  margin-left: 2rem;
-}
-
-.assistant-message {
-  margin-right: 2rem;
-}
-
-.tool-message {
-  background-color: var(--surface-100);
-}
-
-.messages-container {
-  border: 1px solid var(--surface-border);
-  border-radius: var(--border-radius);
-  padding: 1rem;
-  background-color: var(--surface-50);
-}
-</style>

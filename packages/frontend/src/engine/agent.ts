@@ -78,13 +78,13 @@ export class Agent {
             }
           } else {
             this.status = "idle";
-            break;
+            return;
           }
           break;
         case "Error":
           this.status = "error";
           console.error(`Agent ${this.id} error:`, result.error);
-          break;
+          return;
       }
 
       iterations++;

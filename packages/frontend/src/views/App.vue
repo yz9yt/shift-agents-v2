@@ -43,21 +43,13 @@ const createNewAgent = () => {
   });
 };
 
-const getStatusSeverity = (status: string) => {
-  switch (status) {
-    case "idle": return "success";
-    case "thinking": return "info";
-    case "calling-tool": return "warning";
-    case "error": return "danger";
-    default: return "secondary";
-  }
-};
+
 </script>
 
 <template>
-  <div class="p-4">
-    <Panel v-if="agentStore.agents.length === 0" header="Create Your First Agent">
-      <div class="flex flex-column gap-3">
+  <div class="p-6 max-w-4xl mx-auto">
+    <Panel v-if="agentStore.agents.length === 0" header="Create Your First Agent" class="mb-6">
+      <div class="space-y-4">
         <InputText
           v-model="apiKey"
           placeholder="Enter your API key"
@@ -66,51 +58,34 @@ const getStatusSeverity = (status: string) => {
         <Button
           @click="createAgent"
           label="Create Agent"
-          icon="pi pi-plus"
           class="w-full"
         />
       </div>
     </Panel>
 
-    <div v-else class="flex flex-column gap-4">
-      <Panel header="Agent Management">
-        <div class="flex flex-column gap-3">
-          <div class="flex flex-wrap gap-3">
-            <Card
+    <div v-else class="space-y-6">
+      <Panel header="Agents" class="mb-6">
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
               v-for="agent in agentStore.agents"
               :key="agent.id"
-              class="agent-card cursor-pointer"
-              :class="{ 'selected-agent': agentStore.selectedAgentId === agent.id }"
+              class="cursor-pointer border-2 p-4 rounded"
               @click="agentStore.selectAgent(agent.id)"
             >
-              <template #title>
-                <div class="flex align-items-center justify-content-between">
-                  <span>{{ agent.name }}</span>
-                  <Badge
-                    v-if="agentStore.selectedAgentId === agent.id"
-                    value="Active"
-                    severity="success"
-                  />
-                </div>
-              </template>
-              <template #subtitle>
-                {{ agent.id }}
-              </template>
-              <template #content>
-                <Badge
-                  :value="agent.currentStatus"
-                  :severity="getStatusSeverity(agent.currentStatus)"
-                />
-              </template>
-            </Card>
+              <h3 class="font-semibold text-lg">{{ agent.name }}</h3>
+              <p class="text-sm text-gray-600 mb-2">{{ agent.id }}</p>
+              <div class="flex justify-between items-center">
+                <span class="text-sm">{{ agent.currentStatus }}</span>
+                <span v-if="agentStore.selectedAgentId === agent.id" class="text-blue-600 font-medium">Selected</span>
+              </div>
+            </div>
           </div>
 
           <Button
             @click="createNewAgent"
             label="Create New Agent"
-            icon="pi pi-plus"
             outlined
-            class="w-max"
           />
         </div>
       </Panel>
@@ -119,21 +94,3 @@ const getStatusSeverity = (status: string) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.agent-card {
-  min-width: 250px;
-  max-width: 300px;
-  transition: all 0.2s ease;
-}
-
-.agent-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.selected-agent {
-  border: 2px solid var(--primary-color);
-  box-shadow: 0 2px 8px rgba(var(--primary-color-rgb), 0.3);
-}
-</style>
