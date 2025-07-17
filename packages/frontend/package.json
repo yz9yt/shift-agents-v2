@@ -7,8 +7,10 @@
   },
   "dependencies": {
     "@caido/primevue": "0.1.2",
+    "pinia": "^3.0.3",
     "primevue": "4.1.0",
-    "vue": "3.4.37"
+    "vue": "3.4.37",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@caido/sdk-backend": "^0.46.0",

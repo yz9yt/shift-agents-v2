@@ -6,6 +6,7 @@ import { SDKPlugin } from "./plugins/sdk";
 import "./styles/index.css";
 import type { FrontendSDK } from "./types";
 import App from "./views/App.vue";
+import { createPinia } from "pinia";
 
 // This is the entry point for the frontend plugin
 export const init = (sdk: FrontendSDK) => {
@@ -16,6 +17,10 @@ export const init = (sdk: FrontendSDK) => {
     unstyled: true,
     pt: Classic,
   });
+
+  // Create the Pinia store
+  const pinia = createPinia();
+  app.use(pinia);
 
   // Provide the FrontendSDK
   app.use(SDKPlugin, sdk);
