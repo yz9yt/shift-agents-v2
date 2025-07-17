@@ -1,19 +1,29 @@
-import type { Message, ToolCall, AgentConfig, AgentStatus, OpenRouterConfig } from "./types";
+import type { Message, ToolCall, AgentConfig, AgentStatus, OpenRouterConfig, BaseToolResult } from "./types";
 import { TOOLS, type ToolName } from "./tools";
 import { LLMClient } from "./client";
+import { FrontendSDK } from "@/types";
+import { getCurrentReplayRequestRaw } from "./tools/tempUtils";
 
 export class Agent {
   private messages: Message[] = [];
   private llmClient: LLMClient;
   private status: AgentStatus = "idle";
   private maxIterations: number;
+  private replaySessionId: number;
+  private sdk: FrontendSDK;
 
-  constructor(private config: AgentConfig, openRouterConfig: OpenRouterConfig) {
+  constructor( sdk: FrontendSDK, private config: AgentConfig, openRouterConfig: OpenRouterConfig) {
+    if (!config.jitConfig) {
+      throw new Error("JIT config is required");
+    }
+    this.replaySessionId = config.jitConfig.replaySessionId;
     this.llmClient = new LLMClient(openRouterConfig);
-    this.maxIterations = config.maxIterations ?? 5;
+    this.maxIterations = config.jitConfig.maxIterations || 50;
+    this.sdk = sdk;
+    const initialPrompt = `<SYSTEM_PROMPT>${config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`
     this.messages.push({
       role: "system",
-      content: config.systemPrompt,
+      content: initialPrompt,
     });
   }
 
@@ -33,7 +43,11 @@ export class Agent {
     return [...this.messages];
   }
 
-  private async handleToolCall(toolCall: ToolCall): Promise<Message> {
+  private async currentRequestRaw() {
+    return await getCurrentReplayRequestRaw(this.sdk, this.replaySessionId);
+  }
+
+  private async handleToolCall(toolCall: ToolCall, currentRequestRaw: string): Promise<BaseToolResult> {
     const toolName = toolCall.function.name as ToolName;
     const tool = TOOLS[toolName];
 
@@ -42,14 +56,20 @@ export class Agent {
     }
 
     const rawArgs = JSON.parse(toolCall.function.arguments);
-    const validatedArgs = tool.schema.parse(rawArgs);
-    const result = await tool.handler(validatedArgs);
+    // Inject rawRequest into the arguments
+    const argsWithRawRequest = {
+      rawRequest: currentRequestRaw,
+      ...rawArgs,
+    };
+    // Use type assertion since we know the tool type at runtime
+    const validatedArgs = tool.schema.parse(argsWithRawRequest as any);
+    const result = await (tool.handler as any)(validatedArgs);
 
     return {
-      role: "tool",
-      tool_call_id: toolCall.id,
-      name: toolName,
-      content: JSON.stringify(result),
+      currentRequestRaw: result.currentRequestRaw,
+      success: result.success,
+      error: result.error,
+      findings: result.findings,
     };
   }
 
@@ -71,9 +91,11 @@ export class Agent {
 
           if (result.data.tool_calls?.length) {
             this.status = "calling-tool";
-
+            let currentRequestRaw = await this.currentRequestRaw();
             for (const toolCall of result.data.tool_calls) {
-              const toolResponse = await this.handleToolCall(toolCall);
+              const toolResponse = await this.handleToolCall(toolCall, currentRequestRaw);
+              currentRequestRaw = toolResponse.currentRequestRaw;
+              //Update the messages here and also update the raw request and send.
               this.messages.push(toolResponse);
             }
           } else {

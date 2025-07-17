@@ -28,7 +28,24 @@ export const LLMResponseSchema = z.object({
 export type Message = z.infer<typeof MessageSchema>;
 export type ToolCall = z.infer<typeof ToolCallSchema>;
 
-export type ToolFunction<TInput = unknown, TOutput = unknown> = {
+// Base schema that all tool argument schemas should extend
+export const BaseToolArgsSchema = z.object({
+  rawRequest: z.string(),
+});
+
+// Base type that all tool arguments must extend
+export type BaseToolArgs = z.infer<typeof BaseToolArgsSchema>;
+
+// Base return type that all tools must return
+export type BaseToolResult = {
+  success: boolean;
+  currentRequestRaw: string;
+  error?: string;
+  findings?: string;
+};
+
+// Updated ToolFunction type that requires args to extend BaseToolArgs and return BaseToolResult
+export type ToolFunction<TInput extends BaseToolArgs = BaseToolArgs, TOutput extends BaseToolResult = BaseToolResult> = {
   schema: z.ZodSchema<TInput>;
   handler: (args: TInput) => Promise<TOutput>;
   description: string;
@@ -38,6 +55,12 @@ export type AgentConfig = {
   id: string;
   name: string;
   systemPrompt: string;
+  jitConfig?: JITAgentConfig;
+};
+
+export type JITAgentConfig = {
+  replaySessionId: number;
+  jitInstructions: string;
   maxIterations?: number;
 };
 
