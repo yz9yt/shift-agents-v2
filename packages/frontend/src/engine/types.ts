@@ -55,7 +55,7 @@ export type AgentConfig = {
   id: string;
   name: string;
   systemPrompt: string;
-  jitConfig?: JITAgentConfig;
+  jitConfig: JITAgentConfig;
 };
 
 export type JITAgentConfig = {

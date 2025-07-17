@@ -7,10 +7,10 @@ import tailwindCaido from "@caido/tailwindcss";
 import path from "path";
 import prefixwrap from "postcss-prefixwrap";
 
-const id = "frontend-vue";
+const id = "shift-agents";
 export default defineConfig({
   id,
-  name: "Frontend Vue",
+  name: "Shift Agents",
   description: "Plugin template with frontend using VueJS",
   version: "0.0.0",
   author: {
@@ -20,32 +20,24 @@ export default defineConfig({
   },
   plugins: [
     {
-      kind: "backend",
-      id: "backend",
-      root: "packages/backend",
-    },
-    {
       kind: 'frontend',
       id: "frontend",
       root: 'packages/frontend',
-      backend: {
-        id: "backend",
-      },
       vite: {
         plugins: [vue()],
         build: {
           rollupOptions: {
             external: [
-              '@caido/frontend-sdk', 
-              "@codemirror/state", 
-              "@codemirror/view", 
-              "@codemirror/autocomplete", 
-              "@codemirror/commands", 
-              "@codemirror/lint", 
-              "@codemirror/search", 
-              "@codemirror/language", 
-              "@lezer/common", 
-              "@lezer/highlight", 
+              '@caido/frontend-sdk',
+              "@codemirror/state",
+              "@codemirror/view",
+              "@codemirror/autocomplete",
+              "@codemirror/commands",
+              "@codemirror/lint",
+              "@codemirror/search",
+              "@codemirror/language",
+              "@lezer/common",
+              "@lezer/highlight",
               "@lezer/lr"
             ]
           }

@@ -1,4 +1,11 @@
-import type { Message, ToolCall, AgentConfig, AgentStatus, OpenRouterConfig, BaseToolResult } from "./types";
+import type {
+  Message,
+  ToolCall,
+  AgentConfig,
+  AgentStatus,
+  OpenRouterConfig,
+  BaseToolResult,
+} from "./types";
 import { TOOLS, type ToolName } from "./tools";
 import { LLMClient } from "./client";
 import { FrontendSDK } from "@/types";
@@ -12,7 +19,11 @@ export class Agent {
   private replaySessionId: number;
   private sdk: FrontendSDK;
 
-  constructor( sdk: FrontendSDK, private config: AgentConfig, openRouterConfig: OpenRouterConfig) {
+  constructor(
+    sdk: FrontendSDK,
+    private config: AgentConfig,
+    openRouterConfig: OpenRouterConfig
+  ) {
     if (!config.jitConfig) {
       throw new Error("JIT config is required");
     }
@@ -20,7 +31,7 @@ export class Agent {
     this.llmClient = new LLMClient(openRouterConfig);
     this.maxIterations = config.jitConfig.maxIterations || 50;
     this.sdk = sdk;
-    const initialPrompt = `<SYSTEM_PROMPT>${config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`
+    const initialPrompt = `<SYSTEM_PROMPT>${config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`;
     this.messages.push({
       role: "system",
       content: initialPrompt,
@@ -47,7 +58,10 @@ export class Agent {
     return await getCurrentReplayRequestRaw(this.sdk, this.replaySessionId);
   }
 
-  private async handleToolCall(toolCall: ToolCall, currentRequestRaw: string): Promise<BaseToolResult> {
+  private async handleToolCall(
+    toolCall: ToolCall,
+    currentRequestRaw: string
+  ): Promise<BaseToolResult> {
     const toolName = toolCall.function.name as ToolName;
     const tool = TOOLS[toolName];
 
@@ -93,7 +107,10 @@ export class Agent {
             this.status = "calling-tool";
             let currentRequestRaw = await this.currentRequestRaw();
             for (const toolCall of result.data.tool_calls) {
-              const toolResponse = await this.handleToolCall(toolCall, currentRequestRaw);
+              const toolResponse = await this.handleToolCall(
+                toolCall,
+                currentRequestRaw
+              );
               currentRequestRaw = toolResponse.currentRequestRaw;
               //Update the messages here and also update the raw request and send.
               this.messages.push(toolResponse);
