@@ -5,6 +5,7 @@ import type {
   AgentStatus,
   OpenRouterConfig,
   BaseToolResult,
+  Finding,
 } from "./types";
 import { TOOLS, type ToolName } from "./tools";
 import { LLMClient } from "./client";
@@ -52,6 +53,15 @@ export class Agent {
 
   get conversation() {
     return [...this.messages];
+  }
+
+  private async addFinding(finding: Finding) {
+    // We need to find a way to get the correct requestId from the currentReplayRequest.For now, using replaySessionID even tho that's wrong.
+    this.sdk.findings.createFinding(this.replaySessionId.toString(), {
+      title: finding.title,
+      description: finding.markdown,
+      reporter: "Shift Agent - " + this.name + " - " + this.replaySessionId,
+    });
   }
 
   private async currentRequestRaw() {
@@ -128,6 +138,11 @@ export class Agent {
                 currentRequestRaw
               );
               currentRequestRaw = toolResponse.currentRequestRaw;
+              if (toolResponse.findings) {
+                for (const finding of toolResponse.findings) {
+                  await this.addFinding(finding);
+                }
+              }
               if (toolResponse.pause) {
                 this.status = "paused";
                 return;

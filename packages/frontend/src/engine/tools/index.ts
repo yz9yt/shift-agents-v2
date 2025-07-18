@@ -7,6 +7,8 @@ import { setHeader } from "./setHeader";
 import { setQueryParameter } from "./setQueryParameter";
 import { removeQueryParameter } from "./removeQueryParameter";
 import { removeHeader } from "./removeHeader";
+import { pause } from "./pause";
+import { addFinding } from "./addFinding";
 
 export const TOOLS = {
   alert,
@@ -18,6 +20,8 @@ export const TOOLS = {
   setQueryParameter,
   removeQueryParameter,
   removeHeader,
+  pause,
+  addFinding,
 } as const;
 
 export type ToolName = keyof typeof TOOLS;

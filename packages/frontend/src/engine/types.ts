@@ -41,8 +41,13 @@ export type BaseToolResult = {
   success: boolean;
   currentRequestRaw: string;
   error?: string;
-  findings?: string;
+  findings?: Finding[];
   pause?: boolean;
+};
+
+export type Finding = {
+  title: string;
+  markdown: string;
 };
 
 // Updated ToolFunction type that requires args to extend BaseToolArgs and return BaseToolResult
