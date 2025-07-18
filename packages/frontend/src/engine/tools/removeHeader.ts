@@ -13,13 +13,24 @@ export const removeHeader: ToolFunction<RemoveHeaderArgs, BaseToolResult> = {
   description: "Remove a request header with the given name",
   handler: async (args) => {
     try {
-      // TODO: Implement actual remove header functionality
-      console.log(`Removing header: "${args.name}"`);
-      
+      const lines = args.rawRequest.split('\n');
+      const headerEnd = lines.findIndex(line => line === '');
+      if (headerEnd === -1) {
+        throw new Error('Invalid HTTP request - no header/body separator found');
+      }
+
+      const headers = lines.slice(0, headerEnd);
+      const rest = lines.slice(headerEnd);
+
+      const filteredHeaders = headers.filter(line => {
+        const [headerName] = line.split(':');
+        return headerName?.toLowerCase() !== args.name.toLowerCase();
+      });
+
+      const newRequest = [...filteredHeaders, ...rest].join('\n');
       return {
         success: true,
-        currentRequestRaw: args.rawRequest,
-        findings: `Header "${args.name}" removed`,
+        currentRequestRaw: newRequest
       };
     } catch (error) {
       return {

@@ -14,13 +14,11 @@ export const matchAndReplace: ToolFunction<MatchAndReplaceArgs, BaseToolResult> 
   description: "Match and replace text content",
   handler: async (args) => {
     try {
-      // TODO: Implement actual match and replace functionality
-      console.log(`Matching "${args.match}" and replacing with "${args.replace}"`);
+      const replaced = args.rawRequest.replace(args.match, args.replace);
       
       return {
         success: true,
-        currentRequestRaw: args.rawRequest,
-        findings: `Matched "${args.match}" and replaced with "${args.replace}"`,
+        currentRequestRaw: replaced
       };
     } catch (error) {
       return {

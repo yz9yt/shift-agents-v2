@@ -13,12 +13,24 @@ export const setBody: ToolFunction<SetBodyArgs, BaseToolResult> = {
   description: "Set the request body content",
   handler: async (args) => {
     try {
-      // TODO: Implement actual body setting functionality
-      console.log(`Setting body to: "${args.body}"`);
+      const lines = args.rawRequest.split('\n');
+      const headerEnd = lines.findIndex((line, index) => {
+        return line === '' && lines[index + 1] === '';
+      });
       
+      if (headerEnd === -1) {
+        throw new Error('Invalid HTTP request - no double newline separator found');
+      }
+
+      // Keep headers up to the double newline
+      const headers = lines.slice(0, headerEnd + 1).join('\n');
+      
+      // Replace everything after the double newline with new body
+      const newRequest = `${headers}\r\n${args.body}`; // Not sure about the \r\n, we'll have to see how that works.
+
       return {
         success: true,
-        currentRequestRaw: args.rawRequest,
+        currentRequestRaw: newRequest,
         findings: `Request body set to: "${args.body}"`,
       };
     } catch (error) {
