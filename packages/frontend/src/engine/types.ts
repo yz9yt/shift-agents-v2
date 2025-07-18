@@ -24,16 +24,20 @@ export const APILLMResponseSchema = z.object({
     })
   ),
 });
-
 export type APIMessage = z.infer<typeof APIMessageSchema>;
 export type APIToolCall = z.infer<typeof APIToolCallSchema>;
+
+export type Finding = {
+  title: string;
+  markdown: string;
+};
 
 export type BaseToolResult =
   | {
       kind: "Success";
       data: {
         newRequestRaw: string;
-        findings: string;
+        findings: Finding[];
         pause?: boolean;
       };
     }
@@ -44,25 +48,15 @@ export type BaseToolResult =
       };
     };
 
-// Base type that all tool arguments must extend
-export type BaseToolArgs = z.infer<typeof BaseToolArgsSchema>;
-
-// Base return type that all tools must return
-export type BaseToolResult = {
-  success: boolean;
-  currentRequestRaw: string;
-  error?: string;
-  findings?: Finding[];
-  pause?: boolean;
+export type ToolContext = {
+  replaySessionRequestRaw: string;
+  replaySessionId: number;
 };
 
-export type Finding = {
-  title: string;
-  markdown: string;
-};
-
-// Updated ToolFunction type that requires args to extend BaseToolArgs and return BaseToolResult
-export type ToolFunction<TInput extends BaseToolArgs = BaseToolArgs, TOutput extends BaseToolResult = BaseToolResult> = {
+export type ToolFunction<
+  TInput = unknown,
+  TOutput = unknown
+> = {
   schema: z.ZodSchema<TInput>;
   handler: (args: TInput, context: ToolContext) => Promise<TOutput>;
   description: string;

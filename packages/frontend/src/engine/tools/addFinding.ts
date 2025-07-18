@@ -1,8 +1,7 @@
 import { z } from "zod";
-import type { ToolFunction, BaseToolResult } from "../types";
-import { BaseToolArgsSchema } from "../types";
+import type { ToolFunction, BaseToolResult, Finding } from "../types";
 
-const AddFindingSchema = BaseToolArgsSchema.extend({
+const AddFindingSchema = z.object({
   title: z.string().min(1),
   markdown: z.string().min(1),
 });
@@ -12,21 +11,27 @@ type AddFindingArgs = z.infer<typeof AddFindingSchema>;
 export const addFinding: ToolFunction<AddFindingArgs, BaseToolResult> = {
   schema: AddFindingSchema,
   description: "Add a finding with a title and markdown description",
-  handler: async (args) => {
+  handler: async (args, context) => {
     try {
-      const finding = `**${args.title}**\n\n${args.markdown}`;
-      
+      const finding: Finding = {
+        title: args.title,
+        markdown: args.markdown,
+      };
+
       return {
-        success: true,
-        currentRequestRaw: args.rawRequest,
-        findings: finding,
+        kind: "Success",
+        data: {
+          newRequestRaw: context.replaySessionRequestRaw,
+          findings: [finding],
+        },
       };
     } catch (error) {
       return {
-        success: false,
-        currentRequestRaw: args.rawRequest,
-        error: `Failed to add finding: ${error instanceof Error ? error.message : String(error)}`,
+        kind: "Error",
+        data: {
+          error: `Failed to add finding: ${error instanceof Error ? error.message : String(error)}`,
+        },
       };
     }
   },
-}; 
+};

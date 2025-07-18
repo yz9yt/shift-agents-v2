@@ -13,22 +13,29 @@ export const setMethod: ToolFunction<SetMethodArgs, BaseToolResult> = {
   description: "Set the request method",
   handler: async (args) => {
     try {
-      const lines = args.rawRequest.split('\r\n');
+      const lines = args.rawRequest.split("\r\n");
       if (lines.length === 0 || !lines[0]) {
-        throw new Error('Invalid HTTP request - empty request');
+        throw new Error("Invalid HTTP request - empty request");
       }
 
-      const [method, path, protocol] = lines[0].split(' ');
+      const [method, path, protocol] = lines[0].split(" ");
       if (!method || !protocol || !path) {
-        throw new Error('Invalid HTTP request - malformed request line');
+        throw new Error("Invalid HTTP request - malformed request line");
       }
 
-      const newRequest = `${args.method} ${path} ${protocol}\r\n${lines.slice(1).join('\r\n')}`;
+      const newRequest = `${args.method} ${path} ${protocol}\r\n${lines
+        .slice(1)
+        .join("\r\n")}`;
       return {
         kind: "Success",
         data: {
           newRequestRaw: newRequest,
-          findings: `Request method set to: "${args.method}"`,
+          findings: [
+            {
+              title: `Request method set to: "${args.method}"`,
+              markdown: `Request method set to: "${args.method}"`,
+            },
+          ],
         },
       };
     } catch (error) {

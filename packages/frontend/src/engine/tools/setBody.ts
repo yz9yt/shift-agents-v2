@@ -34,7 +34,12 @@ export const setBody: ToolFunction<SetBodyArgs, BaseToolResult> = {
         kind: "Success",
         data: {
           newRequestRaw: newRequest,
-          findings: `Request body set to: "${args.body}"`,
+          findings: [
+            {
+              title: `Request body set to: "${args.body}"`,
+              markdown: `Request body set to: "${args.body}"`,
+            },
+          ],
         },
       };
     } catch (error) {

@@ -6,6 +6,7 @@ import type {
   OpenRouterConfig,
   BaseToolResult,
   Finding,
+  ToolContext,
 } from "./types";
 import { TOOLS, type ToolName } from "./tools";
 import { LLMClient } from "./client";
@@ -28,6 +29,14 @@ export class Agent {
     this.generateSystemPrompt();
   }
 
+  private generateSystemPrompt() {
+    const systemPrompt = `<SYSTEM_PROMPT>${this.config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${this.config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`;
+    this.messages.push({
+      role: "system",
+      content: systemPrompt,
+    });
+  }
+
   get id() {
     return this.config.id;
   }
@@ -46,11 +55,18 @@ export class Agent {
 
   private async addFinding(finding: Finding) {
     // We need to find a way to get the correct requestId from the currentReplayRequest.For now, using replaySessionID even tho that's wrong.
-    this.sdk.findings.createFinding(this.replaySessionId.toString(), {
-      title: finding.title,
-      description: finding.markdown,
-      reporter: "Shift Agent - " + this.name + " - " + this.replaySessionId,
-    });
+    this.sdk.findings.createFinding(
+      this.config.jitConfig.replaySessionId.toString(),
+      {
+        title: finding.title,
+        description: finding.markdown,
+        reporter:
+          "Shift Agent - " +
+          this.name +
+          " - " +
+          this.config.jitConfig.replaySessionId,
+      }
+    );
   }
 
   private async currentRequestRaw() {
@@ -125,17 +141,28 @@ export class Agent {
           if (result.data.tool_calls?.length) {
             this.status = "callingTools";
             for (const toolCall of result.data.tool_calls) {
-              const toolResponse = await this.handleToolCall(
-                toolCall,
-                currentRequestRaw
-              );
-              currentRequestRaw = toolResponse.currentRequestRaw;
-              if (toolResponse.findings) {
-                for (const finding of toolResponse.findings) {
-                  await this.addFinding(finding);
+              const context: ToolContext = {
+                replaySessionRequestRaw: currentRequestRaw,
+                replaySessionId: this.config.jitConfig.replaySessionId,
+              };
+
+              const toolResponse = await this.handleToolCall(toolCall, context);
+
+              if (toolResponse.kind === "Success") {
+                currentRequestRaw = toolResponse.data.newRequestRaw;
+                if (toolResponse.data.findings) {
+                  for (const finding of toolResponse.data.findings) {
+                    await this.addFinding(finding);
+                  }
+                }
+
+                if (toolResponse.data.pause) {
+                  this.status = "paused";
+                  return;
                 }
               }
-              if (toolResponse.pause) {
+
+              if (toolResponse.kind === "Error") {
                 this.status = "paused";
                 return;
               }

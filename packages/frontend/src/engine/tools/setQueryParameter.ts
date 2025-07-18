@@ -45,7 +45,12 @@ export const setQueryParameter: ToolFunction<
         kind: "Success",
         data: {
           newRequestRaw: newRequest,
-          findings: `Query parameter "${args.name}" set to: "${args.value}"`,
+          findings: [
+            {
+              title: `Query parameter "${args.name}" set to: "${args.value}"`,
+              markdown: `Query parameter "${args.name}" set to: "${args.value}"`,
+            },
+          ],
         },
       };
     } catch (error) {

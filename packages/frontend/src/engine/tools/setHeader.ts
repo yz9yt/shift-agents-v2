@@ -48,7 +48,12 @@ export const setHeader: ToolFunction<SetHeaderArgs, BaseToolResult> = {
         kind: "Success",
         data: {
           newRequestRaw: newRequest,
-          findings: `Header "${args.name}" set to: "${args.value}"`,
+          findings: [
+            {
+              title: `Header "${args.name}" set to: "${args.value}"`,
+              markdown: `Header "${args.name}" set to: "${args.value}"`,
+            },
+          ],
         },
       };
     } catch (error) {
