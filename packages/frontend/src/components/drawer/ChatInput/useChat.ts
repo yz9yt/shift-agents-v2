@@ -20,7 +20,11 @@ export const useChat = () => {
     }
 
     console.log("selectedAgent", selectedAgent.value);
-    selectedAgent.value.sendMessage(message);
+    try {
+      selectedAgent.value.sendMessage(message);
+    } catch (error) {
+      console.error("Error sending message", error);
+    }
   };
 
   return {

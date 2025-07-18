@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Message } from "@/engine/types";
+import type { APIMessage } from "@/engine/types";
 import { useMessage } from "./useMessage";
 
 const props = defineProps<{
-  message: Message;
+  message: APIMessage;
 }>();
 
 const {

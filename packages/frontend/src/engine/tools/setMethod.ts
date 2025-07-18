@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { ToolFunction, BaseToolResult } from "../types";
-import { BaseToolArgsSchema } from "../types";
 
-const SetMethodSchema = BaseToolArgsSchema.extend({
+const SetMethodSchema = z.object({
+  rawRequest: z.string(),
   method: z.string().min(1),
 });
 
@@ -13,7 +13,7 @@ export const setMethod: ToolFunction<SetMethodArgs, BaseToolResult> = {
   description: "Set the request method",
   handler: async (args) => {
     try {
-      const lines = args.rawRequest.split('\n');
+      const lines = args.rawRequest.split('\r\n');
       if (lines.length === 0 || !lines[0]) {
         throw new Error('Invalid HTTP request - empty request');
       }
@@ -23,17 +23,24 @@ export const setMethod: ToolFunction<SetMethodArgs, BaseToolResult> = {
         throw new Error('Invalid HTTP request - malformed request line');
       }
 
-      const newRequest = `${args.method} ${path} ${protocol}\n${lines.slice(1).join('\n')}`;
+      const newRequest = `${args.method} ${path} ${protocol}\r\n${lines.slice(1).join('\r\n')}`;
       return {
-        success: true,
-        currentRequestRaw: newRequest,
+        kind: "Success",
+        data: {
+          newRequestRaw: newRequest,
+          findings: `Request method set to: "${args.method}"`,
+        },
       };
     } catch (error) {
       return {
-        success: false,
-        currentRequestRaw: args.rawRequest,
-        error: `Failed to set method: ${error instanceof Error ? error.message : String(error)}`,
+        kind: "Error",
+        data: {
+          currentRequestRaw: args.rawRequest,
+          error: `Failed to set method: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        },
       };
     }
   },
-}; 
+};

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const ToolCallSchema = z.object({
+export const APIToolCallSchema = z.object({
   id: z.string(),
   type: z.literal("function"),
   function: z.object({
@@ -9,46 +9,52 @@ export const ToolCallSchema = z.object({
   }),
 });
 
-export const MessageSchema = z.object({
-  role: z.enum(["user", "ai", "agent", "replay", "error"]),
+export const APIMessageSchema = z.object({
+  role: z.enum(["user", "assistant", "system", "tool"]),
   content: z.string().nullable(),
-  tool_calls: z.array(ToolCallSchema).optional(),
+  tool_calls: z.array(APIToolCallSchema).optional(),
   name: z.string().optional(),
   tool_call_id: z.string().optional(),
 });
 
-export const LLMResponseSchema = z.object({
+export const APILLMResponseSchema = z.object({
   choices: z.array(
     z.object({
-      message: MessageSchema,
+      message: APIMessageSchema,
     })
   ),
 });
 
-export type Message = z.infer<typeof MessageSchema>;
-export type ToolCall = z.infer<typeof ToolCallSchema>;
+export type APIMessage = z.infer<typeof APIMessageSchema>;
+export type APIToolCall = z.infer<typeof APIToolCallSchema>;
 
-// Base schema that all tool argument schemas should extend
-export const BaseToolArgsSchema = z.object({
-  rawRequest: z.string(),
-});
+export type BaseToolResult =
+  | {
+      kind: "Success";
+      data: {
+        newRequestRaw: string;
+        findings: string;
+        pause?: boolean;
+      };
+    }
+  | {
+      kind: "Error";
+      data: {
+        error: string;
+      };
+    };
 
-// Base type that all tool arguments must extend
-export type BaseToolArgs = z.infer<typeof BaseToolArgsSchema>;
-
-// Base return type that all tools must return
-export type BaseToolResult = {
-  success: boolean;
-  currentRequestRaw: string;
-  error?: string;
-  findings?: string;
-  pause?: boolean;
+export type ToolContext = {
+  replaySessionRequestRaw: string;
+  replaySessionId: number;
 };
 
-// Updated ToolFunction type that requires args to extend BaseToolArgs and return BaseToolResult
-export type ToolFunction<TInput extends BaseToolArgs = BaseToolArgs, TOutput extends BaseToolResult = BaseToolResult> = {
+export type ToolFunction<
+  TInput = unknown,
+  TOutput = unknown
+> = {
   schema: z.ZodSchema<TInput>;
-  handler: (args: TInput) => Promise<TOutput>;
+  handler: (args: TInput, context: ToolContext) => Promise<TOutput>;
   description: string;
 };
 
@@ -62,15 +68,19 @@ export type AgentConfig = {
 export type JITAgentConfig = {
   replaySessionId: number;
   jitInstructions: string;
-  maxIterations?: number;
+  maxIterations: number;
 };
 
-export type AgentStatus = "paused" | "queryingAI" | "callingTools" | "sendingReplayRequest" | "error";
+export type AgentStatus =
+  | "paused"
+  | "queryingAI"
+  | "callingTools"
+  | "sendingReplayRequest"
+  | "error";
 
 export type OpenRouterConfig = {
   apiKey: string;
   model: string;
-  provider?: string;
 };
 
 export type APIResponse<T> =

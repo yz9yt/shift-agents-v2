@@ -1,22 +1,21 @@
 import type {
-  Message,
-  ToolCall,
+  APIMessage,
+  APIToolCall,
   AgentConfig,
   AgentStatus,
   OpenRouterConfig,
   BaseToolResult,
+  ToolContext,
 } from "./types";
 import { TOOLS, type ToolName } from "./tools";
 import { LLMClient } from "./client";
 import { FrontendSDK } from "@/types";
-import { getCurrentReplayRequestRaw, sendReplaySessionEntry } from "./tools/tempUtils";
+import { getCurrentReplayRequestRaw, sendReplaySessionEntry } from "@/utils";
 
 export class Agent {
-  private messages: Message[] = [];
+  private messages: APIMessage[] = [];
   private llmClient: LLMClient;
   private status: AgentStatus = "paused";
-  private maxIterations: number;
-  private replaySessionId: number;
   private sdk: FrontendSDK;
 
   constructor(
@@ -24,18 +23,9 @@ export class Agent {
     private config: AgentConfig,
     openRouterConfig: OpenRouterConfig
   ) {
-    if (!config.jitConfig) {
-      throw new Error("JIT config is required");
-    }
-    this.replaySessionId = config.jitConfig.replaySessionId;
-    this.llmClient = new LLMClient(openRouterConfig);
-    this.maxIterations = config.jitConfig.maxIterations || 50;
     this.sdk = sdk;
-    const initialPrompt = `<SYSTEM_PROMPT>${config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`;
-    this.messages.push({
-      role: "agent",
-      content: initialPrompt,
-    });
+    this.llmClient = new LLMClient(openRouterConfig);
+    this.generateSystemPrompt();
   }
 
   get id() {
@@ -54,26 +44,47 @@ export class Agent {
     return [...this.messages];
   }
 
+  private generateSystemPrompt() {
+    const systemPrompt = `<SYSTEM_PROMPT>${this.config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${this.config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`;
+    this.messages.push({
+      role: "system",
+      content: systemPrompt,
+    });
+  }
+
   private async currentRequestRaw() {
     //TODO: This is a temporary solution to get the current request raw. Until the caido SDK is updated to support this.
-    return await getCurrentReplayRequestRaw(this.sdk, this.replaySessionId);
+    return await getCurrentReplayRequestRaw(
+      this.config.jitConfig.replaySessionId.toString()
+    );
   }
 
   private async sendReplayRequest(rawRequest: string) {
     //TODO: This is a temporary solution to send the request. Until the caido SDK is updated to support this.
-    return await sendReplaySessionEntry(this.sdk, this.replaySessionId, rawRequest);
+    return await sendReplaySessionEntry(
+      this.config.jitConfig.replaySessionId.toString(),
+      rawRequest
+    );
   }
 
   private async queryAIModel(currentRequestRaw: string) {
-    const messages = [...this.messages, {
-      role: "replay",
-      content: currentRequestRaw,
-    }];
+    const messages = [
+      ...this.messages,
+      {
+        role: "user" as const,
+        content: `Current request:\n\`\`\`\n${currentRequestRaw}\n\`\`\``,
+      },
+    ];
+
+    console.log("messages", messages);
     const result = await this.llmClient.callLLM(messages);
     return result;
   }
 
-  private async handleToolCall(toolCall: ToolCall, currentRequestRaw: string): Promise<BaseToolResult> {
+  private async handleToolCall(
+    toolCall: APIToolCall,
+    context: ToolContext
+  ): Promise<BaseToolResult> {
     const toolName = toolCall.function.name as ToolName;
     const tool = TOOLS[toolName];
 
@@ -82,22 +93,10 @@ export class Agent {
     }
 
     const rawArgs = JSON.parse(toolCall.function.arguments);
-    // Inject rawRequest into the arguments
-    const argsWithRawRequest = {
-      rawRequest: currentRequestRaw,
-      ...rawArgs,
-    };
-    // Use type assertion since we know the tool type at runtime
-    const validatedArgs = tool.schema.parse(argsWithRawRequest as any);
-    const result = await (tool.handler as any)(validatedArgs);
+    const validatedArgs = tool.schema.parse(rawArgs);
+    const result = await tool.handler(validatedArgs, context);
 
-    return {
-      currentRequestRaw: result.currentRequestRaw,
-      success: result.success,
-      error: result.error,
-      pause: result.pause,
-      findings: result.findings,
-    };
+    return result;
   }
 
   async sendMessage(content: string): Promise<void> {
@@ -108,7 +107,7 @@ export class Agent {
   private async processMessages(): Promise<void> {
     let iterations = 0;
 
-    while (iterations < this.maxIterations) {
+    while (iterations < this.config.jitConfig.maxIterations) {
       this.status = "queryingAI";
 
       let currentRequestRaw = await this.currentRequestRaw();
@@ -116,20 +115,41 @@ export class Agent {
       switch (result.kind) {
         case "Success":
           this.messages.push({
-            role: "ai",
+            role: "assistant",
             content: result.data.content,
           });
+
+          console.log("result", result);
 
           if (result.data.tool_calls?.length) {
             this.status = "callingTools";
             for (const toolCall of result.data.tool_calls) {
-              const toolResponse = await this.handleToolCall(
-                toolCall,
-                currentRequestRaw
-              );
-              currentRequestRaw = toolResponse.currentRequestRaw;
-              if (toolResponse.pause) {
-                this.status = "paused";
+              const context: ToolContext = {
+                replaySessionRequestRaw: currentRequestRaw,
+                replaySessionId: this.config.jitConfig.replaySessionId,
+              };
+
+              const toolResponse = await this.handleToolCall(toolCall, context);
+
+              if (toolResponse.kind === "Success") {
+                currentRequestRaw = toolResponse.data.newRequestRaw;
+
+                if (toolResponse.data.pause) {
+                  this.status = "paused";
+                  return;
+                }
+              }
+
+              if (toolResponse.kind === "Error") {
+                this.status = "error";
+                this.messages.push({
+                  role: "assistant",
+                  content: toolResponse.data.error,
+                });
+                console.error(
+                  `Agent ${this.id} error:`,
+                  toolResponse.data.error
+                );
                 return;
               }
             }
@@ -143,7 +163,7 @@ export class Agent {
         case "Error":
           this.status = "error";
           this.messages.push({
-            role: "error",
+            role: "assistant",
             content: result.error,
           });
           console.error(`Agent ${this.id} error:`, result.error);
@@ -153,10 +173,10 @@ export class Agent {
       iterations++;
     }
 
-    if (iterations >= this.maxIterations) {
+    if (iterations >= this.config.jitConfig.maxIterations) {
       this.status = "paused";
       this.messages.push({
-        role: "error",
+        role: "assistant",
         content: `Agent ${this.id} hit max iterations`,
       });
       console.warn(`Agent ${this.id} hit max iterations`);

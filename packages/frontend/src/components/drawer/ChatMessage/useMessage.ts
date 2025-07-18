@@ -1,7 +1,7 @@
-import type { Message } from "@/engine/types";
+import type { APIMessage } from "@/engine/types";
 import { computed } from "vue";
 
-export const useMessage = (message: Message) => {
+export const useMessage = (message: APIMessage) => {
   const isUser = computed(() => message.role === "user");
   const isAssistant = computed(() => message.role === "assistant");
   const isSystem = computed(() => message.role === "system");

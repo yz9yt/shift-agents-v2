@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { ToolFunction, BaseToolResult } from "../types";
-import { BaseToolArgsSchema } from "../types";
 
-const SetHeaderSchema = BaseToolArgsSchema.extend({
+const SetHeaderSchema = z.object({
+  rawRequest: z.string(),
   name: z.string().min(1),
   value: z.string(),
 });
@@ -14,18 +14,20 @@ export const setHeader: ToolFunction<SetHeaderArgs, BaseToolResult> = {
   description: "Set a request header with the given name and value",
   handler: async (args) => {
     try {
-      const lines = args.rawRequest.split('\n');
-      const headerEnd = lines.findIndex(line => line === '');
+      const lines = args.rawRequest.split("\r\n");
+      const headerEnd = lines.findIndex((line) => line === "");
       if (headerEnd === -1) {
-        throw new Error('Invalid HTTP request - no header/body separator found');
+        throw new Error(
+          "Invalid HTTP request - no header/body separator found"
+        );
       }
 
       const headers = lines.slice(0, headerEnd);
       const rest = lines.slice(headerEnd);
 
       // Find position of existing header if it exists
-      const existingHeaderIndex = headers.findIndex(line => {
-        const [headerName] = line.split(':');
+      const existingHeaderIndex = headers.findIndex((line) => {
+        const [headerName] = line.split(":");
         return headerName?.toLowerCase() === args.name.toLowerCase();
       });
 
@@ -41,16 +43,23 @@ export const setHeader: ToolFunction<SetHeaderArgs, BaseToolResult> = {
         newHeaders.push(newHeaderLine);
       }
 
-      const newRequest = [...newHeaders, ...rest].join('\n');
+      const newRequest = [...newHeaders, ...rest].join("\r\n");
       return {
-        success: true,
-        currentRequestRaw: newRequest
+        kind: "Success",
+        data: {
+          newRequestRaw: newRequest,
+          findings: `Header "${args.name}" set to: "${args.value}"`,
+        },
       };
     } catch (error) {
       return {
-        success: false,
-        currentRequestRaw: args.rawRequest,
-        error: `Failed to set header: ${error instanceof Error ? error.message : String(error)}`,
+        kind: "Error",
+        data: {
+          currentRequestRaw: args.rawRequest,
+          error: `Failed to set header: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        },
       };
     }
   },

@@ -1,8 +1,7 @@
 import { z } from "zod";
 import type { ToolFunction, BaseToolResult } from "../types";
-import { BaseToolArgsSchema } from "../types";
 
-const AlertSchema = BaseToolArgsSchema.extend({
+const AlertSchema = z.object({
   message: z.string().min(1),
 });
 
@@ -12,21 +11,14 @@ export const alert: ToolFunction<AlertArgs, BaseToolResult> = {
   schema: AlertSchema,
   description: "Show a browser alert with the given message",
   handler: async (args) => {
-    try {
-      // Show the alert
-      window.alert(args.message);
-      
-      return {
-        success: true,
-        currentRequestRaw: args.rawRequest,
+    window.alert(args.message);
+
+    return {
+      kind: "Success",
+      data: {
+        newRequestRaw: "",
         findings: `Alert displayed with message: "${args.message}"`,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        currentRequestRaw: args.rawRequest,
-        error: `Failed to display alert: ${error instanceof Error ? error.message : String(error)}`,
-      };
-    }
+      },
+    };
   },
 };

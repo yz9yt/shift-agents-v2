@@ -73,6 +73,7 @@ export const init = (sdk: FrontendSDK) => {
       if (!agentStore.getAgent(sessionId)) {
         agentStore.createAgentFromSessionId(sessionId);
       }
+
       agentStore.selection.selectAgent(sessionId);
     }
   });

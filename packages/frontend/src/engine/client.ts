@@ -1,12 +1,12 @@
-import type { Message, OpenRouterConfig } from "./types";
-import { LLMResponseSchema } from "./types";
+import type { APIMessage, OpenRouterConfig } from "./types";
+import { APILLMResponseSchema } from "./types";
 import { toolDefinitions } from "./tools";
 import type { APIResponse } from "./types";
 
 export class LLMClient {
   constructor(private config: OpenRouterConfig) {}
 
-  async callLLM(messages: Message[]): Promise<APIResponse<Message>> {
+  async callLLM(messages: APIMessage[]): Promise<APIResponse<APIMessage>> {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -28,7 +28,7 @@ export class LLMClient {
     }
 
     const data = await res.json();
-    const response = LLMResponseSchema.parse(data);
+    const response = APILLMResponseSchema.parse(data);
 
     if (!response.choices || response.choices.length === 0) {
       return { kind: "Error", error: "No response from LLM" };

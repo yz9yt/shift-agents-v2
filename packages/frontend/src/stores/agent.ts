@@ -18,12 +18,12 @@ export const useAgentState = () => {
         jitConfig: {
           replaySessionId: parseInt(sessionId),
           jitInstructions: "You are a helpful assistant.",
+          maxIterations: 10,
         },
       },
       {
         apiKey: SECRET_API_KEY,
         model: "moonshotai/kimi-k2",
-        provider: "groq",
       }
     );
     agents.value.set(sessionId, agent);
