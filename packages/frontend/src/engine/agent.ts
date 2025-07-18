@@ -5,7 +5,7 @@ import type {
   AgentStatus,
   OpenRouterConfig,
   BaseToolResult,
-  ToolContext,
+  Finding,
 } from "./types";
 import { TOOLS, type ToolName } from "./tools";
 import { LLMClient } from "./client";
@@ -44,11 +44,12 @@ export class Agent {
     return [...this.messages];
   }
 
-  private generateSystemPrompt() {
-    const systemPrompt = `<SYSTEM_PROMPT>${this.config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${this.config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`;
-    this.messages.push({
-      role: "system",
-      content: systemPrompt,
+  private async addFinding(finding: Finding) {
+    // We need to find a way to get the correct requestId from the currentReplayRequest.For now, using replaySessionID even tho that's wrong.
+    this.sdk.findings.createFinding(this.replaySessionId.toString(), {
+      title: finding.title,
+      description: finding.markdown,
+      reporter: "Shift Agent - " + this.name + " - " + this.replaySessionId,
     });
   }
 
@@ -124,32 +125,18 @@ export class Agent {
           if (result.data.tool_calls?.length) {
             this.status = "callingTools";
             for (const toolCall of result.data.tool_calls) {
-              const context: ToolContext = {
-                replaySessionRequestRaw: currentRequestRaw,
-                replaySessionId: this.config.jitConfig.replaySessionId,
-              };
-
-              const toolResponse = await this.handleToolCall(toolCall, context);
-
-              if (toolResponse.kind === "Success") {
-                currentRequestRaw = toolResponse.data.newRequestRaw;
-
-                if (toolResponse.data.pause) {
-                  this.status = "paused";
-                  return;
+              const toolResponse = await this.handleToolCall(
+                toolCall,
+                currentRequestRaw
+              );
+              currentRequestRaw = toolResponse.currentRequestRaw;
+              if (toolResponse.findings) {
+                for (const finding of toolResponse.findings) {
+                  await this.addFinding(finding);
                 }
               }
-
-              if (toolResponse.kind === "Error") {
-                this.status = "error";
-                this.messages.push({
-                  role: "assistant",
-                  content: toolResponse.data.error,
-                });
-                console.error(
-                  `Agent ${this.id} error:`,
-                  toolResponse.data.error
-                );
+              if (toolResponse.pause) {
+                this.status = "paused";
                 return;
               }
             }
