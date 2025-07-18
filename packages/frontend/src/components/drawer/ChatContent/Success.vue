@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useContent } from "./useContent";
 import { ChatMessage } from "../ChatMessage";
+
+import { useContent } from "./useContent";
 
 const { messages } = useContent();
 </script>

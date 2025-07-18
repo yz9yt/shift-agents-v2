@@ -1,70 +1,55 @@
 import { z } from "zod";
-import type { ToolFunction, BaseToolResult } from "../types";
+
+import type { ToolFunction } from "../types";
 
 const RemoveQueryParameterSchema = z.object({
-  rawRequest: z.string(),
   name: z.string().min(1),
 });
 
 type RemoveQueryParameterArgs = z.infer<typeof RemoveQueryParameterSchema>;
-
 export const removeQueryParameter: ToolFunction<
   RemoveQueryParameterArgs,
-  BaseToolResult
+  string
 > = {
   schema: RemoveQueryParameterSchema,
   description: "Remove a query parameter with the given name",
-  handler: async (args) => {
+  handler: (args, context) => {
     try {
-      const lines = args.rawRequest.split("\r\n");
-      if (lines.length === 0 || !lines[0]) {
-        throw new Error("Invalid HTTP request - empty request");
-      }
-      const [method, path, protocol] = lines[0].split(" ");
-      if (!path) {
-        throw new Error("Invalid HTTP request - no path found");
-      }
-      const [basePath, queryString] = path.split("?");
-      let newRequest = args.rawRequest;
-      if (!queryString) {
-        return {
-          kind: "Success",
-          data: {
-            newRequestRaw: newRequest,
-            findings: `Query parameter "${args.name}" removed`,
-          },
-        };
-      }
+      const hasChanged = context.replaySession.updateRequestRaw((draft) => {
+        const lines = draft.split("\r\n");
+        if (lines.length === 0 || lines[0] === undefined) {
+          throw new Error("Invalid HTTP request - empty request");
+        }
+        const [method, path, protocol] = lines[0].split(" ");
+        if (path === undefined) {
+          throw new Error("Invalid HTTP request - no path found");
+        }
+        const [basePath, queryString] = path.split("?");
 
-      const params = queryString.split("&").filter((param) => {
-        const [name] = param.split("=");
-        return name !== args.name;
+        if (queryString === undefined) {
+          return draft;
+        }
+
+        const params = queryString.split("&").filter((param) => {
+          const [name] = param.split("=");
+          return name !== args.name;
+        });
+
+        const newPath =
+          params.length > 0 ? `${basePath}?${params.join("&")}` : basePath;
+
+        return `${method} ${newPath} ${protocol}\r\n${lines
+          .slice(1)
+          .join("\r\n")}`;
       });
 
-      const newPath =
-        params.length > 0 ? `${basePath}?${params.join("&")}` : basePath;
-
-      newRequest = `${method} ${newPath} ${protocol}\r\n${lines
-        .slice(1)
-        .join("\r\n")}`;
-
-      return {
-        kind: "Success",
-        data: {
-          newRequestRaw: newRequest,
-          findings: `Query parameter "${args.name}" removed`,
-        },
-      };
+      return hasChanged
+        ? "Request has been updated"
+        : "Request has not changed. No query parameter found to remove.";
     } catch (error) {
-      return {
-        kind: "Error",
-        data: {
-          currentRequestRaw: args.rawRequest,
-          error: `Failed to remove query parameter: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        },
-      };
+      return `Failed to remove query parameter: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
     }
   },
 };

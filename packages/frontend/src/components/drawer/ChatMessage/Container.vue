@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { APIMessage } from "@/engine/types";
 import { useMessage } from "./useMessage";
+
+import type { APIMessage } from "@/engine/types";
 
 const props = defineProps<{
   message: APIMessage;
@@ -18,13 +19,15 @@ const {
 </script>
 
 <template>
-  <div
-    class="p-3 rounded-lg max-w-[85%]"
-    :class="messageClasses"
-  >
-    <div class="text-xs font-medium text-surface-300 mb-2 uppercase tracking-wide">
+  <div class="p-3 rounded-lg max-w-[85%]" :class="messageClasses">
+    <div
+      class="text-xs font-medium text-surface-300 mb-2 uppercase tracking-wide"
+    >
       {{ displayName }}
-      <span v-if="hasName && message.name !== message.role" class="text-surface-400">
+      <span
+        v-if="hasName && message.name !== message.role"
+        class="text-surface-400"
+      >
         • {{ message.role }}
       </span>
     </div>
@@ -44,10 +47,7 @@ const {
       <div class="font-mono">{{ formatToolCalls }}</div>
     </div>
 
-    <div
-      v-if="hasToolCallId"
-      class="mt-1 text-xs text-surface-400 font-mono"
-    >
+    <div v-if="hasToolCallId" class="mt-1 text-xs text-surface-400 font-mono">
       Tool Call ID: {{ message.tool_call_id }}
     </div>
   </div>

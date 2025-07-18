@@ -1,11 +1,14 @@
-import { ref, computed } from "vue";
+import { defineStore } from "pinia";
+import { computed, ref } from "vue";
+
 import { Agent } from "../engine/agent";
+
 import { useSDK } from "@/plugins/sdk";
 import { SECRET_API_KEY } from "@/secrets";
 
-export const useAgentState = () => {
+export const useAgentStore = defineStore("stores.agent", () => {
   const agents = ref<Map<string, Agent>>(new Map());
-  const apiKey = ref<string>("");
+  const selectedId = ref<string | undefined>(undefined);
   const sdk = useSDK();
 
   const createAgentFromSessionId = (sessionId: string) => {
@@ -16,7 +19,7 @@ export const useAgentState = () => {
         name: "Agent 1",
         systemPrompt: "You are a helpful assistant.",
         jitConfig: {
-          replaySessionId: parseInt(sessionId),
+          replaySessionId: sessionId,
           jitInstructions: "You are a helpful assistant.",
           maxIterations: 10,
         },
@@ -24,7 +27,7 @@ export const useAgentState = () => {
       {
         apiKey: SECRET_API_KEY,
         model: "moonshotai/kimi-k2",
-      }
+      },
     );
     agents.value.set(sessionId, agent);
     return agent;
@@ -34,19 +37,28 @@ export const useAgentState = () => {
     agents.value.delete(id);
   };
 
-  const setApiKey = (key: string) => {
-    apiKey.value = key;
+  const selectAgent = (id: string) => {
+    if (!agents.value.has(id)) {
+      createAgentFromSessionId(id);
+    }
+
+    selectedId.value = id;
   };
 
-  const agentList = computed(() => Array.from(agents.value.values()));
+  const resetSelection = () => {
+    selectedId.value = undefined;
+  };
+
   const getAgent = (id: string) => agents.value.get(id);
 
   return {
-    agents: agentList,
-    apiKey: computed(() => apiKey.value),
+    agents: computed(() => Array.from(agents.value.values())),
     getAgent,
     removeAgent,
-    setApiKey,
     createAgentFromSessionId,
+    selectedAgent: computed(() => getAgent(selectedId.value ?? "")),
+    selectedId,
+    selectAgent,
+    resetSelection,
   };
-};
+});

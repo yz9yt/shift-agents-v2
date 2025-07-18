@@ -5,8 +5,22 @@ export const getCurrentlySelectedReplayTabSessionId = () => {
   return activeTab ? activeTab.getAttribute("data-session-id") : "";
 };
 
-export async function getCurrentReplayRequestRaw(replaySessionId: string) {
-  const auth = JSON.parse(localStorage.getItem("CAIDO_AUTHENTICATION") || "{}");
+type ReplayRequest = {
+  raw: string;
+  host: string;
+  port: number;
+  isTLS: boolean;
+  SNI: string;
+};
+
+export async function getCurrentReplayRequest(
+  replaySessionId: string
+): Promise<ReplayRequest> {
+  if (typeof replaySessionId !== "string") {
+    throw new Error("replaySessionId must be a string");
+  }
+
+  const auth = JSON.parse(localStorage.getItem("CAIDO_AUTHENTICATION") ?? "{}");
   const accessToken = auth.accessToken;
 
   const response = await fetch("/graphql", {
@@ -17,17 +31,25 @@ export async function getCurrentReplayRequestRaw(replaySessionId: string) {
     },
     body: JSON.stringify({
       query:
-        "query replaySessionEntries($id: ID!){\n    replaySession(id: $id){\n        activeEntry{\n            request{\n                raw\n            }\n        }\n    }\n}",
+        "query replaySessionEntries($id: ID!){\n    replaySession(id: $id){\n        activeEntry{\n            connection{\n                host\n                port\n                isTLS\n                SNI\n            }\n            request{\n                raw\n                id           }\n        }\n    }\n}",
       variables: { id: replaySessionId },
       operationName: "replaySessionEntries",
     }),
   });
   const data = await response.json();
-  return atob(data.data.replaySession.activeEntry.request.raw as string);
+  const activeEntry = data.data.replaySession.activeEntry;
+  console.log("activeEntry", activeEntry);
+  return {
+    raw: atob(activeEntry.request.raw),
+    host: activeEntry.connection.host,
+    port: activeEntry.connection.port,
+    isTLS: activeEntry.connection.isTLS,
+    SNI: activeEntry.connection.SNI,
+  } as ReplayRequest;
 }
 
 export async function getCurrentReplayRequestMetadata(replaySessionId: string) {
-  const auth = JSON.parse(localStorage.getItem("CAIDO_AUTHENTICATION") || "{}");
+  const auth = JSON.parse(localStorage.getItem("CAIDO_AUTHENTICATION") ?? "{}");
   const accessToken = auth.accessToken;
 
   const response = await fetch("/graphql", {
@@ -51,7 +73,7 @@ export async function sendReplaySessionEntry(
   replaySessionId: string,
   rawRequest: string
 ): Promise<boolean> {
-  const auth = JSON.parse(localStorage.getItem("CAIDO_AUTHENTICATION") || "{}");
+  const auth = JSON.parse(localStorage.getItem("CAIDO_AUTHENTICATION") ?? "{}");
   const accessToken = auth.accessToken;
   const sessionData = await getCurrentReplayRequestMetadata(replaySessionId);
   const response = await fetch("/graphql", {

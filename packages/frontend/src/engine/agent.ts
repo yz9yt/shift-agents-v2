@@ -1,31 +1,33 @@
+import { LLMClient } from "./client";
+import { type ToolName, TOOLS } from "./tools";
 import type {
-  APIMessage,
-  APIToolCall,
   AgentConfig,
   AgentStatus,
+  APIMessage,
+  APIToolCall,
   OpenRouterConfig,
-  BaseToolResult,
-  Finding,
   ToolContext,
 } from "./types";
-import { TOOLS, type ToolName } from "./tools";
-import { LLMClient } from "./client";
-import { FrontendSDK } from "@/types";
-import { getCurrentReplayRequestRaw, sendReplaySessionEntry } from "@/utils";
+
+import { type FrontendSDK } from "@/types";
+import { getCurrentReplayRequest } from "@/utils";
 
 export class Agent {
   private messages: APIMessage[] = [];
   private llmClient: LLMClient;
-  private status: AgentStatus = "paused";
+  private status: AgentStatus = "idle";
   private sdk: FrontendSDK;
+  private config: AgentConfig;
 
   constructor(
     sdk: FrontendSDK,
-    private config: AgentConfig,
+    config: AgentConfig,
     openRouterConfig: OpenRouterConfig
   ) {
     this.sdk = sdk;
+    this.config = config;
     this.llmClient = new LLMClient(openRouterConfig);
+
     this.generateSystemPrompt();
   }
 
@@ -53,67 +55,48 @@ export class Agent {
     return [...this.messages];
   }
 
-  private async addFinding(finding: Finding) {
-    // We need to find a way to get the correct requestId from the currentReplayRequest.For now, using replaySessionID even tho that's wrong.
-    this.sdk.findings.createFinding(
-      this.config.jitConfig.replaySessionId.toString(),
-      {
-        title: finding.title,
-        description: finding.markdown,
-        reporter:
-          "Shift Agent - " +
-          this.name +
-          " - " +
-          this.config.jitConfig.replaySessionId,
-      }
-    );
-  }
+  // This is used to query the AI model and include context in the prompt like the current request raw.
+  private async queryAIModel(raw: string) {
+    const context = `Current request:\n<request_raw>\n${raw}\n</request_raw>`;
 
-  private async currentRequestRaw() {
-    //TODO: This is a temporary solution to get the current request raw. Until the caido SDK is updated to support this.
-    return await getCurrentReplayRequestRaw(
-      this.config.jitConfig.replaySessionId.toString()
-    );
-  }
-
-  private async sendReplayRequest(rawRequest: string) {
-    //TODO: This is a temporary solution to send the request. Until the caido SDK is updated to support this.
-    return await sendReplaySessionEntry(
-      this.config.jitConfig.replaySessionId.toString(),
-      rawRequest
-    );
-  }
-
-  private async queryAIModel(currentRequestRaw: string) {
     const messages = [
       ...this.messages,
       {
         role: "user" as const,
-        content: `Current request:\n\`\`\`\n${currentRequestRaw}\n\`\`\``,
+        content: context,
       },
     ];
 
-    console.log("messages", messages);
-    const result = await this.llmClient.callLLM(messages);
-    return result;
+    return await this.llmClient.callLLM(messages);
   }
 
   private async handleToolCall(
     toolCall: APIToolCall,
     context: ToolContext
-  ): Promise<BaseToolResult> {
+  ): Promise<APIMessage> {
     const toolName = toolCall.function.name as ToolName;
     const tool = TOOLS[toolName];
 
     if (!tool) {
-      throw new Error(`Tool not found: ${toolName}`);
+      return {
+        role: "tool",
+        tool_call_id: toolCall.id,
+        name: toolName,
+        content: `Error while executing tool ${toolName}: Tool not found, available tools: ${Object.keys(TOOLS).join(", ")}`,
+      };
     }
 
     const rawArgs = JSON.parse(toolCall.function.arguments);
     const validatedArgs = tool.schema.parse(rawArgs);
+    // @ts-expect-error - TODO: fix this
     const result = await tool.handler(validatedArgs, context);
 
-    return result;
+    return {
+      role: "tool",
+      tool_call_id: toolCall.id,
+      name: toolName,
+      content: JSON.stringify(result),
+    };
   }
 
   async sendMessage(content: string): Promise<void> {
@@ -123,63 +106,74 @@ export class Agent {
 
   private async processMessages(): Promise<void> {
     let iterations = 0;
+    let currentRequest = await getCurrentReplayRequest(
+      this.config.jitConfig.replaySessionId
+    );
 
     while (iterations < this.config.jitConfig.maxIterations) {
       this.status = "queryingAI";
 
-      let currentRequestRaw = await this.currentRequestRaw();
-      const result = await this.queryAIModel(currentRequestRaw);
+      const result = await this.queryAIModel(currentRequest.raw);
       switch (result.kind) {
         case "Success":
-          this.messages.push({
-            role: "assistant",
-            content: result.data.content,
-          });
+          this.messages.push(result.data);
 
-          console.log("result", result);
-
-          if (result.data.tool_calls?.length) {
+          if (result.data.tool_calls && result.data.tool_calls.length > 0) {
             this.status = "callingTools";
+
             for (const toolCall of result.data.tool_calls) {
               const context: ToolContext = {
-                replaySessionRequestRaw: currentRequestRaw,
-                replaySessionId: this.config.jitConfig.replaySessionId,
+                sdk: this.sdk,
+                replaySession: {
+                  requestRaw: currentRequest.raw,
+                  id: this.config.jitConfig.replaySessionId,
+                  updateRequestRaw: (updater: (draft: string) => string) => {
+                    const newRequestRaw = updater(currentRequest.raw);
+                    const hasChanged = newRequestRaw !== currentRequest.raw;
+                    currentRequest.raw = newRequestRaw;
+
+                    return hasChanged;
+                  },
+                },
+                agent: {
+                  name: this.name,
+                },
               };
 
               const toolResponse = await this.handleToolCall(toolCall, context);
-
-              if (toolResponse.kind === "Success") {
-                currentRequestRaw = toolResponse.data.newRequestRaw;
-                if (toolResponse.data.findings) {
-                  for (const finding of toolResponse.data.findings) {
-                    await this.addFinding(finding);
-                  }
-                }
-
-                if (toolResponse.data.pause) {
-                  this.status = "paused";
-                  return;
-                }
-              }
-
-              if (toolResponse.kind === "Error") {
-                this.status = "paused";
-                return;
-              }
+              this.messages.push(toolResponse);
             }
+
+            // TODO: maybe we should instead have a sendReplayRequest tool call instead?
             this.status = "sendingReplayRequest";
-            await this.sendReplayRequest(currentRequestRaw);
+
+            console.log("sending request", currentRequest);
+            // @ts-ignore - no types yet for sendRequest
+            await this.sdk.replay.sendRequest(
+              this.config.jitConfig.replaySessionId,
+              {
+                connectionInfo: {
+                  host: currentRequest.host,
+                  isTLS: currentRequest.isTLS,
+                  port: currentRequest.port,
+                },
+                raw: currentRequest.raw,
+              }
+            );
           } else {
-            this.status = "paused";
+            this.status = "idle";
             return;
           }
           break;
         case "Error":
           this.status = "error";
+
+          // TODO: have a special role for errors
           this.messages.push({
             role: "assistant",
             content: result.error,
           });
+
           console.error(`Agent ${this.id} error:`, result.error);
           return;
       }
@@ -188,11 +182,14 @@ export class Agent {
     }
 
     if (iterations >= this.config.jitConfig.maxIterations) {
-      this.status = "paused";
+      this.status = "idle";
+
+      // TODO: have a special role for this type of messages
       this.messages.push({
         role: "assistant",
         content: `Agent ${this.id} hit max iterations`,
       });
+
       console.warn(`Agent ${this.id} hit max iterations`);
     }
   }

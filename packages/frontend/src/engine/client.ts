@@ -1,7 +1,6 @@
-import type { APIMessage, OpenRouterConfig } from "./types";
-import { APILLMResponseSchema } from "./types";
 import { toolDefinitions } from "./tools";
-import type { APIResponse } from "./types";
+import { APILLMResponseSchema } from "./types";
+import type { APIMessage, APIResponse, OpenRouterConfig } from "./types";
 
 export class LLMClient {
   constructor(private config: OpenRouterConfig) {}
@@ -29,8 +28,7 @@ export class LLMClient {
 
     const data = await res.json();
     const response = APILLMResponseSchema.parse(data);
-
-    if (!response.choices || response.choices.length === 0) {
+    if (response.choices === undefined || response.choices.length === 0) {
       return { kind: "Error", error: "No response from LLM" };
     }
 

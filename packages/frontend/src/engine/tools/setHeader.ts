@@ -1,71 +1,58 @@
 import { z } from "zod";
-import type { ToolFunction, BaseToolResult } from "../types";
+
+import type { ToolFunction } from "../types";
 
 const SetHeaderSchema = z.object({
-  rawRequest: z.string(),
   name: z.string().min(1),
   value: z.string(),
 });
 
 type SetHeaderArgs = z.infer<typeof SetHeaderSchema>;
 
-export const setHeader: ToolFunction<SetHeaderArgs, BaseToolResult> = {
+export const setHeader: ToolFunction<SetHeaderArgs, string> = {
   schema: SetHeaderSchema,
-  description: "Set a request header with the given name and value",
-  handler: async (args) => {
+  description:
+    "Set a request header with the given name and value. If header exists, it will be replaced. If header does not exist, it will be added.",
+  handler: (args, context) => {
     try {
-      const lines = args.rawRequest.split("\r\n");
-      const headerEnd = lines.findIndex((line) => line === "");
-      if (headerEnd === -1) {
-        throw new Error(
-          "Invalid HTTP request - no header/body separator found"
-        );
-      }
+      const hasChanged = context.replaySession.updateRequestRaw((draft) => {
+        const lines = draft.split("\r\n");
+        const headerEnd = lines.findIndex((line) => line === "");
+        if (headerEnd === -1) {
+          throw new Error(
+            "Invalid HTTP request - no header/body separator found"
+          );
+        }
 
-      const headers = lines.slice(0, headerEnd);
-      const rest = lines.slice(headerEnd);
+        const headers = lines.slice(0, headerEnd);
+        const rest = lines.slice(headerEnd);
 
-      // Find position of existing header if it exists
-      const existingHeaderIndex = headers.findIndex((line) => {
-        const [headerName] = line.split(":");
-        return headerName?.toLowerCase() === args.name.toLowerCase();
+        // Find position of existing header if it exists
+        const existingHeaderIndex = headers.findIndex((line) => {
+          const [headerName] = line.split(":");
+          return headerName?.toLowerCase() === args.name.toLowerCase();
+        });
+
+        // Create new headers array
+        const newHeaders = [...headers];
+        const newHeaderLine = `${args.name}: ${args.value}`;
+
+        if (existingHeaderIndex >= 0) {
+          newHeaders[existingHeaderIndex] = newHeaderLine;
+        } else {
+          newHeaders.push(newHeaderLine);
+        }
+
+        return [...newHeaders, ...rest].join("\r\n");
       });
 
-      // Create new headers array
-      const newHeaders = [...headers];
-      const newHeaderLine = `${args.name}: ${args.value}`;
-
-      if (existingHeaderIndex >= 0) {
-        // Replace at same position
-        newHeaders[existingHeaderIndex] = newHeaderLine;
-      } else {
-        // Add to end of headers if not found
-        newHeaders.push(newHeaderLine);
-      }
-
-      const newRequest = [...newHeaders, ...rest].join("\r\n");
-      return {
-        kind: "Success",
-        data: {
-          newRequestRaw: newRequest,
-          findings: [
-            {
-              title: `Header "${args.name}" set to: "${args.value}"`,
-              markdown: `Header "${args.name}" set to: "${args.value}"`,
-            },
-          ],
-        },
-      };
+      return hasChanged
+        ? "Request has been updated"
+        : "Request has not changed";
     } catch (error) {
-      return {
-        kind: "Error",
-        data: {
-          currentRequestRaw: args.rawRequest,
-          error: `Failed to set header: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        },
-      };
+      return `Failed to set header: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
     }
   },
 };

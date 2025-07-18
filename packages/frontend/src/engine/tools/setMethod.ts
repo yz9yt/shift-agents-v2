@@ -1,53 +1,45 @@
 import { z } from "zod";
-import type { ToolFunction, BaseToolResult } from "../types";
+
+import type { ToolFunction } from "../types";
 
 const SetMethodSchema = z.object({
-  rawRequest: z.string(),
   method: z.string().min(1),
 });
 
 type SetMethodArgs = z.infer<typeof SetMethodSchema>;
 
-export const setMethod: ToolFunction<SetMethodArgs, BaseToolResult> = {
+export const setMethod: ToolFunction<SetMethodArgs, string> = {
   schema: SetMethodSchema,
   description: "Set the request method",
-  handler: async (args) => {
+  handler: (args, context) => {
     try {
-      const lines = args.rawRequest.split("\r\n");
-      if (lines.length === 0 || !lines[0]) {
-        throw new Error("Invalid HTTP request - empty request");
-      }
+      const hasChanged = context.replaySession.updateRequestRaw((draft) => {
+        const lines = draft.split("\r\n");
+        if (lines.length === 0 || lines[0] === undefined) {
+          throw new Error("Invalid HTTP request - empty request");
+        }
 
-      const [method, path, protocol] = lines[0].split(" ");
-      if (!method || !protocol || !path) {
-        throw new Error("Invalid HTTP request - malformed request line");
-      }
+        const [method, path, protocol] = lines[0].split(" ");
+        if (
+          method === undefined ||
+          protocol === undefined ||
+          path === undefined
+        ) {
+          throw new Error("Invalid HTTP request - malformed request line");
+        }
 
-      const newRequest = `${args.method} ${path} ${protocol}\r\n${lines
-        .slice(1)
-        .join("\r\n")}`;
-      return {
-        kind: "Success",
-        data: {
-          newRequestRaw: newRequest,
-          findings: [
-            {
-              title: `Request method set to: "${args.method}"`,
-              markdown: `Request method set to: "${args.method}"`,
-            },
-          ],
-        },
-      };
+        return `${args.method} ${path} ${protocol}\r\n${lines
+          .slice(1)
+          .join("\r\n")}`;
+      });
+
+      return hasChanged
+        ? "Request has been updated"
+        : "Request has not changed";
     } catch (error) {
-      return {
-        kind: "Error",
-        data: {
-          currentRequestRaw: args.rawRequest,
-          error: `Failed to set method: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        },
-      };
+      return `Failed to set method: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
     }
   },
 };

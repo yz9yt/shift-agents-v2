@@ -1,17 +1,8 @@
+import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useUIState = () => {
+export const useUIStore = defineStore("stores.ui", () => {
   const drawerVisible = ref(false);
-  const selectedAgentId = ref<string | null>(null);
-
-  const selectAgent = (id: string) => {
-    console.log("selectAgent", id);
-    selectedAgentId.value = id;
-  };
-
-  const resetSelection = () => {
-    selectedAgentId.value = null;
-  };
 
   const toggleDrawer = () => {
     drawerVisible.value = !drawerVisible.value;
@@ -20,10 +11,5 @@ export const useUIState = () => {
   return {
     drawerVisible,
     toggleDrawer,
-    selection: {
-      selectedAgentId,
-      selectAgent,
-      resetSelection,
-    },
   };
-};
+});

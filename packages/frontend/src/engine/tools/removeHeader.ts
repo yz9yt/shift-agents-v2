@@ -1,51 +1,45 @@
 import { z } from "zod";
-import type { ToolFunction, BaseToolResult } from "../types";
+
+import type { ToolFunction } from "../types";
 
 const RemoveHeaderSchema = z.object({
   name: z.string().min(1),
-  rawRequest: z.string(),
 });
 
 type RemoveHeaderArgs = z.infer<typeof RemoveHeaderSchema>;
 
-export const removeHeader: ToolFunction<RemoveHeaderArgs, BaseToolResult> = {
+export const removeHeader: ToolFunction<RemoveHeaderArgs, string> = {
   schema: RemoveHeaderSchema,
   description: "Remove a request header with the given name",
-  handler: async (args) => {
+  handler: (args, context) => {
     try {
-      const lines = args.rawRequest.split("\r\n");
-      const headerEnd = lines.findIndex((line) => line === "");
-      if (headerEnd === -1) {
-        throw new Error(
-          "Invalid HTTP request - no header/body separator found"
-        );
-      }
+      const hasChanged = context.replaySession.updateRequestRaw((draft) => {
+        const lines = draft.split("\r\n");
+        const headerEnd = lines.findIndex((line) => line === "");
+        if (headerEnd === -1) {
+          throw new Error(
+            "Invalid HTTP request - no header/body separator found"
+          );
+        }
 
-      const headers = lines.slice(0, headerEnd);
-      const rest = lines.slice(headerEnd);
+        const headers = lines.slice(0, headerEnd);
+        const rest = lines.slice(headerEnd);
 
-      const filteredHeaders = headers.filter((line) => {
-        const [headerName] = line.split(":");
-        return headerName?.toLowerCase() !== args.name.toLowerCase();
+        const filteredHeaders = headers.filter((line) => {
+          const [headerName] = line.split(":");
+          return headerName?.toLowerCase() !== args.name.toLowerCase();
+        });
+
+        return [...filteredHeaders, ...rest].join("\r\n");
       });
 
-      const newRequest = [...filteredHeaders, ...rest].join("\r\n");
-      return {
-        kind: "Success",
-        data: {
-          newRequestRaw: newRequest,
-          findings: `Header "${args.name}" removed`,
-        },
-      };
+      return hasChanged
+        ? "Request has been updated"
+        : "Request has not changed. No header found to remove.";
     } catch (error) {
-      return {
-        kind: "Error",
-        data: {
-          error: `Failed to remove header: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        },
-      };
+      return `Failed to remove header: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
     }
   },
 };

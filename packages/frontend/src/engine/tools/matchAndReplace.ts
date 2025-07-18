@@ -1,40 +1,30 @@
 import { z } from "zod";
-import type { ToolFunction, BaseToolResult } from "../types";
+
+import type { ToolFunction } from "../types";
 
 const MatchAndReplaceSchema = z.object({
-  rawRequest: z.string(),
   match: z.string().min(1),
   replace: z.string(),
 });
 
 type MatchAndReplaceArgs = z.infer<typeof MatchAndReplaceSchema>;
 
-export const matchAndReplace: ToolFunction<
-  MatchAndReplaceArgs,
-  BaseToolResult
-> = {
+export const matchAndReplace: ToolFunction<MatchAndReplaceArgs, string> = {
   schema: MatchAndReplaceSchema,
   description: "Match and replace text content",
-  handler: async (args) => {
+  handler: (args, context) => {
     try {
-      const replaced = args.rawRequest.replace(args.match, args.replace);
+      const hasChanged = context.replaySession.updateRequestRaw((draft) => {
+        return draft.replace(args.match, args.replace);
+      });
 
-      return {
-        kind: "Success",
-        data: {
-          newRequestRaw: replaced,
-          findings: `Matched "${args.match}" and replaced with "${args.replace}"`,
-        },
-      };
+      return hasChanged
+        ? "Request has been updated"
+        : "Request has not changed. No replacements were made.";
     } catch (error) {
-      return {
-        kind: "Error",
-        data: {
-          error: `Failed to match and replace: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        },
-      };
+      return `Failed to match and replace: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
     }
   },
 };

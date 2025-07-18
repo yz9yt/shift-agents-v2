@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useContent } from "./useContent";
 import None from "./None.vue";
 import Success from "./Success.vue";
+import { useContent } from "./useContent";
+
 import BadState from "@/components/drawer/ChatContent/BadState.vue";
 
 const { hasMessages, hasSelectedAgent } = useContent();

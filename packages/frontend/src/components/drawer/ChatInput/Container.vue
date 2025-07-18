@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { useChat } from "./useChat";
-import InputText from "primevue/inputtext";
 import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import { ref } from "vue";
+
+import { useChat } from "./useChat";
 
 const { sendMessage } = useChat();
 
 const message = ref("");
 const isLoading = ref(false);
 
-const handleSend = async () => {
+const handleSend = () => {
   if (!message.value.trim() || isLoading.value) {
     return;
   }
 
   const messageToSend = message.value.trim();
   message.value = "";
-  isLoading.value = true;
 
   try {
-    await sendMessage(messageToSend);
+    isLoading.value = true;
+    sendMessage(messageToSend);
   } finally {
     isLoading.value = false;
   }
@@ -39,15 +40,12 @@ const handleKeydown = (event: KeyboardEvent) => {
       v-model="message"
       placeholder="Type your message..."
       :disabled="isLoading"
-      @keydown="handleKeydown"
       class="flex-1"
       :pt="{
         root: 'bg-surface-700 border-surface-600 text-surface-100',
       }"
+      @keydown="handleKeydown"
     />
-    <Button
-      @click="handleSend"
-      label="Send"
-    />
+    <Button label="Send" @click="handleSend" />
   </div>
 </template>

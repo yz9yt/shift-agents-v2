@@ -1,28 +1,33 @@
-import { useAgentStore } from "@/stores";
 import { computed } from "vue";
+
+import { useSDK } from "@/plugins/sdk";
+import { useAgentStore } from "@/stores/agent";
 
 export const useChat = () => {
   const agentStore = useAgentStore();
-  const selectedAgent = computed(() => agentStore.selectedAgent);
+  const sdk = useSDK();
 
   const messages = computed(() => {
-    if (!selectedAgent.value) {
+    if (!agentStore.selectedAgent) {
       return [];
     }
 
-    return selectedAgent.value.conversation;
+    return agentStore.selectedAgent.conversation;
   });
 
   const sendMessage = (message: string) => {
     console.log("sending message", message);
-    if (!selectedAgent.value) {
+    if (!agentStore.selectedAgent) {
       return;
     }
 
-    console.log("selectedAgent", selectedAgent.value);
+    console.log("selectedAgent", agentStore.selectedAgent);
     try {
-      selectedAgent.value.sendMessage(message);
+      agentStore.selectedAgent.sendMessage(message);
     } catch (error) {
+      sdk.window.showToast("Error sending message", {
+        variant: "error",
+      });
       console.error("Error sending message", error);
     }
   };

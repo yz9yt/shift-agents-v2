@@ -1,28 +1,26 @@
-import { useAgentStore } from "@/stores";
 import { computed } from "vue";
+
+import { useAgentStore } from "@/stores/agent";
 
 export const useContent = () => {
   const agentStore = useAgentStore();
-  const selectedAgent = computed(() => agentStore.selectedAgent);
 
   const messages = computed(() => {
-    if (!selectedAgent.value) {
+    if (!agentStore.selectedAgent) {
       return [];
     }
 
-    return selectedAgent.value.conversation.filter(
-      (message) => message.role !== "system"
+    return agentStore.selectedAgent.conversation.filter(
+      (message) => message.role !== "system",
     );
   });
 
   const hasMessages = computed(() => messages.value.length > 0);
-
-  const hasSelectedAgent = computed(() => !!selectedAgent.value);
+  const hasSelectedAgent = computed(() => !!agentStore.selectedAgent);
 
   return {
     messages,
     hasMessages,
     hasSelectedAgent,
-    selectedAgent,
   };
 };

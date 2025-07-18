@@ -1,4 +1,5 @@
 import { Classic } from "@caido/primevue";
+import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 import { createApp } from "vue";
 
@@ -6,9 +7,10 @@ import { SDKPlugin } from "./plugins/sdk";
 import "./styles/index.css";
 import type { FrontendSDK } from "./types";
 import App from "./views/App.vue";
-import { createPinia } from "pinia";
-import { useAgentStore } from "@/stores";
+
 import { createDOMManager } from "@/dom";
+import { useAgentStore } from "@/stores/agent";
+import { useUIStore } from "@/stores/ui";
 
 export const init = (sdk: FrontendSDK) => {
   const app = createApp(App);
@@ -43,8 +45,8 @@ export const init = (sdk: FrontendSDK) => {
     type: "Button",
     label: "Agent",
     onClick: () => {
-      const agentStore = useAgentStore();
-      agentStore.toggleDrawer();
+      const uiStore = useUIStore();
+      uiStore.toggleDrawer();
     },
   });
 
@@ -69,12 +71,8 @@ export const init = (sdk: FrontendSDK) => {
 
   domManager.session.onSelected((sessionId) => {
     const agentStore = useAgentStore();
-    if (sessionId) {
-      if (!agentStore.getAgent(sessionId)) {
-        agentStore.createAgentFromSessionId(sessionId);
-      }
-
-      agentStore.selection.selectAgent(sessionId);
+    if (sessionId !== undefined) {
+      agentStore.selectAgent(sessionId);
     }
   });
 };

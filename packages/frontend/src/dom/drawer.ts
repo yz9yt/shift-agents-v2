@@ -1,11 +1,12 @@
 import { Classic } from "@caido/primevue";
 import PrimeVue from "primevue/config";
-import { createApp, type App } from "vue";
-import { type FrontendSDK } from "@/types";
+import { type App, createApp } from "vue";
+
 import { Drawer } from "@/components/drawer";
+import { type FrontendSDK } from "@/types";
 
 export const useDrawerManager = (sdk: FrontendSDK) => {
-  let app: App | null = null;
+  let app: App | undefined = undefined;
 
   const start = () => {
     // @ts-expect-error temporary workaround for missing onPageChange type
@@ -26,7 +27,7 @@ export const useDrawerManager = (sdk: FrontendSDK) => {
   const remove = () => {
     if (app) {
       app.unmount();
-      app = null;
+      app = undefined;
     }
   };
 

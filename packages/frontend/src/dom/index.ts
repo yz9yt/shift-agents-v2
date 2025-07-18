@@ -1,6 +1,6 @@
 import { useDrawerManager } from "@/dom/drawer";
 import { useSessionManager } from "@/dom/session";
-import { FrontendSDK } from "@/types";
+import { type FrontendSDK } from "@/types";
 
 export const createDOMManager = (sdk: FrontendSDK) => {
   return {

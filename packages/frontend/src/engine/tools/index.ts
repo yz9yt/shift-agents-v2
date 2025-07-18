@@ -1,14 +1,14 @@
+import { addFinding } from "./addFinding";
 import { alert } from "./alert";
 import { matchAndReplace } from "./matchAndReplace";
-import { setBody } from "./setBody";
-import { setPath } from "./setPath";
-import { setMethod } from "./setMethod";
-import { setHeader } from "./setHeader";
-import { setQueryParameter } from "./setQueryParameter";
-import { removeQueryParameter } from "./removeQueryParameter";
-import { removeHeader } from "./removeHeader";
 import { pause } from "./pause";
-import { addFinding } from "./addFinding";
+import { removeHeader } from "./removeHeader";
+import { removeQueryParameter } from "./removeQueryParameter";
+import { setBody } from "./setBody";
+import { setHeader } from "./setHeader";
+import { setMethod } from "./setMethod";
+import { setPath } from "./setPath";
+import { setQueryParameter } from "./setQueryParameter";
 
 export const TOOLS = {
   alert,

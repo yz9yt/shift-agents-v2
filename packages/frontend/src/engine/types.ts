@@ -1,3 +1,4 @@
+import { FrontendSDK } from "@/types";
 import { z } from "zod";
 
 export const APIToolCallSchema = z.object({
@@ -24,41 +25,25 @@ export const APILLMResponseSchema = z.object({
     })
   ),
 });
+
 export type APIMessage = z.infer<typeof APIMessageSchema>;
 export type APIToolCall = z.infer<typeof APIToolCallSchema>;
 
-export type Finding = {
-  title: string;
-  markdown: string;
-};
-
-export type BaseToolResult =
-  | {
-      kind: "Success";
-      data: {
-        newRequestRaw: string;
-        findings: Finding[];
-        pause?: boolean;
-      };
-    }
-  | {
-      kind: "Error";
-      data: {
-        error: string;
-      };
-    };
-
 export type ToolContext = {
-  replaySessionRequestRaw: string;
-  replaySessionId: number;
+  sdk: FrontendSDK;
+  replaySession: {
+    requestRaw: string;
+    id: string;
+    updateRequestRaw: (updater: (draft: string) => string) => boolean;
+  };
+  agent: {
+    name: string;
+  };
 };
 
-export type ToolFunction<
-  TInput = unknown,
-  TOutput = unknown
-> = {
+export type ToolFunction<TInput = unknown, TOutput = unknown> = {
   schema: z.ZodSchema<TInput>;
-  handler: (args: TInput, context: ToolContext) => Promise<TOutput>;
+  handler: (args: TInput, context: ToolContext) => Promise<TOutput> | TOutput;
   description: string;
 };
 
@@ -70,13 +55,13 @@ export type AgentConfig = {
 };
 
 export type JITAgentConfig = {
-  replaySessionId: number;
+  replaySessionId: string;
   jitInstructions: string;
   maxIterations: number;
 };
 
 export type AgentStatus =
-  | "paused"
+  | "idle"
   | "queryingAI"
   | "callingTools"
   | "sendingReplayRequest"

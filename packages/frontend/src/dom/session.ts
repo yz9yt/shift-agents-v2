@@ -64,7 +64,7 @@ export const useSessionManager = (sdk: FrontendSDK) => {
     });
 
     const initialSelected = treeCollection.querySelector(
-      '.c-tree-session[data-is-selected="true"]'
+      '.c-tree-session[data-is-selected="true"]',
     );
     if (initialSelected) {
       const sessionId = initialSelected.getAttribute("data-session-id");

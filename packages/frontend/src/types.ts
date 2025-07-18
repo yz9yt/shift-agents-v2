@@ -18,16 +18,6 @@ export type Agent = {
 
 export type Tool = {
   name: string;
-  parameters: Record<string, any>; // map of parameters
-  function: (parameters: Record<string, any>) => Promise<boolean>; // boolean if the tool was successful
+  parameters: Record<string, unknown>; // map of parameters
+  function: (parameters: Record<string, unknown>) => Promise<boolean>; // boolean if the tool was successful
 };
-
-export enum AgentState {
-  Paused = "paused", // Agent has been paused. This state occurs when
-  Restarted = "restarted",
-  Error = "error",
-  WaitingOnAI = "running - waiting on ai",
-  ReadyToImplementActions = "idle - ready to implement actions",
-  WaitingOnReplay = "running - waiting on replay",
-  ReadyToTellAI = "idle - ready to tell ai",
-}

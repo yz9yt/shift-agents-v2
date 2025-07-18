@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAgentStore } from "@/stores";
+import { useAgentStore } from "@/stores/agent";
 
 const agentStore = useAgentStore();
 </script>
@@ -9,7 +9,7 @@ const agentStore = useAgentStore();
     <div class="text-center">
       <div class="text-lg mb-2">Start a conversation</div>
       <div class="text-sm">Send a message to begin</div>
-      <pre>[debug] session ID: {{ agentStore.selection.selectedAgentId }}</pre>
+      <pre>[debug] session ID: {{ agentStore.selectedId }}</pre>
     </div>
   </div>
 </template>
