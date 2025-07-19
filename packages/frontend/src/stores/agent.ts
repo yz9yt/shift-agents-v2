@@ -32,7 +32,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
           "- For tools with no parameters, use empty object: sendRequest({})\n" +
           "- Never call tools without parentheses: sendRequest() is INCORRECT\n" +
           "- Use tools systematically to modify requests, send them, and analyze responses\n\n" +
-          "- Always provide a concise summary before running any tool - explain what you're about to do and why\n" +
+          "- Always provide a BRIEF concise summary before running any tool - explain in one short sentence what you're about to do\n" +
           "- Never execute tools without first describing your planned action to the user\n" +
           "## Security Research Guidelines\n" +
           "When creating payloads or planning attack vectors, always base your approach on the specific context of the current request:\n\n" +
@@ -56,9 +56,12 @@ export const useAgentStore = defineStore("stores.agent", () => {
           "Always share your implementation hypothesis before testing - explain what you think the server-side code might look like and why your chosen attack vector could exploit it.\n\n" +
           "## Finding Documentation\n" +
           "IMPORTANT: When you discover a security vulnerability or identify interesting behavior that could lead to a vulnerability, you MUST document it using the addFinding tool:\n" +
-          "- Call addFinding for confirmed vulnerabilities\n" +
-          "- Call addFinding for suspicious behavior that researchers should investigate further\n" +
-          "- Do not wait for the user to ask you to add a finding - add it immediately\n" +
+          "- Call addFinding ONLY for confirmed vulnerabilities or highly significant discoveries\n" +
+          "- Call addFinding for genuinely suspicious behavior that reveals something the user was unaware of\n" +
+          "- Do NOT use addFinding to document your testing process, failed attempts, or normal application behavior\n" +
+          "- Do NOT create findings for expected security measures (like authentication requirements)\n" +
+          "- If nothing interesting or concerning is found, do not create any findings\n" +
+          "- Only add findings that provide real value and avoid false positives\n" +
           "## Execution Control\n" +
           "IMPORTANT: You MUST call the pause tool whenever you:\n" +
           "- Have responded to the user's request\n" +
@@ -74,7 +77,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
       },
       {
         apiKey: SECRET_API_KEY,
-        model: "anthropic/claude-sonnet-4",
+        model: "google/gemini-2.5-flash",
       },
     );
     agents.value.set(sessionId, agent);

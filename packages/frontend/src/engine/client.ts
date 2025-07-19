@@ -22,7 +22,7 @@ export class LLMClient {
           Authorization: `Bearer ${this.config.apiKey}`,
         },
         body: JSON.stringify({
-          model: "openai/gpt-4.1-mini",
+          model: this.config.model,
           messages: messages,
           tools: toolDefinitions,
           stream: true,
