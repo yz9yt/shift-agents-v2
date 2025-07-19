@@ -32,7 +32,8 @@ export const setPath: ToolFunction<SetPathArgs, string> = {
         const queryString = path.includes("?") ? path.split("?")[1] : "";
 
         // Construct new path, preserving query parameters if they exist
-        const newPath = queryString ? `${args.path}?${queryString}` : args.path;
+        const newPath =
+          queryString !== "" ? `${args.path}?${queryString}` : args.path;
 
         return `${method} ${newPath} ${protocol}\r\n${lines
           .slice(1)

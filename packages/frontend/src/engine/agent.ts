@@ -22,7 +22,7 @@ export class Agent {
   constructor(
     sdk: FrontendSDK,
     config: AgentConfig,
-    openRouterConfig: OpenRouterConfig
+    openRouterConfig: OpenRouterConfig,
   ) {
     this.sdk = sdk;
     this.config = config;
@@ -56,27 +56,33 @@ export class Agent {
 
   private async handleToolCall(
     toolCall: APIToolCall,
-    context: ToolContext
+    context: ToolContext,
   ): Promise<APIMessage> {
     const toolName = toolCall.function.name as ToolName;
     const tool = TOOLS[toolName];
 
-    if (!tool) {
+    if (tool === undefined) {
       return {
         role: "tool",
         tool_call_id: toolCall.id,
         name: toolName,
         content: `Error while executing tool ${toolName}: Tool not found, available tools: ${Object.keys(
-          TOOLS
+          TOOLS,
         ).join(", ")}`,
       };
     }
 
     try {
-      const argsString = toolCall.function.arguments?.trim() ?? "";
-      const rawArgs = argsString === "" ? {} : JSON.parse(argsString);
+      let argsString = toolCall.function.arguments.trim();
+      if (argsString === "") {
+        argsString = "{}";
+      }
+
+      const rawArgs = JSON.parse(argsString);
       const validatedArgs = tool.schema.parse(rawArgs);
-      const result = await (tool.handler as any)(validatedArgs, context);
+
+      // @ts-expect-error - TODO: fix this
+      const result = await tool.handler(validatedArgs, context);
 
       return {
         role: "tool",
@@ -102,7 +108,7 @@ export class Agent {
   private async processMessages(): Promise<void> {
     let iterations = 0;
     const currentRequest = await getCurrentReplayRequest(
-      this.config.jitConfig.replaySessionId
+      this.config.jitConfig.replaySessionId,
     );
 
     while (iterations < this.config.jitConfig.maxIterations) {
@@ -175,7 +181,10 @@ export class Agent {
                 },
               };
 
-              const toolResponse = await this.handleToolCall(toolCall, toolContext);
+              const toolResponse = await this.handleToolCall(
+                toolCall,
+                toolContext,
+              );
               this.messages.push(toolResponse);
             }
           },

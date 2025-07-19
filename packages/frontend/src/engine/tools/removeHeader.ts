@@ -18,7 +18,7 @@ export const removeHeader: ToolFunction<RemoveHeaderArgs, string> = {
         const headerEnd = lines.findIndex((line) => line === "");
         if (headerEnd === -1) {
           throw new Error(
-            "Invalid HTTP request - no header/body separator found"
+            "Invalid HTTP request - no header/body separator found",
           );
         }
 

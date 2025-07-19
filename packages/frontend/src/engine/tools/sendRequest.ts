@@ -11,13 +11,16 @@ type SendRequestResult =
       error: string;
     };
 
-export const sendRequest: ToolFunction<{} | undefined, SendRequestResult> = {
-  schema: z.object({}).optional(),
+const SendRequestSchema = z.object({}).optional();
+type SendRequestArgs = z.infer<typeof SendRequestSchema>;
+
+export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
+  schema: SendRequestSchema,
   description:
     "Send the current request and return the response. Usage: sendRequest() or sendRequest({})",
   instructions: `Usage: sendRequest() or sendRequest({}). Args are optional.`,
   handler: async (args, context) => {
-    // @ts-ignore - no types yet for sendRequest
+    // @ts-expect-error - no types yet for sendRequest
     context.sdk.replay.sendRequest(context.replaySession.id, {
       connectionInfo: {
         host: context.replaySession.request.host,
@@ -34,7 +37,7 @@ export const sendRequest: ToolFunction<{} | undefined, SendRequestResult> = {
       const timeout = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error("Request timeout after 30 seconds")),
-          30000
+          30000,
         );
       });
 

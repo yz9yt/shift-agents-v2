@@ -11,7 +11,7 @@ export class LLMClient {
       onToolCall?: (toolCalls: APIToolCall[]) => Promise<void>;
       onFinish?: (response: APIMessage) => void;
       onError?: (error: string) => void;
-    }
+    },
   ) {
     const stream = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -27,11 +27,11 @@ export class LLMClient {
           tools: toolDefinitions,
           stream: true,
         }),
-      }
+      },
     );
 
     const reader = stream.body?.getReader();
-    if (!reader) {
+    if (reader === undefined) {
       const error = "No reader from LLM";
       callbacks?.onError?.(error);
       return { kind: "Error", error };
@@ -59,36 +59,39 @@ export class LLMClient {
           const data = JSON.parse(line.slice(6));
 
           const delta = data.choices?.[0]?.delta;
-          if (delta) {
-            if (delta.role) {
+          if (delta !== undefined) {
+            if (delta.role !== undefined) {
               role = delta.role;
             }
-            if (delta.content) {
+            if (delta.content !== undefined) {
               content += delta.content;
               callbacks?.onChunk?.(delta.content);
             }
-            if (delta.tool_calls) {
+            if (delta.tool_calls !== undefined) {
               for (const toolCall of delta.tool_calls) {
                 const index = toolCall.index;
                 if (!toolCallsMap.has(index)) {
                   toolCallsMap.set(index, {
-                    id: toolCall.id || "",
+                    id: toolCall.id !== undefined ? toolCall.id : "",
                     type: "function",
                     function: {
-                      name: toolCall.function?.name || "",
+                      name:
+                        toolCall.function?.name !== undefined
+                          ? toolCall.function.name
+                          : "",
                       arguments: "",
                     },
                   });
                 }
 
                 const existingToolCall = toolCallsMap.get(index)!;
-                if (toolCall.id) {
+                if (toolCall.id !== undefined) {
                   existingToolCall.id = toolCall.id;
                 }
-                if (toolCall.function?.name) {
+                if (toolCall.function?.name !== undefined) {
                   existingToolCall.function.name = toolCall.function.name;
                 }
-                if (toolCall.function?.arguments) {
+                if (toolCall.function?.arguments !== undefined) {
                   existingToolCall.function.arguments +=
                     toolCall.function.arguments;
                 }

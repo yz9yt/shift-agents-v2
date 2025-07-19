@@ -20,7 +20,7 @@ export const setBody: ToolFunction<SetBodyArgs, string> = {
 
         if (headerEnd === -1) {
           throw new Error(
-            "Invalid HTTP request - no double newline separator found"
+            "Invalid HTTP request - no double newline separator found",
           );
         }
 

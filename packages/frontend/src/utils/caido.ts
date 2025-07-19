@@ -1,6 +1,6 @@
 export const getCurrentlySelectedReplayTabSessionId = () => {
   const activeTab = document.querySelector(
-    '[data-is-selected="true"][data-session-id]'
+    '[data-is-selected="true"][data-session-id]',
   );
   return activeTab ? activeTab.getAttribute("data-session-id") : "";
 };
@@ -14,7 +14,7 @@ type ReplayRequest = {
 };
 
 export async function getCurrentReplayRequest(
-  replaySessionId: string
+  replaySessionId: string,
 ): Promise<ReplayRequest> {
   if (typeof replaySessionId !== "string") {
     throw new Error("replaySessionId must be a string");
@@ -71,7 +71,7 @@ export async function getCurrentReplayRequestMetadata(replaySessionId: string) {
 
 export async function sendReplaySessionEntry(
   replaySessionId: string,
-  rawRequest: string
+  rawRequest: string,
 ): Promise<boolean> {
   const auth = JSON.parse(localStorage.getItem("CAIDO_AUTHENTICATION") ?? "{}");
   const accessToken = auth.accessToken;

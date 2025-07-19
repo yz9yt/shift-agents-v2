@@ -19,7 +19,7 @@ export const regexMatchAndReplace: ToolFunction<
     try {
       // TODO: Implement actual regex match and replace functionality
       console.log(
-        `[TOOL CALL] Regex matching "${args.match}" and replacing with "${args.replace}"`
+        `[TOOL CALL] Regex matching "${args.match}" and replacing with "${args.replace}"`,
       );
 
       return "Request has been updated";

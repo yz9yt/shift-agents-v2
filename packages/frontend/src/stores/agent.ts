@@ -77,7 +77,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
       },
       {
         apiKey: SECRET_API_KEY,
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-4.1",
       },
     );
     agents.value.set(sessionId, agent);

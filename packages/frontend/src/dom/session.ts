@@ -39,9 +39,14 @@ export const useSessionManager = (sdk: FrontendSDK) => {
           if (target.classList.contains("c-tree-session")) {
             const isSelected =
               target.getAttribute("data-is-selected") === "true";
-            const sessionId = target.getAttribute("data-session-id");
+            const sessionId =
+              target.getAttribute("data-session-id") ?? undefined;
 
-            if (isSelected && sessionId && sessionId !== currentSelectedId) {
+            if (
+              isSelected &&
+              sessionId !== undefined &&
+              sessionId !== currentSelectedId
+            ) {
               currentSelectedId = sessionId;
               if (onSelectedCallback) {
                 onSelectedCallback(sessionId);
@@ -67,8 +72,9 @@ export const useSessionManager = (sdk: FrontendSDK) => {
       '.c-tree-session[data-is-selected="true"]',
     );
     if (initialSelected) {
-      const sessionId = initialSelected.getAttribute("data-session-id");
-      if (sessionId) {
+      const sessionId =
+        initialSelected.getAttribute("data-session-id") ?? undefined;
+      if (sessionId !== undefined) {
         currentSelectedId = sessionId;
         if (onSelectedCallback) {
           onSelectedCallback(sessionId);

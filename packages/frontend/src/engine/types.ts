@@ -1,5 +1,6 @@
-import { FrontendSDK } from "@/types";
 import { z } from "zod";
+
+import { type FrontendSDK } from "@/types";
 
 export const APIToolCallSchema = z.object({
   id: z.string(),
@@ -38,7 +39,6 @@ export type ToolContext = {
     name: string;
   };
 };
-
 
 export type ToolFunction<TInput = unknown, TOutput = unknown> = {
   schema: z.ZodSchema<TInput>;
