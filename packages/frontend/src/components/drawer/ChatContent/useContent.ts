@@ -17,10 +17,12 @@ export const useContent = () => {
 
   const hasMessages = computed(() => messages.value.length > 0);
   const hasSelectedAgent = computed(() => !!agentStore.selectedAgent);
+  const agentStatus = computed(() => agentStore.selectedAgent?.currentStatus);
 
   return {
     messages,
     hasMessages,
     hasSelectedAgent,
+    agentStatus,
   };
 };

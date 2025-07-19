@@ -1,9 +1,10 @@
 import { z } from "zod";
 import type { ToolFunction } from "../types";
 
-const AlertSchema = z.object({
-  message: z.string().min(1),
-});
+const AlertSchema = z
+  .object({
+    message: z.string().min(1),
+  })
 
 type AlertArgs = z.infer<typeof AlertSchema>;
 

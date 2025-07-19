@@ -33,12 +33,6 @@ importers:
         specifier: 5.5.4
         version: 5.5.4
 
-  packages/backend:
-    devDependencies:
-      '@caido/sdk-backend':
-        specifier: ^0.46.0
-        version: 0.46.0
-
   packages/frontend:
     dependencies:
       '@caido/primevue':

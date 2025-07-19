@@ -18,21 +18,19 @@ export const APIMessageSchema = z.object({
   tool_call_id: z.string().optional(),
 });
 
-export const APILLMResponseSchema = z.object({
-  choices: z.array(
-    z.object({
-      message: APIMessageSchema,
-    })
-  ),
-});
-
 export type APIMessage = z.infer<typeof APIMessageSchema>;
 export type APIToolCall = z.infer<typeof APIToolCallSchema>;
 
 export type ToolContext = {
   sdk: FrontendSDK;
   replaySession: {
-    requestRaw: string;
+    request: {
+      raw: string;
+      host: string;
+      port: number;
+      isTLS: boolean;
+      SNI: string;
+    };
     id: string;
     updateRequestRaw: (updater: (draft: string) => string) => boolean;
   };
@@ -41,10 +39,12 @@ export type ToolContext = {
   };
 };
 
+
 export type ToolFunction<TInput = unknown, TOutput = unknown> = {
   schema: z.ZodSchema<TInput>;
   handler: (args: TInput, context: ToolContext) => Promise<TOutput> | TOutput;
   description: string;
+  instructions?: string;
 };
 
 export type AgentConfig = {
@@ -71,7 +71,3 @@ export type OpenRouterConfig = {
   apiKey: string;
   model: string;
 };
-
-export type APIResponse<T> =
-  | { kind: "Success"; data: T }
-  | { kind: "Error"; error: string };

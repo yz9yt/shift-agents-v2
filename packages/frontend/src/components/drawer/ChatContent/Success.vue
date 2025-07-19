@@ -3,7 +3,7 @@ import { ChatMessage } from "../ChatMessage";
 
 import { useContent } from "./useContent";
 
-const { messages } = useContent();
+const { messages, agentStatus } = useContent();
 </script>
 
 <template>
@@ -13,5 +13,17 @@ const { messages } = useContent();
       :key="index"
       :message="message"
     />
+    <div v-if="agentStatus === 'idle'" class="text-sm text-surface-400">
+      Agent is paused.
+    </div>
+    <div v-if="agentStatus === 'error'" class="text-sm text-surface-400">
+      Agent encountered an error.
+    </div>
+    <div v-if="agentStatus === 'queryingAI'" class="text-sm text-surface-400">
+      Agent is querying the AI.
+    </div>
+    <div v-if="agentStatus === 'callingTools'" class="text-sm text-surface-400">
+      Agent is calling tools.
+    </div>
   </div>
 </template>

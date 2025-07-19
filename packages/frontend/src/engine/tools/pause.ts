@@ -7,7 +7,7 @@ type PauseArgs = z.infer<typeof PauseSchema>;
 
 export const pause: ToolFunction<PauseArgs, string> = {
   schema: PauseSchema,
-  description: "Pause the current execution",
+  description: "Once you have finished your work, you can use this tool to pause the execution of the agent.",
   handler: () => {
     return "Paused";
   },

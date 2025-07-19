@@ -9,6 +9,8 @@ import { setHeader } from "./setHeader";
 import { setMethod } from "./setMethod";
 import { setPath } from "./setPath";
 import { setQueryParameter } from "./setQueryParameter";
+import { sendRequest } from "./sendRequest";
+import * as z from "zod";
 
 export const TOOLS = {
   alert,
@@ -22,6 +24,7 @@ export const TOOLS = {
   removeHeader,
   pause,
   addFinding,
+  sendRequest,
 } as const;
 
 export type ToolName = keyof typeof TOOLS;
@@ -30,7 +33,7 @@ export const toolDefinitions = Object.entries(TOOLS).map(([name, tool]) => ({
   type: "function" as const,
   function: {
     name,
-    description: tool.description,
-    parameters: tool.schema,
+    description: tool.description + "\n\n" + tool.instructions,
+    parameters: z.toJSONSchema(tool.schema),
   },
 }));

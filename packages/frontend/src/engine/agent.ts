@@ -27,11 +27,10 @@ export class Agent {
     this.sdk = sdk;
     this.config = config;
     this.llmClient = new LLMClient(openRouterConfig);
-
     this.generateSystemPrompt();
   }
 
-  private generateSystemPrompt() {
+  private generateSystemPrompt(): void {
     const systemPrompt = `<SYSTEM_PROMPT>${this.config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${this.config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`;
     this.messages.push({
       role: "system",
@@ -39,35 +38,20 @@ export class Agent {
     });
   }
 
-  get id() {
+  get id(): string {
     return this.config.id;
   }
 
-  get name() {
+  get name(): string {
     return this.config.name;
   }
 
-  get currentStatus() {
+  get currentStatus(): AgentStatus {
     return this.status;
   }
 
-  get conversation() {
+  get conversation(): APIMessage[] {
     return [...this.messages];
-  }
-
-  // This is used to query the AI model and include context in the prompt like the current request raw.
-  private async queryAIModel(raw: string) {
-    const context = `Current request:\n<request_raw>\n${raw}\n</request_raw>`;
-
-    const messages = [
-      ...this.messages,
-      {
-        role: "user" as const,
-        content: context,
-      },
-    ];
-
-    return await this.llmClient.callLLM(messages);
   }
 
   private async handleToolCall(
@@ -82,21 +66,32 @@ export class Agent {
         role: "tool",
         tool_call_id: toolCall.id,
         name: toolName,
-        content: `Error while executing tool ${toolName}: Tool not found, available tools: ${Object.keys(TOOLS).join(", ")}`,
+        content: `Error while executing tool ${toolName}: Tool not found, available tools: ${Object.keys(
+          TOOLS
+        ).join(", ")}`,
       };
     }
 
-    const rawArgs = JSON.parse(toolCall.function.arguments);
-    const validatedArgs = tool.schema.parse(rawArgs);
-    // @ts-expect-error - TODO: fix this
-    const result = await tool.handler(validatedArgs, context);
+    try {
+      const argsString = toolCall.function.arguments?.trim() ?? "";
+      const rawArgs = argsString === "" ? {} : JSON.parse(argsString);
+      const validatedArgs = tool.schema.parse(rawArgs);
+      const result = await (tool.handler as any)(validatedArgs, context);
 
-    return {
-      role: "tool",
-      tool_call_id: toolCall.id,
-      name: toolName,
-      content: JSON.stringify(result),
-    };
+      return {
+        role: "tool",
+        tool_call_id: toolCall.id,
+        name: toolName,
+        content: JSON.stringify(result),
+      };
+    } catch (error) {
+      return {
+        role: "tool",
+        tool_call_id: toolCall.id,
+        name: toolName,
+        content: `Error while executing tool ${toolName}: ${error}`,
+      };
+    }
   }
 
   async sendMessage(content: string): Promise<void> {
@@ -106,32 +101,72 @@ export class Agent {
 
   private async processMessages(): Promise<void> {
     let iterations = 0;
-    let currentRequest = await getCurrentReplayRequest(
+    const currentRequest = await getCurrentReplayRequest(
       this.config.jitConfig.replaySessionId
     );
 
     while (iterations < this.config.jitConfig.maxIterations) {
       this.status = "queryingAI";
 
-      const result = await this.queryAIModel(currentRequest.raw);
-      switch (result.kind) {
-        case "Success":
-          this.messages.push(result.data);
+      const context = `Current request:\n<request_raw>\n${currentRequest.raw}\n</request_raw>`;
+      const messages = [
+        ...this.messages,
+        {
+          role: "user" as const,
+          content: context,
+        },
+      ];
 
-          if (result.data.tool_calls && result.data.tool_calls.length > 0) {
+      const assistantMessageIndex =
+        this.messages.push({
+          role: "assistant",
+          content: "",
+        }) - 1;
+
+      let hasToolCalls = false;
+      let shouldPause = false;
+
+      try {
+        await this.llmClient.streamLLM(messages, {
+          onChunk: (content) => {
+            this.messages[assistantMessageIndex]!.content += content;
+          },
+          onError: (error) => {
+            this.status = "error";
+            this.messages[assistantMessageIndex]!.content = error;
+            console.error(`Agent ${this.id} error:`, error);
+          },
+          onFinish: (response) => {
+            this.messages[assistantMessageIndex] = response;
+            if (!hasToolCalls) {
+              this.status = "idle";
+            }
+          },
+          onToolCall: async (toolCalls) => {
+            hasToolCalls = true;
             this.status = "callingTools";
+            this.messages[assistantMessageIndex]!.tool_calls = toolCalls;
 
-            for (const toolCall of result.data.tool_calls) {
-              const context: ToolContext = {
+            for (const toolCall of toolCalls) {
+              if (toolCall.function.name === "pause") {
+                shouldPause = true;
+                this.status = "idle";
+                this.messages.push({
+                  role: "assistant",
+                  content: "Agent paused",
+                });
+                return;
+              }
+
+              const toolContext: ToolContext = {
                 sdk: this.sdk,
                 replaySession: {
-                  requestRaw: currentRequest.raw,
+                  request: currentRequest,
                   id: this.config.jitConfig.replaySessionId,
                   updateRequestRaw: (updater: (draft: string) => string) => {
                     const newRequestRaw = updater(currentRequest.raw);
                     const hasChanged = newRequestRaw !== currentRequest.raw;
                     currentRequest.raw = newRequestRaw;
-
                     return hasChanged;
                   },
                 },
@@ -140,57 +175,39 @@ export class Agent {
                 },
               };
 
-              const toolResponse = await this.handleToolCall(toolCall, context);
+              const toolResponse = await this.handleToolCall(toolCall, toolContext);
               this.messages.push(toolResponse);
             }
+          },
+        });
 
-            // TODO: maybe we should instead have a sendReplayRequest tool call instead?
-            this.status = "sendingReplayRequest";
-
-            console.log("sending request", currentRequest);
-            // @ts-ignore - no types yet for sendRequest
-            await this.sdk.replay.sendRequest(
-              this.config.jitConfig.replaySessionId,
-              {
-                connectionInfo: {
-                  host: currentRequest.host,
-                  isTLS: currentRequest.isTLS,
-                  port: currentRequest.port,
-                },
-                raw: currentRequest.raw,
-              }
-            );
-          } else {
-            this.status = "idle";
-            return;
-          }
-          break;
-        case "Error":
-          this.status = "error";
-
-          // TODO: have a special role for errors
-          this.messages.push({
-            role: "assistant",
-            content: result.error,
-          });
-
-          console.error(`Agent ${this.id} error:`, result.error);
+        if (shouldPause) {
           return;
+        }
+
+        if (hasToolCalls) {
+          iterations++;
+          continue;
+        } else {
+          this.status = "idle";
+          return;
+        }
+      } catch (error) {
+        this.status = "error";
+        this.messages.push({
+          role: "assistant",
+          content: `Error in agent processing: ${error}`,
+        });
+        console.error(`Agent ${this.id} processing error:`, error);
+        return;
       }
-
-      iterations++;
     }
 
-    if (iterations >= this.config.jitConfig.maxIterations) {
-      this.status = "idle";
-
-      // TODO: have a special role for this type of messages
-      this.messages.push({
-        role: "assistant",
-        content: `Agent ${this.id} hit max iterations`,
-      });
-
-      console.warn(`Agent ${this.id} hit max iterations`);
-    }
+    this.status = "idle";
+    this.messages.push({
+      role: "assistant",
+      content: `Agent ${this.id} hit max iterations`,
+    });
+    console.warn(`Agent ${this.id} hit max iterations`);
   }
 }

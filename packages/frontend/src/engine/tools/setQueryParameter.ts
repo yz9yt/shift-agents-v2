@@ -13,6 +13,7 @@ export const setQueryParameter: ToolFunction<SetQueryParameterArgs, string> = {
   schema: SetQueryParameterSchema,
   description: "Set a query parameter with the given name and value",
   handler: (args, context) => {
+    console.log("Setting query parameter", args);
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {
         const lines = draft.split("\r\n");
