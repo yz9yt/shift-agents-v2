@@ -30,6 +30,12 @@ export class LLMClient {
       },
     );
 
+    if (!stream.ok) {
+      const error = await stream.text();
+      callbacks?.onError?.(error);
+      return { kind: "Error", error };
+    }
+
     const reader = stream.body?.getReader();
     if (reader === undefined) {
       const error = "No reader from LLM";
@@ -63,7 +69,7 @@ export class LLMClient {
             if (delta.role !== undefined) {
               role = delta.role;
             }
-            if (delta.content !== undefined) {
+            if (delta.content !== undefined && delta.content !== null) {
               content += delta.content;
               callbacks?.onChunk?.(delta.content);
             }

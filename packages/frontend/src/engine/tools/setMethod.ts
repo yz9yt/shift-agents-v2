@@ -11,6 +11,10 @@ type SetMethodArgs = z.infer<typeof SetMethodSchema>;
 export const setMethod: ToolFunction<SetMethodArgs, string> = {
   schema: SetMethodSchema,
   description: "Set the request method",
+  frontend: {
+    icon: "fas fa-edit",
+    message: ({ method }) => `Set the request method to ${method}`
+  },
   handler: (args, context) => {
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {

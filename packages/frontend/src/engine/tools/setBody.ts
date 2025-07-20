@@ -10,6 +10,11 @@ type SetBodyArgs = z.infer<typeof SetBodySchema>;
 export const setBody: ToolFunction<SetBodyArgs, string> = {
   schema: SetBodySchema,
   description: "Set the request body content",
+  frontend: {
+    icon: "fas fa-edit",
+    message: () => `Updated the request body`,
+    details: ({ body }) => body,
+  },
   handler: (args, context) => {
     try {
       context.replaySession.updateRequestRaw((draft) => {
@@ -20,7 +25,7 @@ export const setBody: ToolFunction<SetBodyArgs, string> = {
 
         if (headerEnd === -1) {
           throw new Error(
-            "Invalid HTTP request - no double newline separator found",
+            "Invalid HTTP request - no double newline separator found"
           );
         }
 

@@ -22,6 +22,33 @@ export const APIMessageSchema = z.object({
 export type APIMessage = z.infer<typeof APIMessageSchema>;
 export type APIToolCall = z.infer<typeof APIToolCallSchema>;
 
+export type ComputedFrontendMetadata = {
+  icon: string;
+  message: string;
+  details?: string;
+};
+
+export type FrontendToolCall =
+  | {
+      kind: "success";
+      message: APIMessage;
+      frontend: ComputedFrontendMetadata;
+    }
+  | {
+      kind: "processing";
+      frontend: ComputedFrontendMetadata;
+    }
+  | {
+      kind: "error";
+      message: APIMessage;
+    };
+
+export type FrontendMessage = {
+  role: "user" | "assistant" | "system" | "tool" | "error";
+  content?: string;
+  tool_call?: FrontendToolCall;
+};
+
 export type ToolContext = {
   sdk: FrontendSDK;
   replaySession: {
@@ -40,10 +67,17 @@ export type ToolContext = {
   };
 };
 
+export type ToolFunctionFrontend<TInput = unknown, TOutput = unknown> = {
+  icon: string;
+  message: (args: TInput) => string;
+  details?: (args: TInput, output: TOutput) => string;
+};
+
 export type ToolFunction<TInput = unknown, TOutput = unknown> = {
   schema: z.ZodSchema<TInput>;
   handler: (args: TInput, context: ToolContext) => Promise<TOutput> | TOutput;
   description: string;
+  frontend: ToolFunctionFrontend<TInput, TOutput>;
   instructions?: string;
 };
 

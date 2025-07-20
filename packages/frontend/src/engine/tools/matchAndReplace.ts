@@ -12,6 +12,11 @@ type MatchAndReplaceArgs = z.infer<typeof MatchAndReplaceSchema>;
 export const matchAndReplace: ToolFunction<MatchAndReplaceArgs, string> = {
   schema: MatchAndReplaceSchema,
   description: "Match and replace text content",
+  frontend: {
+    icon: "fas fa-edit",
+    message: () => `Replaced text in the request`,
+    details: ({ match, replace }) => `Replaced every occurence of "${match}" with "${replace}"`,
+  },
   handler: (args, context) => {
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {

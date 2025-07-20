@@ -13,6 +13,11 @@ export const addFinding: ToolFunction<AddFindingArgs, string> = {
   schema: AddFindingSchema,
   description:
     "Add a finding with a title and markdown description. Finding represets a discovered vulnerability or interesting behavior that you want to report to the user. ",
+  frontend: {
+    icon: "fas fa-bug",
+    message: () => `Created a new finding`,
+    details: ({ markdown }) => markdown,
+  },
   handler: ({ title, markdown }, context) => {
     try {
       console.log("Adding finding", title, markdown);

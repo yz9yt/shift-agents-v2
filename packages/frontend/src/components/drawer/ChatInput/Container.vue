@@ -1,14 +1,24 @@
 <script setup lang="ts">
 import Button from "primevue/button";
-import InputText from "primevue/inputtext";
-import { ref } from "vue";
+import Dropdown from "primevue/dropdown";
+import { computed, ref, onMounted } from "vue";
 
 import { useChat } from "./useChat";
+import { useAgentStore } from "@/stores/agent";
 
 const { sendMessage } = useChat();
 
+const agentStore = useAgentStore();
+const selectedAgent = computed(() => agentStore.selectedAgent);
+
 const message = ref("");
 const isLoading = ref(false);
+const selectedModel = ref("Gemini 2.5 Pro");
+const textareaRef = ref<HTMLTextAreaElement>();
+
+onMounted(() => {
+  textareaRef.value?.focus();
+});
 
 const handleSend = () => {
   if (!message.value.trim() || isLoading.value) {
@@ -32,20 +42,110 @@ const handleKeydown = (event: KeyboardEvent) => {
     handleSend();
   }
 };
+
+const models = [
+  {
+    label: "Claude",
+    items: [
+      {
+        name: "Claude 3.5 Sonnet",
+        isRecommended: true,
+        id: "anthropic/claude-sonnet-3-5-sonnet",
+      },
+      { name: "Claude 4 Sonnet", id: "anthropic/claude-sonnet-4" },
+    ],
+  },
+  {
+    label: "Gemini",
+    items: [
+      {
+        name: "Gemini 2.5 Pro",
+        isRecommended: true,
+        id: "google/gemini-2.5-pro",
+      },
+      { name: "Gemini 2.5 Flash", id: "google/gemini-2.5-flash" },
+      {
+        name: "Gemini 2.5 Flash Lite",
+        id: "google/gemini-2.5-flash-lite-preview-06-17",
+      },
+      { name: "Gemini 2.0 Flash", id: "google/gemini-2.0-flash-001" },
+    ],
+  },
+  {
+    label: "GPT",
+    items: [
+      { name: "GPT 4.1", isRecommended: true, id: "openai/gpt-4.1" },
+      { name: "GPT o4 Mini High", id: "openai/o4-mini-high" },
+    ],
+  },
+];
 </script>
 
 <template>
-  <div class="flex gap-2 p-4 border-t border-surface-700">
-    <InputText
+  <div
+    class="p-4 bg-surface-900 h-40 flex flex-col gap-2 border-t border-surface-700"
+  >
+    <textarea
+      ref="textareaRef"
       v-model="message"
-      placeholder="Type your message..."
-      :disabled="isLoading"
-      class="flex-1"
-      :pt="{
-        root: 'bg-surface-700 border-surface-600 text-surface-100',
-      }"
       @keydown="handleKeydown"
+      placeholder="Message the Shift agent"
+      class="h-30 border-0 outline-none font-mono text-surface-200 resize-none bg-transparent flex-1 text-sm focus:outline-none focus:ring-0 overflow-y-auto scrollbar-hide"
+      style="scrollbar-width: none; -ms-overflow-style: none"
+      spellcheck="false"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
     />
-    <Button label="Send" @click="handleSend" />
+
+    <div class="flex justify-between gap-2 items-center">
+      <Dropdown
+        v-model="selectedModel"
+        :options="models"
+        optionLabel="name"
+        optionValue="name"
+        optionGroupLabel="label"
+        optionGroupChildren="items"
+        class="text-sm font-mono"
+      >
+        <template #option="slotProps">
+          <div class="flex items-center justify-between w-full">
+            <span>{{ slotProps.option.name }}</span>
+            <i
+              v-if="slotProps.option.isRecommended"
+              class="fas fa-star text-secondary-400 text-xs ml-2"
+              title="This model is recommended"
+            />
+          </div>
+        </template>
+      </Dropdown>
+
+      <Button
+        v-if="selectedAgent?.currentStatus === 'idle'"
+        @click="handleSend"
+        severity="tertiary"
+        icon="fas fa-arrow-circle-up"
+        :pt="{
+          root: {
+            class:
+              'bg-surface-700/50 text-surface-200 text-sm py-1.5 px-2 flex items-center justify-center rounded-md hover:text-white transition-colors duration-200 h-8 w-8 cursor-pointer',
+          },
+        }"
+      />
+      <Button
+        v-else
+        severity="danger"
+        icon="fas fa-square"
+        :pt="{
+          root: {
+            class:
+              'bg-red-400/10 text-red-400 py-1 px-1.5 flex items-center justify-center rounded-md hover:bg-red-400/20 transition-colors duration-200 h-8 w-8 cursor-pointer',
+          },
+          icon: {
+            class: 'text-sm',
+          },
+        }"
+      />
+    </div>
   </div>
 </template>

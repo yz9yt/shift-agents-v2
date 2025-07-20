@@ -13,6 +13,10 @@ export const removeQueryParameter: ToolFunction<
 > = {
   schema: RemoveQueryParameterSchema,
   description: "Remove a query parameter with the given name",
+  frontend: {
+    icon: "fas fa-edit",
+    message: ({ name }) => `Removed query parameter ${name} from the request`
+  },
   handler: (args, context) => {
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {

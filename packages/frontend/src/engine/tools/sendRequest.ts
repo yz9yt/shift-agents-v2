@@ -19,6 +19,16 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
   description:
     "Send the current request and return the response. Usage: sendRequest() or sendRequest({})",
   instructions: `Usage: sendRequest() or sendRequest({}). Args are optional.`,
+  frontend: {
+    icon: "fas fa-rocket",
+    message: () => `Sent the request`,
+    details: (_, result) => {
+      if ("error" in result) {
+        return result.error;
+      }
+      return `Response: \n${result.rawResponse.slice(0, 1000)}`;
+    },
+  },
   handler: async (args, context) => {
     // @ts-expect-error - no types yet for sendRequest
     context.sdk.replay.sendRequest(context.replaySession.id, {
@@ -37,7 +47,7 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
       const timeout = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error("Request timeout after 30 seconds")),
-          30000,
+          30000
         );
       });
 

@@ -11,6 +11,10 @@ type SetPathArgs = z.infer<typeof SetPathSchema>;
 export const setPath: ToolFunction<SetPathArgs, string> = {
   schema: SetPathSchema,
   description: "Set the request path",
+  frontend: {
+    icon: "fas fa-edit",
+    message: ({ path }) => `Set the request path to ${path}`
+  },
   handler: (args, context) => {
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {

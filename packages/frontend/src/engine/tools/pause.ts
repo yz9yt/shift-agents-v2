@@ -9,6 +9,10 @@ export const pause: ToolFunction<PauseArgs, string> = {
   schema: PauseSchema,
   description:
     "Once you have finished your work, you can use this tool to pause the execution of the agent.",
+  frontend: {
+    icon: "fas fa-pause",
+    message: () => `Paused the agent`,
+  },
   handler: () => {
     return "Paused";
   },

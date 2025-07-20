@@ -12,6 +12,10 @@ type SetQueryParameterArgs = z.infer<typeof SetQueryParameterSchema>;
 export const setQueryParameter: ToolFunction<SetQueryParameterArgs, string> = {
   schema: SetQueryParameterSchema,
   description: "Set a query parameter with the given name and value",
+  frontend: {
+    icon: "fas fa-edit",
+    message: ({ name, value }) => `Set a query parameter ${name} to ${value}`
+  },
   handler: (args, context) => {
     console.log("Setting query parameter", args);
     try {

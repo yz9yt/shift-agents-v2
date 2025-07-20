@@ -41,14 +41,21 @@ export const init = (sdk: FrontendSDK) => {
 
   sdk.sidebar.registerItem("Shift Agents", "/shift-agents");
 
+  useUIStore().toggleDrawer();
+  useAgentStore().selectAgent("2");
+
   sdk.replay.addToSlot("topbar", {
     type: "Button",
     label: "Agent",
-    onClick: () => {
-      const uiStore = useUIStore();
-      uiStore.toggleDrawer();
-    },
+    onClick: () => useUIStore().toggleDrawer(),
   });
+
+  sdk.commands.register("shift-agents:toggle-drawer", {
+    name: "Toggle Shift Agents Drawer",
+    run: () => useUIStore().toggleDrawer(),
+  });
+
+  sdk.shortcuts.register("shift-agents:toggle-drawer", ["shift", "meta", "i"]);
 
   // TEMPORARY WORKAROUND FOR MISSING ONPAGECHANGE TYPE
 

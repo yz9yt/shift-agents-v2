@@ -19,9 +19,7 @@ const uiStore = useUIStore();
       class="absolute top-0 right-0 bg-surface-800 shadow-lg pointer-events-auto h-full w-[35rem] border-l border-surface-900"
     >
       <div class="flex flex-col h-full">
-        <div class="flex-1 flex-grow-[4] overflow-auto">
-          <ChatContent />
-        </div>
+        <ChatContent />
         <div v-if="agentStore.selectedId" class="flex-shrink-0 flex-grow-1">
           <ChatInput />
         </div>
