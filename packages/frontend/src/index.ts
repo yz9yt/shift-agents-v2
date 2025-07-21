@@ -42,7 +42,6 @@ export const init = (sdk: FrontendSDK) => {
   sdk.sidebar.registerItem("Shift Agents", "/shift-agents");
 
   useUIStore().toggleDrawer();
-  useAgentStore().selectAgent("2");
 
   sdk.replay.addToSlot("topbar", {
     type: "Button",

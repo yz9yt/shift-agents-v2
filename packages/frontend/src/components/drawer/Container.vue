@@ -16,7 +16,7 @@ const uiStore = useUIStore();
     style="margin-top: 3.5rem; height: calc(100vh - 3.5rem)"
   >
     <div
-      class="absolute top-0 right-0 bg-surface-800 shadow-lg pointer-events-auto h-full w-[35rem] border-l border-surface-900"
+      class="absolute top-0 right-0 bg-surface-800 shadow-lg pointer-events-auto h-full w-[35rem] border-l border-t border-surface-700"
     >
       <div class="flex flex-col h-full">
         <ChatContent />

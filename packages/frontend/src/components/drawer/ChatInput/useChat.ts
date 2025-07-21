@@ -12,7 +12,7 @@ export const useChat = () => {
       return [];
     }
 
-    return agentStore.selectedAgent.conversation;
+    return agentStore.selectedAgent.messageManager.getApiMessages();
   });
 
   const sendMessage = (message: string) => {

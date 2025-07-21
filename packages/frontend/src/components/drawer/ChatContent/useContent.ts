@@ -10,9 +10,7 @@ export const useContent = () => {
       return [];
     }
 
-    return agentStore.selectedAgent.conversation.filter(
-      (message) => message.role !== "system",
-    );
+    return agentStore.selectedAgent.messageManager.getUiMessages();
   });
 
   const hasMessages = computed(() => messages.value.length > 0);

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { FrontendMessage } from "@/engine/types";
+import type { UIMessage } from "@/engine/types/agent";
 
 defineProps<{
-  message: FrontendMessage;
+  message: UIMessage & { kind: "error" };
 }>();
 </script>
 

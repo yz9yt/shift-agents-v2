@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { FrontendMessage } from "@/engine/types";
 import { computed } from "vue";
 
+import type { UIMessage } from "@/engine/types/agent";
+
 const props = defineProps<{
-  message: FrontendMessage;
+  message: UIMessage & { kind: "assistant" };
 }>();
 
 const content = computed(() => {
@@ -13,8 +14,8 @@ const content = computed(() => {
 
 <template>
   <div
-    class="p-2 text-surface-200 whitespace-pre-wrap break-words font-mono select-text"
     v-if="content.length > 0"
+    class="p-2 text-surface-200 whitespace-pre-wrap break-words font-mono select-text"
   >
     {{ content }}
   </div>

@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import User from "./User.vue";
-import Error from "./Error.vue";
 import Agent from "./Agent.vue";
+import Error from "./Error.vue";
 import Tool from "./Tool.vue";
+import User from "./User.vue";
 
-import type { FrontendMessage } from "@/engine/types";
+import type { UIMessage } from "@/engine/types/agent";
 
 defineProps<{
-  message: FrontendMessage;
+  message: UIMessage;
 }>();
 </script>
 
 <template>
-  <User v-if="message.role === 'user'" :message="message" />
-  <Agent v-else-if="message.role === 'assistant'" :message="message" />
-  <Error v-else-if="message.role === 'error'" :message="message" />
-  <Tool v-else-if="message.role === 'tool'" :message="message" />
-  <div v-else>Unknown message role: {{ message.role }}</div>
+  <User v-if="message.kind === 'user'" :message="message" />
+  <Agent v-else-if="message.kind === 'assistant'" :message="message" />
+  <Error v-else-if="message.kind === 'error'" :message="message" />
+  <Tool v-else-if="message.kind === 'tool'" :message="message" />
+  <div v-else>Unknown message kind: {{ message }}</div>
 </template>

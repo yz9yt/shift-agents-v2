@@ -1,55 +1,39 @@
 <script setup lang="ts">
-import type { FrontendMessage } from "@/engine/types";
-import { computed, ref } from "vue";
-import { toRefs } from "vue";
+import { computed, ref, toRefs } from "vue";
+
+import type { UIMessage } from "@/engine/types/agent";
 
 const props = defineProps<{
-  message: FrontendMessage;
+  message: UIMessage & { kind: "tool" };
 }>();
 
 const { message } = toRefs(props);
 
 const showDetails = ref(false);
 
-const toolCall = computed(() => message.value.tool_call);
-
-const isProcessing = computed(() => toolCall.value?.kind === "processing");
+const isProcessing = computed(() => message.value.status === "processing");
 
 const formatToolCalls = computed(() => {
-  const call = toolCall.value;
-  if (call?.kind === "success" || call?.kind === "processing") {
-    return call.frontend.message;
-  }
-  return undefined;
+  return message.value.metadata.message;
 });
 
 const toolDetails = computed(() => {
-  const call = toolCall.value;
-  if (call?.kind === "success") {
-    return call.frontend.details;
-  }
-  return undefined;
+  return message.value.metadata.details;
 });
 
 const toolIcon = computed(() => {
-  const call = toolCall.value;
-  if (call?.kind === "success" || call?.kind === "processing") {
-    return call.frontend.icon;
-  }
-  return "fas fa-exclamation-triangle";
+  return message.value.metadata.icon;
 });
 </script>
 
 <template>
-  <div v-if="toolCall" class="flex flex-col gap-2 text-surface-300 px-2">
+  <div class="flex flex-col gap-2 text-surface-300 px-2">
     <div class="flex items-center gap-2">
       <i :class="toolIcon" class="text-sm" />
       <span
-        class="text-sm font-mono font-thin flex items-center gap-1 justify-between w-full"
+        class="text-sm font-mono font-thin flex items-center gap-1 justify-between w-full overflow-hidden text-ellipsis"
         :class="[
-          toolDetails
-            ? 'cursor-pointer hover:text-surface-200'
-            : '',
+          toolDetails ? 'cursor-pointer hover:text-surface-200' : '',
           isProcessing ? 'shimmer' : '',
         ]"
         @click="toolDetails && (showDetails = !showDetails)"

@@ -13,7 +13,7 @@ export const alert: ToolFunction<AlertArgs, string> = {
   description: "Show a browser alert with the given message",
   frontend: {
     icon: "fas fa-exclamation-triangle",
-    message: () => `Alerted the user`
+    message: () => `Alerted the user`,
   },
   handler: (args) => {
     window.alert(args.message);
