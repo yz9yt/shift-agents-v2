@@ -13,7 +13,7 @@ export const setPath: ToolFunction<SetPathArgs, string> = {
   description: "Set the request path",
   frontend: {
     icon: "fas fa-edit",
-    message: ({ path }) => `Set the request path to ${path}`
+    message: ({ path }) => `Set the request path to ${path}`,
   },
   handler: (args, context) => {
     try {

@@ -13,7 +13,7 @@ export const setMethod: ToolFunction<SetMethodArgs, string> = {
   description: "Set the request method",
   frontend: {
     icon: "fas fa-edit",
-    message: ({ method }) => `Set the request method to ${method}`
+    message: ({ method }) => `Set the request method to ${method}`,
   },
   handler: (args, context) => {
     try {

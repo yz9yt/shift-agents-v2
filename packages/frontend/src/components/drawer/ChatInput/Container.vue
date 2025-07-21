@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
-import { computed, ref, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import { useChat } from "./useChat";
+
 import { useAgentStore } from "@/stores/agent";
 
 const { sendMessage } = useChat();
@@ -88,7 +89,6 @@ const models = [
     <textarea
       ref="textareaRef"
       v-model="message"
-      @keydown="handleKeydown"
       placeholder="Message the Shift agent"
       class="h-30 border-0 outline-none font-mono text-surface-200 resize-none bg-transparent flex-1 text-sm focus:outline-none focus:ring-0 overflow-y-auto scrollbar-hide"
       style="scrollbar-width: none; -ms-overflow-style: none"
@@ -96,16 +96,17 @@ const models = [
       autocomplete="off"
       autocorrect="off"
       autocapitalize="off"
+      @keydown="handleKeydown"
     />
 
     <div class="flex justify-between gap-2 items-center">
       <Dropdown
         v-model="selectedModel"
         :options="models"
-        optionLabel="name"
-        optionValue="name"
-        optionGroupLabel="label"
-        optionGroupChildren="items"
+        option-label="name"
+        option-value="name"
+        option-group-label="label"
+        option-group-children="items"
         class="text-sm font-mono"
       >
         <template #option="slotProps">
@@ -122,7 +123,6 @@ const models = [
 
       <Button
         v-if="selectedAgent?.currentStatus === 'idle'"
-        @click="handleSend"
         severity="tertiary"
         icon="fas fa-arrow-circle-up"
         :pt="{
@@ -131,6 +131,7 @@ const models = [
               'bg-surface-700/50 text-surface-200 text-sm py-1.5 px-2 flex items-center justify-center rounded-md hover:text-white transition-colors duration-200 h-8 w-8 cursor-pointer',
           },
         }"
+        @click="handleSend"
       />
       <Button
         v-else

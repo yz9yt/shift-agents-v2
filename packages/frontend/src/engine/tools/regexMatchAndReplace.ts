@@ -18,13 +18,14 @@ export const regexMatchAndReplace: ToolFunction<
   frontend: {
     icon: "fas fa-edit",
     message: () => `Replaced text in the request`,
-    details: ({ match, replace }) => `Replaced every occurence of "${match}" with "${replace}"`,
+    details: ({ match, replace }) =>
+      `Replaced every occurence of "${match}" with "${replace}"`,
   },
   handler: (args, context) => {
     try {
       // TODO: Implement actual regex match and replace functionality
       console.log(
-        `[TOOL CALL] Regex matching "${args.match}" and replacing with "${args.replace}"`
+        `[TOOL CALL] Regex matching "${args.match}" and replacing with "${args.replace}"`,
       );
 
       return "Request has been updated";

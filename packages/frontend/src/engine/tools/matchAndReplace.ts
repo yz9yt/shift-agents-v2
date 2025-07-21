@@ -15,7 +15,8 @@ export const matchAndReplace: ToolFunction<MatchAndReplaceArgs, string> = {
   frontend: {
     icon: "fas fa-edit",
     message: () => `Replaced text in the request`,
-    details: ({ match, replace }) => `Replaced every occurence of "${match}" with "${replace}"`,
+    details: ({ match, replace }) =>
+      `Replaced every occurence of "${match}" with "${replace}"`,
   },
   handler: (args, context) => {
     try {

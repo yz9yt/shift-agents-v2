@@ -47,7 +47,7 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
       const timeout = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error("Request timeout after 30 seconds")),
-          30000
+          30000,
         );
       });
 
