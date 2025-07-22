@@ -1,4 +1,4 @@
-import type z from "zod";
+import { z } from "zod";
 
 import { type FrontendMetadata } from "@/engine/types/agent";
 import { type FrontendSDK } from "@/types";
@@ -28,11 +28,11 @@ export type ToolFunctionFrontend<TInput = unknown, TOutput = unknown> = {
 };
 
 export type ToolFunction<TInput = unknown, TOutput = unknown> = {
+  name: string;
   schema: z.ZodSchema<TInput>;
   handler: (args: TInput, context: ToolContext) => Promise<TOutput> | TOutput;
   description: string;
   frontend: ToolFunctionFrontend<TInput, TOutput>;
-  instructions?: string;
 };
 
 export type ToolDefinition = {

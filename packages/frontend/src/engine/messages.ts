@@ -9,7 +9,6 @@ import { generateId } from "@/utils";
 export class MessageManager {
   private apiMessages = new Map<string, APIMessage>();
   private uiMessages = new Map<string, UIMessage>();
-  private subscribers = new Set<(messages: UIMessage[]) => void>();
 
   addUserMessage(content: string): string {
     const id = generateId();
@@ -24,7 +23,6 @@ export class MessageManager {
 
     this.apiMessages.set(id, apiMessage);
     this.uiMessages.set(id, uiMessage);
-    this.notify();
 
     return id;
   }
@@ -53,7 +51,6 @@ export class MessageManager {
 
     this.apiMessages.set(id, apiMessage);
     this.uiMessages.set(id, uiMessage);
-    this.notify();
 
     return id;
   }
@@ -89,7 +86,6 @@ export class MessageManager {
       });
     }
 
-    this.notify();
     return id;
   }
 
@@ -102,12 +98,12 @@ export class MessageManager {
       metadata,
     });
 
-    this.notify();
     return id;
   }
+
   completeToolMessage<TOutput>(
     id: string,
-    toolCall: ToolResult<TOutput>,
+    toolCall: ToolResult<TOutput>
   ): void {
     switch (toolCall.kind) {
       case "success":
@@ -160,7 +156,6 @@ export class MessageManager {
 
     this.apiMessages.set(id, apiMessage);
     this.uiMessages.set(id, uiMessage);
-    this.notify();
 
     return id;
   }
@@ -170,7 +165,7 @@ export class MessageManager {
     updater: {
       api?: (draft: APIMessage) => APIMessage;
       ui?: (draft: UIMessage) => UIMessage;
-    },
+    }
   ): void {
     if (updater.api !== undefined) {
       const apiMessage = this.apiMessages.get(id);
@@ -183,7 +178,6 @@ export class MessageManager {
       const uiMessage = this.uiMessages.get(id);
       if (uiMessage !== undefined) {
         this.uiMessages.set(id, updater.ui(uiMessage));
-        this.notify();
       }
     }
   }
@@ -203,7 +197,6 @@ export class MessageManager {
         ...uiMessage,
         content,
       });
-      this.notify();
     }
   }
 
@@ -215,21 +208,8 @@ export class MessageManager {
     return [...this.uiMessages.values()];
   }
 
-  subscribe(callback: (messages: UIMessage[]) => void): () => void {
-    this.subscribers.add(callback);
-    return () => {
-      this.subscribers.delete(callback);
-    };
-  }
-
-  private notify(): void {
-    const messages = this.getUiMessages();
-    this.subscribers.forEach((callback) => callback(messages));
-  }
-
   clear(): void {
     this.apiMessages.clear();
     this.uiMessages.clear();
-    this.notify();
   }
 }

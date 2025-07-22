@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const AddFindingSchema = z.object({
   title: z.string().min(1),
@@ -10,6 +10,7 @@ const AddFindingSchema = z.object({
 type AddFindingArgs = z.infer<typeof AddFindingSchema>;
 
 export const addFinding: ToolFunction<AddFindingArgs, string> = {
+  name: "addFinding",
   schema: AddFindingSchema,
   description:
     "Add a finding with a title and markdown description. Finding represets a discovered vulnerability or interesting behavior that you want to report to the user. ",

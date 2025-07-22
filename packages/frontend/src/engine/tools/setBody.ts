@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const SetBodySchema = z.object({
   body: z.string(),
@@ -8,6 +8,7 @@ const SetBodySchema = z.object({
 
 type SetBodyArgs = z.infer<typeof SetBodySchema>;
 export const setBody: ToolFunction<SetBodyArgs, string> = {
+  name: "setBody",
   schema: SetBodySchema,
   description: "Set the request body content",
   frontend: {

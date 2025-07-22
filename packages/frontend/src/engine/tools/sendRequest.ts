@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 type SendRequestResult =
   | {
@@ -15,10 +15,10 @@ const SendRequestSchema = z.object({}).optional();
 type SendRequestArgs = z.infer<typeof SendRequestSchema>;
 
 export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
+  name: "sendRequest",
   schema: SendRequestSchema,
   description:
     "Send the current request and return the response. Usage: sendRequest() or sendRequest({})",
-  instructions: `Usage: sendRequest() or sendRequest({}). Args are optional.`,
   frontend: {
     icon: "fas fa-rocket",
     message: () => `Sent the request`,
@@ -47,7 +47,7 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
       const timeout = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error("Request timeout after 30 seconds")),
-          30000,
+          30000
         );
       });
 

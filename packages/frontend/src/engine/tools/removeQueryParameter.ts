@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const RemoveQueryParameterSchema = z.object({
   name: z.string().min(1),
@@ -11,6 +11,7 @@ export const removeQueryParameter: ToolFunction<
   RemoveQueryParameterArgs,
   string
 > = {
+  name: "removeQueryParameter",
   schema: RemoveQueryParameterSchema,
   description: "Remove a query parameter with the given name",
   frontend: {

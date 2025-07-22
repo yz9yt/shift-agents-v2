@@ -1,4 +1,4 @@
-import type OpenAI from "openai";
+import { z } from "zod";
 
 export type AgentStatus =
   | "idle"
@@ -7,8 +7,25 @@ export type AgentStatus =
   | "sendingReplayRequest"
   | "error";
 
-export type APIMessage = OpenAI.ChatCompletionMessageParam;
-export type APIToolCall = OpenAI.ChatCompletionMessageToolCall;
+export const APIToolCallSchema = z.object({
+  id: z.string(),
+  type: z.literal("function"),
+  function: z.object({
+    name: z.string(),
+    arguments: z.string(),
+  }),
+});
+
+export const APIMessageSchema = z.object({
+  role: z.enum(["user", "assistant", "system", "tool"]),
+  content: z.string().nullable(),
+  tool_calls: z.array(APIToolCallSchema).optional(),
+  name: z.string().optional(),
+  tool_call_id: z.string().optional(),
+});
+
+export type APIMessage = z.infer<typeof APIMessageSchema>;
+export type APIToolCall = z.infer<typeof APIToolCallSchema>;
 
 export type FrontendMetadata = {
   icon: string;
@@ -23,10 +40,7 @@ export type StreamChunk =
     }
   | {
       kind: "toolCall";
-      id: string;
-      name: string;
-      arguments: string;
-      isComplete: boolean;
+      toolCalls: APIToolCall[];
     };
 
 export type UIMessage =

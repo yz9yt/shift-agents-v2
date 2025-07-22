@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Button from "primevue/button";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import { computed, onMounted, ref } from "vue";
 
 import { useChat } from "./useChat";
@@ -100,7 +100,7 @@ const models = [
     />
 
     <div class="flex justify-between gap-2 items-center">
-      <Dropdown
+      <Select
         v-model="selectedModel"
         :options="models"
         option-label="name"
@@ -119,7 +119,7 @@ const models = [
             />
           </div>
         </template>
-      </Dropdown>
+      </Select>
 
       <Button
         v-if="selectedAgent?.currentStatus === 'idle'"

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const MatchAndReplaceSchema = z.object({
   match: z.string().min(1),
@@ -10,6 +10,7 @@ const MatchAndReplaceSchema = z.object({
 type MatchAndReplaceArgs = z.infer<typeof MatchAndReplaceSchema>;
 
 export const matchAndReplace: ToolFunction<MatchAndReplaceArgs, string> = {
+  name: "matchAndReplace",
   schema: MatchAndReplaceSchema,
   description: "Match and replace text content",
   frontend: {

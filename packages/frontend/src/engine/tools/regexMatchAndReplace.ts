@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const RegexMatchAndReplaceSchema = z.object({
   match: z.string().min(1),
@@ -13,6 +13,7 @@ export const regexMatchAndReplace: ToolFunction<
   RegexMatchAndReplaceArgs,
   string
 > = {
+  name: "regexMatchAndReplace",
   schema: RegexMatchAndReplaceSchema,
   description: "Match and replace text content using regular expressions",
   frontend: {

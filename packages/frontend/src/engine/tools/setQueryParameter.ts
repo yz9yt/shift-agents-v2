@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const SetQueryParameterSchema = z.object({
   name: z.string().min(1),
@@ -10,6 +10,7 @@ const SetQueryParameterSchema = z.object({
 type SetQueryParameterArgs = z.infer<typeof SetQueryParameterSchema>;
 
 export const setQueryParameter: ToolFunction<SetQueryParameterArgs, string> = {
+  name: "setQueryParameter",
   schema: SetQueryParameterSchema,
   description: "Set a query parameter with the given name and value",
   frontend: {

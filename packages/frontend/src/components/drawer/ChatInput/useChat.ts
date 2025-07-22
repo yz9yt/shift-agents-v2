@@ -16,12 +16,10 @@ export const useChat = () => {
   });
 
   const sendMessage = (message: string) => {
-    console.log("sending message", message);
     if (!agentStore.selectedAgent) {
       return;
     }
 
-    console.log("selectedAgent", agentStore.selectedAgent);
     try {
       agentStore.selectedAgent.sendMessage(message);
     } catch (error) {

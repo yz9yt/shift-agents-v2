@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const RemoveHeaderSchema = z.object({
   name: z.string().min(1),
@@ -9,6 +9,7 @@ const RemoveHeaderSchema = z.object({
 type RemoveHeaderArgs = z.infer<typeof RemoveHeaderSchema>;
 
 export const removeHeader: ToolFunction<RemoveHeaderArgs, string> = {
+  name: "removeHeader",
   schema: RemoveHeaderSchema,
   description: "Remove a request header with the given name",
   frontend: {

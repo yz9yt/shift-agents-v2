@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const SetHeaderSchema = z.object({
   name: z.string().min(1),
@@ -10,6 +10,7 @@ const SetHeaderSchema = z.object({
 type SetHeaderArgs = z.infer<typeof SetHeaderSchema>;
 
 export const setHeader: ToolFunction<SetHeaderArgs, string> = {
+  name: "setHeader",
   schema: SetHeaderSchema,
   description:
     "Set a request header with the given name and value. If header exists, it will be replaced. If header does not exist, it will be added.",

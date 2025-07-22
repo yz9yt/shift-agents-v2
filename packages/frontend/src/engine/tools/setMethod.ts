@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const SetMethodSchema = z.object({
   method: z.string().min(1),
@@ -9,6 +9,7 @@ const SetMethodSchema = z.object({
 type SetMethodArgs = z.infer<typeof SetMethodSchema>;
 
 export const setMethod: ToolFunction<SetMethodArgs, string> = {
+  name: "setMethod",
   schema: SetMethodSchema,
   description: "Set the request method",
   frontend: {

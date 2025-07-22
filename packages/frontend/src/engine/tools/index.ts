@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 
 import { addFinding } from "./addFinding";
 import { alert } from "./alert";
@@ -12,8 +12,9 @@ import { setHeader } from "./setHeader";
 import { setMethod } from "./setMethod";
 import { setPath } from "./setPath";
 import { setQueryParameter } from "./setQueryParameter";
+import { FrontendMetadata, ToolContext, ToolResult } from "@/engine/types";
 
-export const TOOLS = {
+export const TOOLS = [
   alert,
   matchAndReplace,
   setBody,
@@ -26,15 +27,68 @@ export const TOOLS = {
   pause,
   addFinding,
   sendRequest,
-} as const;
+] as const;
 
-export type ToolName = keyof typeof TOOLS;
-
-export const toolDefinitions = Object.entries(TOOLS).map(([name, tool]) => ({
+export const toolDefinitions = TOOLS.map((tool) => ({
   type: "function" as const,
   function: {
-    name,
-    description: tool.description + "\n\n" + tool.instructions,
+    name: tool.name,
+    description: tool.description,
     parameters: z.toJSONSchema(tool.schema),
   },
 }));
+
+export async function executeTool(
+  id: string,
+  name: string,
+  args: string,
+  context: ToolContext
+): Promise<ToolResult> {
+  try {
+    const tool = TOOLS.find((tool) => tool.name === name);
+    const parsedArgs = JSON.parse(args);
+
+    if (!tool) {
+      return {
+        kind: "error",
+        id,
+        error: `Tool "${name}" not found. Available tools: ${[
+          ...TOOLS.map((tool) => tool.name),
+        ].join(", ")}`,
+        uiMessage: {
+          icon: "fas fa-exclamation-triangle",
+          message: `Tool "${name}" not found`,
+        },
+      };
+    }
+
+    const validatedArgs = tool.schema.parse(parsedArgs);
+    // @ts-expect-error - tool.handler is not typed
+    const result = await tool.handler(validatedArgs, context);
+
+    const uiMessage: FrontendMetadata = {
+      icon: tool.frontend.icon,
+      // @ts-expect-error - tool.frontend.message is not typed
+      message: tool.frontend.message(validatedArgs),
+      // @ts-expect-error - tool.frontend.details is not typed
+      details: tool.frontend.details?.(validatedArgs, result),
+    };
+
+    return {
+      kind: "success",
+      id,
+      result,
+      uiMessage,
+    };
+  } catch (error) {
+    return {
+      kind: "error",
+      id,
+      error: error instanceof Error ? error.message : String(error),
+      uiMessage: {
+        icon: "fas fa-exclamation-triangle",
+        message: "Tool execution failed",
+      },
+    };
+  }
+}

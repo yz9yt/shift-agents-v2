@@ -2,3 +2,4 @@ dist
 node_modules
 secrets.ts
 .cursor
+DS_Store

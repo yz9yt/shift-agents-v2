@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ToolFunction } from "../types";
+import type { ToolFunction } from "@/engine/types";
 
 const SetPathSchema = z.object({
   path: z.string().min(1),
@@ -9,6 +9,7 @@ const SetPathSchema = z.object({
 type SetPathArgs = z.infer<typeof SetPathSchema>;
 
 export const setPath: ToolFunction<SetPathArgs, string> = {
+  name: "setPath",
   schema: SetPathSchema,
   description: "Set the request path",
   frontend: {

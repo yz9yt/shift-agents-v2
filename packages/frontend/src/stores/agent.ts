@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
-import { Agent } from "@/engine/agent/agent";
+import { Agent } from "@/engine/agent";
 import { useSDK } from "@/plugins/sdk";
 import { SECRET_API_KEY } from "@/secrets";
 
 export const useAgentStore = defineStore("stores.agent", () => {
-  const agents = ref<Map<string, Agent>>(new Map());
+  const agents = ref(new Map<string, Agent>());
   const selectedId = ref<string | undefined>(undefined);
   const sdk = useSDK();
 
