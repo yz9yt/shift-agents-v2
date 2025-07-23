@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 import { addFinding } from "./addFinding";
+import { addTodo } from "./addTodo";
 import { alert } from "./alert";
+import { grepResponse } from "./grepResponse";
 import { matchAndReplace } from "./matchAndReplace";
 import { removeHeader } from "./removeHeader";
 import { removeQueryParameter } from "./removeQueryParameter";
@@ -11,7 +13,13 @@ import { setHeader } from "./setHeader";
 import { setMethod } from "./setMethod";
 import { setPath } from "./setPath";
 import { setQueryParameter } from "./setQueryParameter";
-import { FrontendMetadata, ToolContext, ToolResult } from "@/engine/types";
+import { updateTodo } from "./updateTodo";
+
+import {
+  type FrontendMetadata,
+  type ToolContext,
+  type ToolResult,
+} from "@/engine/types";
 
 export const TOOLS = [
   alert,
@@ -25,13 +33,18 @@ export const TOOLS = [
   removeHeader,
   addFinding,
   sendRequest,
+  grepResponse,
+  addTodo,
+  updateTodo,
 ] as const;
 
 export const toolDefinitions = TOOLS.map((tool) => ({
   type: "function" as const,
   function: {
     name: tool.name,
-    description: tool.description,
+    description:
+      tool.description +
+      (tool.examples ? `\n\nExamples:\n${tool.examples.join("\n")}` : ""),
     parameters: z.toJSONSchema(tool.schema),
   },
 }));
@@ -40,7 +53,7 @@ export async function executeTool(
   id: string,
   name: string,
   args: string,
-  context: ToolContext
+  context: ToolContext,
 ): Promise<ToolResult> {
   try {
     const tool = TOOLS.find((tool) => tool.name === name);

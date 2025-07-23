@@ -1,8 +1,4 @@
-<script setup lang="ts">
-import { useAgentStore } from "@/stores/agent";
-
-const agentStore = useAgentStore();
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="flex-1 flex items-center justify-center text-surface-400">

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ChatContent } from "./ChatContent";
 import { ChatInput } from "./ChatInput";
+import { ChatTodos } from "./ChatTodos";
 
 import { useAgentStore } from "@/stores/agent";
 import { useUIStore } from "@/stores/ui";
@@ -21,6 +22,7 @@ const uiStore = useUIStore();
       <div class="flex flex-col h-full">
         <ChatContent />
         <div v-if="agentStore.selectedId" class="flex-shrink-0 flex-grow-1">
+          <ChatTodos />
           <ChatInput />
         </div>
       </div>

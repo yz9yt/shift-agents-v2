@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
-import { Agent } from "@/engine/agent";
-import { useSDK } from "@/plugins/sdk";
-import { generateSystemPrompt } from "@/engine/prompt";
 import { useConfigStore } from "./config";
+
+import { Agent } from "@/engine/agent";
+import { generateSystemPrompt } from "@/engine/prompt";
+import { useSDK } from "@/plugins/sdk";
 
 export const useAgentStore = defineStore("stores.agent", () => {
   const agents = ref(new Map<string, Agent>());
@@ -13,7 +14,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
   const configStore = useConfigStore();
 
   const createAgentFromSessionId = (replaySessionId: string) => {
-    const maxIterations = 25;
+    const maxIterations = 35;
 
     const agent = new Agent(sdk, {
       id: replaySessionId,
@@ -31,7 +32,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
       openRouterConfig: {
         apiKey: configStore.openRouterApiKey,
         model: configStore.model,
-        reasoningEnabled: configStore.selectedModel?.reasoningModel || false,
+        reasoningEnabled: configStore.selectedModel?.reasoningModel ?? false,
         reasoning: configStore.reasoningConfig,
       },
     });
@@ -58,13 +59,69 @@ export const useAgentStore = defineStore("stores.agent", () => {
   const getAgent = (id: string) => agents.value.get(id);
 
   const abortSelectedAgent = () => {
-    if (!selectedId.value) {
+    if (selectedId.value === undefined) {
       throw new Error("No agent selected");
     }
 
     const agent = getAgent(selectedId.value);
     if (agent) {
       agent.abort();
+    }
+  };
+
+  const updateUserMessage = (messageId: string, content: string): boolean => {
+    if (selectedId.value === undefined) {
+      return false;
+    }
+
+    const agent = getAgent(selectedId.value);
+    if (agent) {
+      return agent.updateUserMessage(messageId, content);
+    }
+    return false;
+  };
+
+  const removeMessagesAfter = (messageId: string): void => {
+    if (selectedId.value === undefined) {
+      return;
+    }
+
+    const agent = getAgent(selectedId.value);
+    if (agent) {
+      agent.removeMessagesAfter(messageId);
+    }
+  };
+
+  const setInputMessage = (content: string, isEditing: boolean = false): void => {
+    if (selectedId.value === undefined) {
+      return;
+    }
+
+    const agent = getAgent(selectedId.value);
+    if (agent) {
+      agent.setInputMessage(content, isEditing);
+    }
+  };
+
+  const clearInputMessage = (): void => {
+    if (selectedId.value === undefined) {
+      return;
+    }
+
+    const agent = getAgent(selectedId.value);
+    if (agent) {
+      agent.clearInputMessage();
+    }
+  };
+
+  const editMessage = (messageId: string, content: string): void => {
+    if (selectedId.value === undefined) {
+      return;
+    }
+
+    const agent = getAgent(selectedId.value);
+    if (agent) {
+      agent.editMessage(messageId, content);
     }
   };
 
@@ -78,5 +135,10 @@ export const useAgentStore = defineStore("stores.agent", () => {
     selectAgent,
     resetSelection,
     abortSelectedAgent,
+    updateUserMessage,
+    removeMessagesAfter,
+    setInputMessage,
+    clearInputMessage,
+    editMessage,
   };
 });

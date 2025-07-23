@@ -1,11 +1,12 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import type { ReasoningConfig, ModelGroup } from "@/engine/types/config";
+
+import type { ModelGroup, ReasoningConfig } from "@/engine/types/config";
 import { SECRET_API_KEY } from "@/secrets";
 
 export const useConfigStore = defineStore("stores.config", () => {
   const openRouterApiKey = ref<string>(SECRET_API_KEY);
-  const model = ref<string>("deepseek/deepseek-r1-0528");
+  const model = ref<string>("openai/gpt-4.1");
   const reasoningConfig = ref<ReasoningConfig>({
     enabled: true,
     max_tokens: 1500,
@@ -16,9 +17,9 @@ export const useConfigStore = defineStore("stores.config", () => {
       label: "Claude",
       items: [
         {
-          name: "Claude 3.5 Sonnet",
-          isRecommended: true,
-          id: "anthropic/claude-3.5-sonnet",
+          name: "Claude 4 Sonnet",
+          id: "anthropic/claude-sonnet-4",
+          reasoningModel: true,
         },
         {
           name: "Claude 3.7 Sonnet",
@@ -27,9 +28,9 @@ export const useConfigStore = defineStore("stores.config", () => {
           reasoningModel: true,
         },
         {
-          name: "Claude 4 Sonnet",
-          id: "anthropic/claude-sonnet-4",
-          reasoningModel: true,
+          name: "Claude 3.5 Sonnet",
+          isRecommended: true,
+          id: "anthropic/claude-3.5-sonnet",
         },
       ],
     },
@@ -41,13 +42,20 @@ export const useConfigStore = defineStore("stores.config", () => {
           isRecommended: true,
           id: "google/gemini-2.5-pro",
         },
-        { name: "Gemini 2.5 Flash", id: "google/gemini-2.5-flash" },
+        {
+          name: "Gemini 2.5 Flash",
+          id: "google/gemini-2.5-flash",
+          reasoningModel: true,
+        },
         {
           name: "Gemini 2.5 Flash Lite",
           id: "google/gemini-2.5-flash-lite",
         },
         { name: "Gemini 2.0 Flash", id: "google/gemini-2.0-flash-001" },
-        { name: "Gemini 2.0 Flash Lite", id: "google/gemini-2.0-flash-lite-001" },
+        {
+          name: "Gemini 2.0 Flash Lite",
+          id: "google/gemini-2.0-flash-lite-001",
+        },
       ],
     },
     {
@@ -71,7 +79,7 @@ export const useConfigStore = defineStore("stores.config", () => {
           id: "deepseek/deepseek-r1-0528",
         },
       ],
-    }
+    },
   ]);
 
   const setOpenRouterApiKey = (key: string) => {

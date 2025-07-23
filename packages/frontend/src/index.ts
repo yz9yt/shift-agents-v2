@@ -58,16 +58,42 @@ export const init = (sdk: FrontendSDK) => {
 
   // TEMPORARY WORKAROUND FOR MISSING ONPAGECHANGE TYPE
 
+  const pageChangeSubscribers = new Set<(page: string) => void>();
+
   // @ts-expect-error temporary workaround for missing onPageChange type
-  sdk.navigation.onPageChange = () => {};
+  sdk.navigation.onPageChange = (callback: (page: string) => void) => {
+    pageChangeSubscribers.add(callback);
+    return () => {
+      pageChangeSubscribers.delete(callback);
+    };
+  };
+
+  // @ts-expect-error temporary workaround for missing onPageChange type
+  sdk.navigation.addPageChangeListener = (callback: (page: string) => void) => {
+    pageChangeSubscribers.add(callback);
+    return () => {
+      pageChangeSubscribers.delete(callback);
+    };
+  };
+
+  // @ts-expect-error temporary workaround for missing onPageChange type
+  sdk.navigation.removePageChangeListener = (callback: (page: string) => void) => {
+    pageChangeSubscribers.delete(callback);
+  };
 
   let currentPage: string | undefined = undefined;
   setInterval(() => {
     const newPage = window.location.hash;
     if (currentPage !== newPage) {
       currentPage = newPage;
-      // @ts-expect-error temporary workaround for missing onPageChange type
-      sdk.navigation.onPageChange(newPage);
+      // Notify all subscribers
+      pageChangeSubscribers.forEach(callback => {
+        try {
+          callback(newPage);
+        } catch (error) {
+          console.error('Error in page change callback:', error);
+        }
+      });
     }
   }, 50);
 

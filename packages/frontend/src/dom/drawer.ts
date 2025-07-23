@@ -7,21 +7,30 @@ import { type FrontendSDK } from "@/types";
 
 export const useDrawerManager = (sdk: FrontendSDK) => {
   let app: App | undefined = undefined;
+  let unsubscribe: (() => void) | undefined = undefined;
 
   const start = () => {
     // @ts-expect-error temporary workaround for missing onPageChange type
-    sdk.navigation.onPageChange = (page) => {
+    unsubscribe = sdk.navigation.onPageChange((page) => {
       console.log("onPageChange", page);
       if (page === "#/replay") {
         inject();
       } else {
         remove();
       }
-    };
+    });
   };
 
   const inject = () => {
     displayDrawer(document.body);
+  };
+
+  const stop = () => {
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = undefined;
+    }
+    remove();
   };
 
   const remove = () => {
@@ -50,5 +59,6 @@ export const useDrawerManager = (sdk: FrontendSDK) => {
 
   return {
     start,
+    stop,
   };
 };

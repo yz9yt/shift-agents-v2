@@ -3,15 +3,36 @@ import { type FrontendSDK } from "@/types";
 export const useSessionManager = (sdk: FrontendSDK) => {
   let currentSelectedId: string | undefined = undefined;
   let observer: MutationObserver | undefined = undefined;
+  let unsubscribe: (() => void) | undefined = undefined;
   let onSelectedCallback:
     | ((sessionId: string | undefined) => void)
     | undefined = undefined;
 
   const start = () => {
-    observeSessionChanges();
+    if (location.hash === "#/replay") {
+      inject();
+    }
+
+    // @ts-expect-error temporary workaround for missing onPageChange type
+    unsubscribe = sdk.navigation.onPageChange((page) => {
+      console.log("onPageChange", page);
+      if (page === "#/replay") {
+        inject();
+      } else {
+        remove();
+      }
+    });
   };
 
   const stop = () => {
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = undefined;
+    }
+    remove();
+  };
+
+  const remove = () => {
     if (observer) {
       observer.disconnect();
       observer = undefined;
@@ -22,12 +43,15 @@ export const useSessionManager = (sdk: FrontendSDK) => {
     onSelectedCallback = callback;
   };
 
-  const observeSessionChanges = () => {
+  const inject = () => {
+    console.log("inject");
     const treeCollection = document.querySelector(".c-tree-collection");
     if (!treeCollection) {
-      setTimeout(observeSessionChanges, 100);
+      setTimeout(inject, 100);
       return;
     }
+
+    selectCurrentSession();
 
     observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -69,7 +93,7 @@ export const useSessionManager = (sdk: FrontendSDK) => {
     });
 
     const initialSelected = treeCollection.querySelector(
-      '.c-tree-session[data-is-selected="true"]',
+      '.c-tree-session[data-is-selected="true"]'
     );
     if (initialSelected) {
       const sessionId =
@@ -81,6 +105,30 @@ export const useSessionManager = (sdk: FrontendSDK) => {
         }
       }
     }
+  };
+
+  const selectCurrentSession = () => {
+    const currentSessionId = getCurrentSessionId();
+    if (currentSessionId) {
+      if (onSelectedCallback) {
+        onSelectedCallback(currentSessionId);
+      }
+    }
+  };
+
+  const getCurrentSessionId = () => {
+    const treeCollection = document.querySelector(".c-tree-collection");
+    if (!treeCollection) {
+      return undefined;
+    }
+
+    const currentSelected = treeCollection.querySelector(
+      '.c-tree-session[data-is-selected="true"]'
+    );
+    if (!currentSelected) {
+      return undefined;
+    }
+    return currentSelected.getAttribute("data-session-id") ?? undefined;
   };
 
   return {

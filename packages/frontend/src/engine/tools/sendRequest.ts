@@ -27,7 +27,7 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
         return result.error;
       }
 
-      return result.rawResponse.slice(0, 1000);
+      return result.rawResponse.slice(0, 5000);
     },
   },
   handler: async (args, context) => {
@@ -48,7 +48,7 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
       const timeout = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error("Request timeout after 30 seconds")),
-          30000
+          30000,
         );
       });
 
@@ -80,8 +80,19 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
         throw new Error("Failed to retrieve response");
       }
 
+      let finalResponse = result.response.raw;
+      const maxResponseLength = 5000;
+      if (finalResponse.length > maxResponseLength) {
+        const totalLength = finalResponse.length;
+        const remainingLength = totalLength - maxResponseLength;
+        finalResponse =
+          finalResponse.slice(0, maxResponseLength) +
+          `[...] (truncated after ${maxResponseLength} bytes. ${remainingLength} bytes remaining. If you need to read more, use the responseID '${responseID}' with grepResponse tool to read the next ${maxResponseLength} byte chunk. Only do this if the content you're looking for wasn't found in this chunk. The full response is ${totalLength} bytes.)`;
+      }
+
       return {
-        rawResponse: result.response.raw,
+        responseID,
+        rawResponse: finalResponse,
         roundtripTime: result.response.roundtripTime,
       };
     } catch (error) {

@@ -1,40 +1,54 @@
 <script setup lang="ts">
 import Button from "primevue/button";
 import Select from "primevue/select";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import { useChat } from "./useChat";
 
 import { useAgentStore } from "@/stores/agent";
 import { useConfigStore } from "@/stores/config";
 
-const { sendMessage, abortMessage } = useChat();
+const {
+  sendMessage,
+  abortMessage,
+  inputMessage,
+  isEditingMessage,
+} = useChat();
 
 const agentStore = useAgentStore();
 const configStore = useConfigStore();
 const selectedAgent = computed(() => agentStore.selectedAgent);
 
-const message = ref("");
 const textareaRef = ref<HTMLTextAreaElement>();
 
 const isAgentIdle = computed(
   () => selectedAgent.value?.currentStatus === "idle"
 );
 const canSendMessage = computed(
-  () => isAgentIdle.value && message.value.trim()
+  () => isAgentIdle.value && inputMessage.value.trim() !== ""
 );
 
 onMounted(() => {
   textareaRef.value?.focus();
 });
 
+watch(
+  isEditingMessage,
+  (isEditing) => {
+    if (isEditing && textareaRef.value) {
+      textareaRef.value.focus();
+    }
+  },
+  { flush: "post" }
+);
+
 const handleSend = () => {
   if (!canSendMessage.value) {
     return;
   }
 
-  const messageToSend = message.value.trim();
-  message.value = "";
+  const messageToSend = inputMessage.value.trim();
+  inputMessage.value = "";
   sendMessage(messageToSend);
 };
 
@@ -52,7 +66,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   >
     <textarea
       ref="textareaRef"
-      v-model="message"
+      v-model="inputMessage"
       placeholder="Message the Shift agent"
       :disabled="!isAgentIdle"
       :class="{

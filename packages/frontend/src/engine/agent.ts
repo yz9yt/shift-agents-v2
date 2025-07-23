@@ -1,16 +1,17 @@
-import { executeTool, TOOLS } from "@/engine/tools";
+import { TodoManager } from "@/engine/todo";
 import { LLMClient } from "./client";
 
 import { MessageManager } from "@/engine/messages";
+import { executeTool, TOOLS } from "@/engine/tools";
 import {
-  ToolFunction,
   type AgentConfig,
   type AgentStatus,
   type APIMessage,
+  type APIToolCall,
   type ToolContext,
-  type UIMessage,
+  type ToolFunction,
   type ToolResult,
-  APIToolCall,
+  type UIMessage,
 } from "@/engine/types";
 import { type FrontendSDK } from "@/types";
 import { getCurrentReplayRequest } from "@/utils";
@@ -18,11 +19,15 @@ import { getCurrentReplayRequest } from "@/utils";
 export class Agent {
   public llmClient: LLMClient;
   public messageManager: MessageManager;
+  public todoManager: TodoManager;
   public status: AgentStatus = "idle";
   private aborted: boolean = false;
+  public inputMessage: string = "";
+  public isEditingMessage: boolean = false;
 
   constructor(public sdk: FrontendSDK, public config: AgentConfig) {
     this.llmClient = new LLMClient(this);
+    this.todoManager = new TodoManager();
     this.messageManager = new MessageManager();
     this.status = "idle";
     this.aborted = false;
@@ -51,6 +56,7 @@ export class Agent {
   async sendMessage(message: string): Promise<void> {
     this.aborted = false;
     this.messageManager.addUserMessage(message);
+    this.clearInputMessage();
 
     try {
       await this.processMessages();
@@ -78,6 +84,40 @@ export class Agent {
           content: `Here is the current HTTP request that you are analyzing: <request>${currentRequest.raw}</request> <host>${currentRequest.host}</host> <port>${currentRequest.port}</port>`,
         },
       ];
+
+      const allTodos = this.todoManager.getTodos();
+      if (allTodos.length > 0) {
+        const pendingTodos = allTodos.filter(
+          (todo) => todo.status === "pending"
+        );
+        const completedTodos = allTodos.filter(
+          (todo) => todo.status === "completed"
+        );
+
+        let message = "Here is the current status of todos:\n";
+
+        if (completedTodos.length > 0) {
+          message += "\nCompleted todos:\n";
+          message += completedTodos
+            .map((todo) => `- [x] ${todo.content} (ID: ${todo.id})`)
+            .join("\n");
+        }
+
+        if (pendingTodos.length > 0) {
+          message += "\nPending todos:\n";
+          message += pendingTodos
+            .map((todo) => `- [ ] ${todo.content} (ID: ${todo.id})`)
+            .join("\n");
+        }
+
+        message +=
+          "\n\nYou can mark pending todos as finished using the todo tool with their IDs.";
+
+        messages.push({
+          role: "user",
+          content: message,
+        });
+      }
 
       let currentContent = "";
       let currentReasoning = "";
@@ -147,7 +187,7 @@ export class Agent {
                   (tool) => tool.name === toolCall.function.name
                 ) as ToolFunction;
 
-                if (tool) {
+                if (tool !== undefined) {
                   const toolContext: ToolContext = {
                     sdk: this.sdk,
                     replaySession: {
@@ -165,6 +205,7 @@ export class Agent {
                     agent: {
                       name: this.config.name,
                     },
+                    todoManager: this.todoManager,
                   };
 
                   const result = await executeTool(
@@ -173,6 +214,10 @@ export class Agent {
                     toolCall.function.arguments,
                     toolContext
                   );
+
+                  if (this.aborted) {
+                    break;
+                  }
 
                   toolCallManager.completeToolMessage(toolCall, {
                     kind: "success",
@@ -198,6 +243,7 @@ export class Agent {
         }
 
         if (!hasToolCalls || this.aborted) {
+          this.todoManager.clearTodos();
           this.status = "idle";
           break;
         }
@@ -208,6 +254,7 @@ export class Agent {
           error instanceof Error ? error.message : String(error)
         );
 
+        this.todoManager.clearTodos();
         this.status = "idle";
         break;
       }
@@ -238,11 +285,40 @@ export class Agent {
     return [...this.messageManager.getUiMessages()];
   }
 
+  updateUserMessage(id: string, content: string): boolean {
+    return this.messageManager.updateUserMessage(id, content);
+  }
+
+  removeMessagesAfter(messageId: string): void {
+    this.messageManager.removeMessagesAfter(messageId);
+  }
+
+  removeMessage(id: string): void {
+    this.messageManager.deleteMessage(id);
+  }
+
+  setInputMessage(content: string, isEditing: boolean = false): void {
+    this.inputMessage = content;
+    this.isEditingMessage = isEditing;
+  }
+
+  clearInputMessage(): void {
+    this.inputMessage = "";
+    this.isEditingMessage = false;
+  }
+
+  editMessage(messageId: string, content: string): void {
+    this.removeMessagesAfter(messageId);
+    this.removeMessage(messageId);
+    this.setInputMessage(content, true);
+  }
+
   abort(): void {
     this.aborted = true;
     this.llmClient.abort();
     this.status = "idle";
     this.messageManager.cleanupPendingToolMessages();
+    this.todoManager.clearTodos();
   }
 }
 

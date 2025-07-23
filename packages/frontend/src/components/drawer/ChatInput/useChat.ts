@@ -9,6 +9,15 @@ export const useChat = () => {
   const configStore = useConfigStore();
   const sdk = useSDK();
 
+  const inputMessage = computed({
+    get: () => agentStore.selectedAgent?.inputMessage ?? "",
+    set: (value: string) => {
+      agentStore.setInputMessage(value, agentStore.selectedAgent?.isEditingMessage ?? false);
+    }
+  });
+
+  const isEditingMessage = computed(() => agentStore.selectedAgent?.isEditingMessage ?? false);
+
   const messages = computed(() => {
     if (!agentStore.selectedAgent) {
       return [];
@@ -26,7 +35,7 @@ export const useChat = () => {
       agentStore.selectedAgent.updateConfig((draft) => {
         draft.openRouterConfig.model = configStore.model;
         draft.openRouterConfig.reasoningEnabled =
-          configStore.selectedModel?.reasoningModel || false;
+          configStore.selectedModel?.reasoningModel ?? false;
       });
       agentStore.selectedAgent.sendMessage(message);
     } catch (error) {
@@ -41,9 +50,21 @@ export const useChat = () => {
     agentStore.abortSelectedAgent();
   };
 
+  const editMessage = (messageId: string, content: string) => {
+    agentStore.editMessage(messageId, content);
+  };
+
+  const clearInputMessage = () => {
+    agentStore.clearInputMessage();
+  };
+
   return {
     messages,
+    inputMessage,
+    isEditingMessage,
     sendMessage,
     abortMessage,
+    editMessage,
+    clearInputMessage,
   };
 };

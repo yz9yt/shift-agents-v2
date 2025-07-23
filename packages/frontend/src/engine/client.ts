@@ -3,8 +3,8 @@ import { toolDefinitions } from "@/engine/tools";
 import {
   type APIMessage,
   type APIToolCall,
-  type StreamChunk,
   type DeltaToolCall,
+  type StreamChunk,
 } from "@/engine/types/agent";
 
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
@@ -25,7 +25,7 @@ export class LLMClient {
   }
 
   public async *streamText(
-    messages: APIMessage[]
+    messages: APIMessage[],
   ): AsyncGenerator<StreamChunk, void, unknown> {
     this.abortController = new AbortController();
 
@@ -37,7 +37,7 @@ export class LLMClient {
         stream: true,
       };
 
-      if (this.agent.config.openRouterConfig.reasoning) {
+      if (this.agent.config.openRouterConfig.reasoningEnabled) {
         requestBody.reasoning = this.agent.config.openRouterConfig.reasoning;
       }
 
@@ -54,7 +54,7 @@ export class LLMClient {
       if (!response.ok) {
         const body = await response.text();
         throw new Error(
-          `HTTP ${response.status}: ${response.statusText} ${body}`
+          `HTTP ${response.status}: ${response.statusText} ${body}`,
         );
       }
 
@@ -84,7 +84,7 @@ export class LLMClient {
 
           state.buffer += state.decoder.decode(value, { stream: true });
           const lines = state.buffer.split("\n");
-          state.buffer = lines.pop() || "";
+          state.buffer = lines.pop() ?? "";
 
           for (const line of lines) {
             if (!line.trim() || !line.startsWith("data: ")) {
@@ -118,7 +118,7 @@ export class LLMClient {
                 if (delta.tool_calls !== undefined) {
                   const hasChanges = this.processToolCalls(
                     state,
-                    delta.tool_calls
+                    delta.tool_calls,
                   );
                   if (hasChanges && state.toolCallsMap.size > 0) {
                     const toolCalls = Array.from(state.toolCallsMap.values());
@@ -172,7 +172,7 @@ export class LLMClient {
 
   private processToolCalls(
     state: StreamingState,
-    toolCalls: DeltaToolCall[]
+    toolCalls: DeltaToolCall[],
   ): boolean {
     let hasChanges = false;
 

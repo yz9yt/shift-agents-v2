@@ -20,9 +20,7 @@ watch(
 
     if (isScrolledToBottom) {
       await nextTick();
-      if (scrollContainer.value) {
-        scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
-      }
+      scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
     }
   },
   {
@@ -37,8 +35,8 @@ watch(
     class="flex-1 overflow-y-auto p-4 flex flex-col gap-2 h-full"
   >
     <ChatMessage
-      v-for="(message, index) in messages"
-      :key="index"
+      v-for="message in messages"
+      :key="message.id"
       :message="message"
     />
   </div>

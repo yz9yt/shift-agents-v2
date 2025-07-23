@@ -66,30 +66,36 @@ export type StreamChunk =
 
 export type UIMessage =
   | {
+      id: string;
       kind: "user";
       content: string;
     }
   | {
+      id: string;
       kind: "assistant";
       content: string;
       reasoning?: string;
     }
   | {
+      id: string;
       kind: "error";
       content: string;
     }
   | {
+      id: string;
       kind: "tool";
       status: "processing";
       metadata: FrontendMetadata;
     }
   | {
+      id: string;
       kind: "tool";
       status: "success";
       metadata: FrontendMetadata;
       content: string;
     }
   | {
+      id: string;
       kind: "tool";
       status: "error";
       metadata: FrontendMetadata;

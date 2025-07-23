@@ -1,7 +1,8 @@
-import { z } from "zod";
+import { type z } from "zod";
 
 import { type FrontendMetadata } from "@/engine/types/agent";
 import { type FrontendSDK } from "@/types";
+import { TodoManager } from "@/engine/todo";
 
 export type ToolContext = {
   sdk: FrontendSDK;
@@ -19,6 +20,7 @@ export type ToolContext = {
   agent: {
     name: string;
   };
+  todoManager: TodoManager;
 };
 
 export type ToolFunctionFrontend<TInput = unknown, TOutput = unknown> = {
@@ -32,6 +34,7 @@ export type ToolFunction<TInput = unknown, TOutput = unknown> = {
   schema: z.ZodSchema<TInput>;
   handler: (args: TInput, context: ToolContext) => Promise<TOutput> | TOutput;
   description: string;
+  examples?: string[];
   frontend: ToolFunctionFrontend<TInput, TOutput>;
 };
 
