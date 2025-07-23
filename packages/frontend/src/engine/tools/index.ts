@@ -3,7 +3,6 @@ import { z } from "zod";
 import { addFinding } from "./addFinding";
 import { alert } from "./alert";
 import { matchAndReplace } from "./matchAndReplace";
-import { pause } from "./pause";
 import { removeHeader } from "./removeHeader";
 import { removeQueryParameter } from "./removeQueryParameter";
 import { sendRequest } from "./sendRequest";
@@ -24,7 +23,6 @@ export const TOOLS = [
   setQueryParameter,
   removeQueryParameter,
   removeHeader,
-  pause,
   addFinding,
   sendRequest,
 ] as const;
@@ -46,7 +44,7 @@ export async function executeTool(
 ): Promise<ToolResult> {
   try {
     const tool = TOOLS.find((tool) => tool.name === name);
-    const parsedArgs = JSON.parse(args);
+    const parsedArgs = JSON.parse(args || "{}");
 
     if (!tool) {
       return {
@@ -61,6 +59,8 @@ export async function executeTool(
         },
       };
     }
+
+    console.log("Tool calling", name, args || "{}");
 
     const validatedArgs = tool.schema.parse(parsedArgs);
     // @ts-expect-error - tool.handler is not typed
@@ -81,6 +81,7 @@ export async function executeTool(
       uiMessage,
     };
   } catch (error) {
+    console.error("Tool execution failed", error);
     return {
       kind: "error",
       id,

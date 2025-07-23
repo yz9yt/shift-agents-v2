@@ -20,13 +20,14 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
   description:
     "Send the current request and return the response. Usage: sendRequest() or sendRequest({})",
   frontend: {
-    icon: "fas fa-rocket",
+    icon: "fas fa-terminal",
     message: () => `Sent the request`,
     details: (_, result) => {
       if ("error" in result) {
         return result.error;
       }
-      return `Response: \n${result.rawResponse.slice(0, 1000)}`;
+
+      return result.rawResponse.slice(0, 1000);
     },
   },
   handler: async (args, context) => {

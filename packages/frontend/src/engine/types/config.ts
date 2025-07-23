@@ -12,7 +12,12 @@ export type JITAgentConfig = {
   maxIterations: number;
 };
 
+export type ReasoningConfig = {
+  max_tokens?: number;
+};
+
 export type OpenRouterConfig = {
   apiKey: string;
   model: string;
+  reasoning?: ReasoningConfig;
 };

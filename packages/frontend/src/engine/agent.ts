@@ -7,21 +7,100 @@ import {
   type AgentConfig,
   type AgentStatus,
   type APIMessage,
+  type APIToolCall,
   type ToolContext,
+  type ToolResult,
   type UIMessage,
 } from "@/engine/types";
 import { type FrontendSDK } from "@/types";
 import { getCurrentReplayRequest } from "@/utils";
 
+class ToolCallManager {
+  private toolMessages = new Map<string, string>();
+
+  constructor(private messageManager: MessageManager) {}
+
+  handlePartialToolCall(toolCall: APIToolCall): void {
+    const toolKey = this.getToolKey(toolCall);
+    const toolName = toolCall.function.name || "...";
+
+    if (!this.toolMessages.has(toolKey)) {
+      const id = this.messageManager.addProcessingToolMessage({
+        icon: "fas fa-spinner fa-spin",
+        message: toolName ? `Preparing ${toolName}...` : "Preparing tool...",
+      });
+      this.toolMessages.set(toolKey, id);
+    } else {
+      this.updateToolMessage(toolKey, {
+        icon: "fas fa-spinner fa-spin",
+        message: toolName ? `Preparing ${toolName}...` : "Preparing tool...",
+      });
+    }
+  }
+
+  handleCompleteToolCall(toolCall: APIToolCall): string {
+    const toolKey = this.getToolKey(toolCall);
+
+    if (this.toolMessages.has(toolKey)) {
+      const id = this.toolMessages.get(toolKey)!;
+      this.updateToolMessage(toolKey, {
+        icon: "fas fa-spinner fa-spin",
+        message: "Processing...",
+      });
+      return id;
+    } else {
+      const id = this.messageManager.addProcessingToolMessage({
+        icon: "fas fa-spinner fa-spin",
+        message: "Processing...",
+      });
+      this.toolMessages.set(toolKey, id);
+      return id;
+    }
+  }
+
+  private getToolKey(toolCall: APIToolCall): string {
+    return `${toolCall.id}_${toolCall.function.name}`;
+  }
+
+  private updateToolMessage(
+    toolKey: string,
+    metadata: { icon: string; message: string }
+  ): void {
+    const id = this.toolMessages.get(toolKey)!;
+    this.messageManager.updateMessage(id, {
+      ui: (draft) => {
+        if (draft.kind === "tool") {
+          return {
+            ...draft,
+            metadata: {
+              ...draft.metadata,
+              ...metadata,
+            },
+          };
+        }
+        return draft;
+      },
+    });
+  }
+
+  completeToolMessage(toolCall: APIToolCall, result: ToolResult): void {
+    const toolKey = this.getToolKey(toolCall);
+    const id = this.toolMessages.get(toolKey)!;
+    this.messageManager.completeToolMessage(id, result);
+  }
+}
+
 export class Agent {
   public llmClient: LLMClient;
   public messageManager: MessageManager;
   public status: AgentStatus = "idle";
+  private aborted: boolean = false;
 
   constructor(public sdk: FrontendSDK, public config: AgentConfig) {
     this.llmClient = new LLMClient(this);
     this.messageManager = new MessageManager();
     this.status = "idle";
+    this.aborted = false;
     this.generateSystemPrompt();
   }
 
@@ -31,8 +110,17 @@ export class Agent {
   }
 
   async sendMessage(message: string): Promise<void> {
+    this.aborted = false;
     this.messageManager.addUserMessage(message);
-    await this.processMessages();
+
+    try {
+      await this.processMessages();
+    } catch (error) {
+      console.error(error);
+      this.messageManager.addErrorMessage(
+        error instanceof Error ? error.message : String(error)
+      );
+    }
   }
 
   private async processMessages(): Promise<void> {
@@ -41,7 +129,7 @@ export class Agent {
       this.config.jitConfig.replaySessionId
     );
 
-    while (iterations < this.config.jitConfig.maxIterations) {
+    while (iterations < this.config.jitConfig.maxIterations && !this.aborted) {
       this.status = "queryingAI";
 
       const messages: APIMessage[] = [
@@ -52,28 +140,58 @@ export class Agent {
         },
       ];
 
-      let assistantMessageID = "";
       let currentContent = "";
-      let shouldPause = false;
+      let currentReasoning = "";
       let hasToolCalls = false;
+      const toolCallManager = new ToolCallManager(this.messageManager);
 
+      let assistantMessageID = "";
       try {
         const response = this.llmClient.streamText(messages);
+        assistantMessageID = this.messageManager.addAssistantMessage("");
+
         for await (const chunk of response) {
+          if (this.aborted) {
+            break;
+          }
+
           switch (chunk.kind) {
             case "text":
               currentContent += chunk.content;
-              if (assistantMessageID === "") {
-                assistantMessageID =
-                  this.messageManager.addAssistantMessage(currentContent);
-              } else {
-                this.messageManager.updateAssistantMessage(
-                  assistantMessageID,
-                  currentContent
-                );
+              this.messageManager.updateAssistantMessage(
+                assistantMessageID,
+                currentContent.trim()
+              );
+              break;
+
+            case "reasoning":
+              console.log("reasoning", chunk.content);
+              currentReasoning += chunk.content;
+              this.messageManager.updateMessage(assistantMessageID, {
+                ui: (draft) => {
+                  if (draft.kind === "assistant") {
+                    return {
+                      ...draft,
+                      reasoning: currentReasoning,
+                    };
+                  }
+                  return draft;
+                },
+                api: (draft) => ({
+                  ...draft,
+                  reasoning: currentReasoning,
+                }),
+              });
+              break;
+
+            case "partialToolCall":
+              for (const toolCall of chunk.toolCalls) {
+                toolCallManager.handlePartialToolCall(toolCall);
               }
               break;
+
             case "toolCall":
+              console.log("toolCall", chunk.toolCalls);
               hasToolCalls = true;
 
               this.messageManager.updateMessage(assistantMessageID, {
@@ -86,24 +204,7 @@ export class Agent {
               this.status = "callingTools";
 
               for (const toolCall of chunk.toolCalls) {
-                const id = this.messageManager.addProcessingToolMessage({
-                  icon: "fas fa-spinner fa-spin",
-                  message: "Processing...",
-                });
-
-                if (toolCall.function.name === "pause") {
-                  shouldPause = true;
-                  this.messageManager.completeToolMessage(id, {
-                    kind: "success",
-                    id: toolCall.id,
-                    result: "Paused",
-                    uiMessage: {
-                      icon: "fas fa-pause",
-                      message: "Paused",
-                    },
-                  });
-                  continue;
-                }
+                toolCallManager.handleCompleteToolCall(toolCall);
 
                 const tool = TOOLS.find(
                   (tool) => tool.name === toolCall.function.name
@@ -125,7 +226,7 @@ export class Agent {
                       },
                     },
                     agent: {
-                      name: this.name,
+                      name: this.config.name,
                     },
                   };
 
@@ -136,14 +237,14 @@ export class Agent {
                     toolContext
                   );
 
-                  this.messageManager.completeToolMessage(id, {
+                  toolCallManager.completeToolMessage(toolCall, {
                     kind: "success",
                     id: toolCall.id,
                     result,
                     uiMessage: result.uiMessage,
                   });
                 } else {
-                  this.messageManager.completeToolMessage(id, {
+                  toolCallManager.completeToolMessage(toolCall, {
                     kind: "error",
                     id: toolCall.id,
                     error: "Tool not found",
@@ -154,21 +255,22 @@ export class Agent {
                   });
                 }
               }
+
               break;
           }
         }
 
-        if (shouldPause || !hasToolCalls) {
+        if (!hasToolCalls || this.aborted) {
           this.status = "idle";
           break;
         }
       } catch (error) {
         console.error(error);
+        this.messageManager.deleteMessage(assistantMessageID);
         this.messageManager.addErrorMessage(
           error instanceof Error ? error.message : String(error)
         );
 
-        // TODO: maybe revert back to idle state so user can query AI again, or make some frontend change
         this.status = "error";
         break;
       }
@@ -182,7 +284,7 @@ export class Agent {
 
     if (iterations >= this.config.jitConfig.maxIterations) {
       this.messageManager.addAssistantMessage(
-        "This agent hit max iterations. Please try again.",
+        "This agent hit max iterations. Please try again."
       );
     }
   }
@@ -201,5 +303,11 @@ export class Agent {
 
   get uiMessages(): UIMessage[] {
     return [...this.messageManager.getUiMessages()];
+  }
+
+  abort(): void {
+    this.aborted = true;
+    this.llmClient.abort();
+    this.status = "idle";
   }
 }

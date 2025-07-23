@@ -16,16 +16,28 @@ export const APIToolCallSchema = z.object({
   }),
 });
 
+export const DeltaToolCallSchema = z.object({
+  index: z.number(),
+  id: z.string().optional(),
+  function: z.object({
+    name: z.string().optional(),
+    arguments: z.string().optional(),
+  }).optional(),
+});
+
 export const APIMessageSchema = z.object({
   role: z.enum(["user", "assistant", "system", "tool"]),
   content: z.string().nullable(),
   tool_calls: z.array(APIToolCallSchema).optional(),
   name: z.string().optional(),
   tool_call_id: z.string().optional(),
+  reasoning: z.string().optional(),
+  reasoning_details: z.array(z.unknown()).optional(),
 });
 
 export type APIMessage = z.infer<typeof APIMessageSchema>;
 export type APIToolCall = z.infer<typeof APIToolCallSchema>;
+export type DeltaToolCall = z.infer<typeof DeltaToolCallSchema>;
 
 export type FrontendMetadata = {
   icon: string;
@@ -39,7 +51,15 @@ export type StreamChunk =
       content: string;
     }
   | {
+      kind: "reasoning";
+      content: string;
+    }
+  | {
       kind: "toolCall";
+      toolCalls: APIToolCall[];
+    }
+  | {
+      kind: "partialToolCall";
       toolCalls: APIToolCall[];
     };
 
@@ -51,6 +71,7 @@ export type UIMessage =
   | {
       kind: "assistant";
       content: string;
+      reasoning?: string;
     }
   | {
       kind: "error";

@@ -200,6 +200,11 @@ export class MessageManager {
     }
   }
 
+  deleteMessage(id: string): void {
+    this.apiMessages.delete(id);
+    this.uiMessages.delete(id);
+  }
+
   getApiMessages(): APIMessage[] {
     return [...this.apiMessages.values()];
   }

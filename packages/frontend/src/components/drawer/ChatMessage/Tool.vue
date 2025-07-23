@@ -75,10 +75,10 @@ const toolIcon = computed(() => {
     background-position: -4rem top;
   }
   70% {
-    background-position: 6.5rem top;
+    background-position: 10rem top;
   }
   100% {
-    background-position: 6.5rem top;
+    background-position: 10rem top;
   }
 }
 
@@ -87,10 +87,10 @@ const toolIcon = computed(() => {
     background-position: -4rem top;
   }
   70% {
-    background-position: 6.5rem top;
+    background-position: 10rem top;
   }
   100% {
-    background-position: 6.5rem top;
+    background-position: 10rem top;
   }
 }
 </style>

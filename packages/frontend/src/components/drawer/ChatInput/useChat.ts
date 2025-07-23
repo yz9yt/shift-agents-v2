@@ -30,8 +30,13 @@ export const useChat = () => {
     }
   };
 
+  const abortMessage = () => {
+    agentStore.abortSelectedAgent();
+  };
+
   return {
     messages,
     sendMessage,
+    abortMessage,
   };
 };

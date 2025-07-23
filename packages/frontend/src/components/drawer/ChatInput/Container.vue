@@ -7,34 +7,34 @@ import { useChat } from "./useChat";
 
 import { useAgentStore } from "@/stores/agent";
 
-const { sendMessage } = useChat();
+const { sendMessage, abortMessage } = useChat();
 
 const agentStore = useAgentStore();
 const selectedAgent = computed(() => agentStore.selectedAgent);
 
 const message = ref("");
-const isLoading = ref(false);
 const selectedModel = ref("Gemini 2.5 Pro");
 const textareaRef = ref<HTMLTextAreaElement>();
+
+const isAgentIdle = computed(
+  () => selectedAgent.value?.currentStatus === "idle"
+);
+const canSendMessage = computed(
+  () => isAgentIdle.value && message.value.trim()
+);
 
 onMounted(() => {
   textareaRef.value?.focus();
 });
 
 const handleSend = () => {
-  if (!message.value.trim() || isLoading.value) {
+  if (!canSendMessage.value) {
     return;
   }
 
   const messageToSend = message.value.trim();
   message.value = "";
-
-  try {
-    isLoading.value = true;
-    sendMessage(messageToSend);
-  } finally {
-    isLoading.value = false;
-  }
+  sendMessage(messageToSend);
 };
 
 const handleKeydown = (event: KeyboardEvent) => {
@@ -90,7 +90,13 @@ const models = [
       ref="textareaRef"
       v-model="message"
       placeholder="Message the Shift agent"
-      class="h-30 border-0 outline-none font-mono text-surface-200 resize-none bg-transparent flex-1 text-sm focus:outline-none focus:ring-0 overflow-y-auto scrollbar-hide"
+      :disabled="!isAgentIdle"
+      :class="{
+        'opacity-50 cursor-not-allowed': !isAgentIdle,
+        'text-surface-200': isAgentIdle,
+        'text-surface-400': !isAgentIdle,
+      }"
+      class="h-30 border-0 outline-none font-mono resize-none bg-transparent flex-1 text-sm focus:outline-none focus:ring-0 overflow-y-auto scrollbar-hide"
       style="scrollbar-width: none; -ms-overflow-style: none"
       spellcheck="false"
       autocomplete="off"
@@ -122,13 +128,15 @@ const models = [
       </Select>
 
       <Button
-        v-if="selectedAgent?.currentStatus === 'idle'"
+        v-if="isAgentIdle"
         severity="tertiary"
         icon="fas fa-arrow-circle-up"
+        :disabled="!canSendMessage"
         :pt="{
           root: {
-            class:
-              'bg-surface-700/50 text-surface-200 text-sm py-1.5 px-2 flex items-center justify-center rounded-md hover:text-white transition-colors duration-200 h-8 w-8 cursor-pointer',
+            class: canSendMessage
+              ? 'bg-surface-700/50 text-surface-200 text-sm py-1.5 px-2 flex items-center justify-center rounded-md hover:text-white transition-colors duration-200 h-8 w-8 cursor-pointer'
+              : 'bg-surface-700/20 text-surface-400 text-sm py-1.5 px-2 flex items-center justify-center rounded-md h-8 w-8 cursor-not-allowed',
           },
         }"
         @click="handleSend"
@@ -146,6 +154,7 @@ const models = [
             class: 'text-sm',
           },
         }"
+        @click="abortMessage"
       />
     </div>
   </div>

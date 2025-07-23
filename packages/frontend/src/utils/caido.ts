@@ -38,7 +38,6 @@ export async function getCurrentReplayRequest(
   });
   const data = await response.json();
   const activeEntry = data.data.replaySession.activeEntry;
-  console.log("activeEntry", activeEntry);
   return {
     raw: atob(activeEntry.request.raw),
     host: activeEntry.connection.host,
