@@ -13,11 +13,25 @@ export type JITAgentConfig = {
 };
 
 export type ReasoningConfig = {
+  enabled: boolean;
   max_tokens?: number;
 };
 
 export type OpenRouterConfig = {
   apiKey: string;
   model: string;
+  reasoningEnabled: boolean;
   reasoning?: ReasoningConfig;
+};
+
+export type ModelItem = {
+  name: string;
+  id: string;
+  isRecommended?: boolean;
+  reasoningModel?: boolean;
+};
+
+export type ModelGroup = {
+  label: string;
+  items: ModelItem[];
 };

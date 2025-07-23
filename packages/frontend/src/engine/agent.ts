@@ -7,88 +7,13 @@ import {
   type AgentConfig,
   type AgentStatus,
   type APIMessage,
-  type APIToolCall,
   type ToolContext,
-  type ToolResult,
   type UIMessage,
+  type ToolResult,
+  APIToolCall,
 } from "@/engine/types";
 import { type FrontendSDK } from "@/types";
 import { getCurrentReplayRequest } from "@/utils";
-
-class ToolCallManager {
-  private toolMessages = new Map<string, string>();
-
-  constructor(private messageManager: MessageManager) {}
-
-  handlePartialToolCall(toolCall: APIToolCall): void {
-    const toolKey = this.getToolKey(toolCall);
-    const toolName = toolCall.function.name || "...";
-
-    if (!this.toolMessages.has(toolKey)) {
-      const id = this.messageManager.addProcessingToolMessage({
-        icon: "fas fa-spinner fa-spin",
-        message: toolName ? `Preparing ${toolName}...` : "Preparing tool...",
-      });
-      this.toolMessages.set(toolKey, id);
-    } else {
-      this.updateToolMessage(toolKey, {
-        icon: "fas fa-spinner fa-spin",
-        message: toolName ? `Preparing ${toolName}...` : "Preparing tool...",
-      });
-    }
-  }
-
-  handleCompleteToolCall(toolCall: APIToolCall): string {
-    const toolKey = this.getToolKey(toolCall);
-
-    if (this.toolMessages.has(toolKey)) {
-      const id = this.toolMessages.get(toolKey)!;
-      this.updateToolMessage(toolKey, {
-        icon: "fas fa-spinner fa-spin",
-        message: "Processing...",
-      });
-      return id;
-    } else {
-      const id = this.messageManager.addProcessingToolMessage({
-        icon: "fas fa-spinner fa-spin",
-        message: "Processing...",
-      });
-      this.toolMessages.set(toolKey, id);
-      return id;
-    }
-  }
-
-  private getToolKey(toolCall: APIToolCall): string {
-    return `${toolCall.id}_${toolCall.function.name}`;
-  }
-
-  private updateToolMessage(
-    toolKey: string,
-    metadata: { icon: string; message: string }
-  ): void {
-    const id = this.toolMessages.get(toolKey)!;
-    this.messageManager.updateMessage(id, {
-      ui: (draft) => {
-        if (draft.kind === "tool") {
-          return {
-            ...draft,
-            metadata: {
-              ...draft.metadata,
-              ...metadata,
-            },
-          };
-        }
-        return draft;
-      },
-    });
-  }
-
-  completeToolMessage(toolCall: APIToolCall, result: ToolResult): void {
-    const toolKey = this.getToolKey(toolCall);
-    const id = this.toolMessages.get(toolKey)!;
-    this.messageManager.completeToolMessage(id, result);
-  }
-}
 
 export class Agent {
   public llmClient: LLMClient;
@@ -106,7 +31,21 @@ export class Agent {
 
   private generateSystemPrompt(): void {
     const systemPrompt = `<SYSTEM_PROMPT>${this.config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${this.config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`;
-    this.messageManager.addSystemMessage(systemPrompt);
+
+    const hasSystemMessages = this.messageManager
+      .getApiMessages()
+      .some((message) => message.role === "system");
+
+    if (!hasSystemMessages) {
+      this.messageManager.addSystemMessage(systemPrompt);
+    }
+  }
+
+  updateConfig(updater: (draft: AgentConfig) => void): void {
+    const draft = { ...this.config };
+    updater(draft);
+    this.config = draft;
+    this.generateSystemPrompt();
   }
 
   async sendMessage(message: string): Promise<void> {
@@ -165,14 +104,13 @@ export class Agent {
               break;
 
             case "reasoning":
-              console.log("reasoning", chunk.content);
               currentReasoning += chunk.content;
               this.messageManager.updateMessage(assistantMessageID, {
                 ui: (draft) => {
                   if (draft.kind === "assistant") {
                     return {
                       ...draft,
-                      reasoning: currentReasoning,
+                      reasoning: currentReasoning.trim(),
                     };
                   }
                   return draft;
@@ -191,7 +129,6 @@ export class Agent {
               break;
 
             case "toolCall":
-              console.log("toolCall", chunk.toolCalls);
               hasToolCalls = true;
 
               this.messageManager.updateMessage(assistantMessageID, {
@@ -271,15 +208,11 @@ export class Agent {
           error instanceof Error ? error.message : String(error)
         );
 
-        this.status = "error";
+        this.status = "idle";
         break;
       }
 
       iterations++;
-    }
-
-    if (this.status !== "error") {
-      this.status = "idle";
     }
 
     if (iterations >= this.config.jitConfig.maxIterations) {
@@ -309,5 +242,81 @@ export class Agent {
     this.aborted = true;
     this.llmClient.abort();
     this.status = "idle";
+    this.messageManager.cleanupPendingToolMessages();
+  }
+}
+
+class ToolCallManager {
+  private toolMessages = new Map<string, string>();
+
+  constructor(private messageManager: MessageManager) {}
+
+  handlePartialToolCall(toolCall: APIToolCall): void {
+    const toolKey = this.getToolKey(toolCall);
+    const toolName = toolCall.function.name || "...";
+
+    if (!this.toolMessages.has(toolKey)) {
+      const id = this.messageManager.addProcessingToolMessage({
+        icon: "fas fa-spinner fa-spin",
+        message: toolName ? `Preparing ${toolName}...` : "Preparing tool...",
+      });
+      this.toolMessages.set(toolKey, id);
+    } else {
+      this.updateToolMessage(toolKey, {
+        icon: "fas fa-spinner fa-spin",
+        message: toolName ? `Preparing ${toolName}...` : "Preparing tool...",
+      });
+    }
+  }
+
+  handleCompleteToolCall(toolCall: APIToolCall): string {
+    const toolKey = this.getToolKey(toolCall);
+
+    if (this.toolMessages.has(toolKey)) {
+      const id = this.toolMessages.get(toolKey)!;
+      this.updateToolMessage(toolKey, {
+        icon: "fas fa-spinner fa-spin",
+        message: `Processing ${toolCall.function.name}...`,
+      });
+      return id;
+    } else {
+      const id = this.messageManager.addProcessingToolMessage({
+        icon: "fas fa-spinner fa-spin",
+        message: `Processing ${toolCall.function.name}...`,
+      });
+      this.toolMessages.set(toolKey, id);
+      return id;
+    }
+  }
+
+  private getToolKey(toolCall: APIToolCall): string {
+    return `${toolCall.id}_${toolCall.function.name}`;
+  }
+
+  private updateToolMessage(
+    toolKey: string,
+    metadata: { icon: string; message: string }
+  ): void {
+    const id = this.toolMessages.get(toolKey)!;
+    this.messageManager.updateMessage(id, {
+      ui: (draft) => {
+        if (draft.kind === "tool") {
+          return {
+            ...draft,
+            metadata: {
+              ...draft.metadata,
+              ...metadata,
+            },
+          };
+        }
+        return draft;
+      },
+    });
+  }
+
+  completeToolMessage(toolCall: APIToolCall, result: ToolResult): void {
+    const toolKey = this.getToolKey(toolCall);
+    const id = this.toolMessages.get(toolKey)!;
+    this.messageManager.completeToolMessage(id, result);
   }
 }

@@ -60,8 +60,6 @@ export async function executeTool(
       };
     }
 
-    console.log("Tool calling", name, args || "{}");
-
     const validatedArgs = tool.schema.parse(parsedArgs);
     // @ts-expect-error - tool.handler is not typed
     const result = await tool.handler(validatedArgs, context);

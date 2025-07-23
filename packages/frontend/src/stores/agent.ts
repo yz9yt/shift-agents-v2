@@ -3,7 +3,6 @@ import { computed, ref } from "vue";
 
 import { Agent } from "@/engine/agent";
 import { useSDK } from "@/plugins/sdk";
-import { SECRET_API_KEY } from "@/secrets";
 import { generateSystemPrompt } from "@/engine/prompt";
 import { useConfigStore } from "./config";
 
@@ -14,14 +13,13 @@ export const useAgentStore = defineStore("stores.agent", () => {
   const configStore = useConfigStore();
 
   const createAgentFromSessionId = (replaySessionId: string) => {
-    const model = "anthropic/claude-3.7-sonnet";
     const maxIterations = 25;
 
     const agent = new Agent(sdk, {
       id: replaySessionId,
       name: "Shift Agent",
       systemPrompt: generateSystemPrompt({
-        model,
+        model: configStore.model,
         replaySessionId,
         maxIterations,
       }),
@@ -31,8 +29,9 @@ export const useAgentStore = defineStore("stores.agent", () => {
         maxIterations,
       },
       openRouterConfig: {
-        apiKey: SECRET_API_KEY,
-        model,
+        apiKey: configStore.openRouterApiKey,
+        model: configStore.model,
+        reasoningEnabled: configStore.selectedModel?.reasoningModel || false,
         reasoning: configStore.reasoningConfig,
       },
     });
@@ -65,7 +64,6 @@ export const useAgentStore = defineStore("stores.agent", () => {
 
     const agent = getAgent(selectedId.value);
     if (agent) {
-      console.log("aborting agent", selectedId.value);
       agent.abort();
     }
   };

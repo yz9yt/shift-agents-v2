@@ -21,7 +21,6 @@ export const addFinding: ToolFunction<AddFindingArgs, string> = {
   },
   handler: ({ title, markdown }, context) => {
     try {
-      console.log("Adding finding", title, markdown);
       // TODO: We need to find a way to get the correct requestId from the currentReplayRequest.For now, using replaySessionID even tho that's wrong.
       context.sdk.findings.createFinding(context.replaySession.id.toString(), {
         title,

@@ -143,12 +143,6 @@ export class LLMClient {
                 break;
               }
             } catch (parseError) {
-              console.warn(
-                "Failed to parse streaming data:",
-                parseError,
-                "Raw data:",
-                dataStr
-              );
               continue;
             }
           }
@@ -170,7 +164,6 @@ export class LLMClient {
       if (this.abortController?.signal.aborted) {
         return;
       }
-      console.error("Streaming error:", error);
       throw error;
     } finally {
       this.abortController = undefined;

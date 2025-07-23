@@ -6,14 +6,15 @@ import { computed, onMounted, ref } from "vue";
 import { useChat } from "./useChat";
 
 import { useAgentStore } from "@/stores/agent";
+import { useConfigStore } from "@/stores/config";
 
 const { sendMessage, abortMessage } = useChat();
 
 const agentStore = useAgentStore();
+const configStore = useConfigStore();
 const selectedAgent = computed(() => agentStore.selectedAgent);
 
 const message = ref("");
-const selectedModel = ref("Gemini 2.5 Pro");
 const textareaRef = ref<HTMLTextAreaElement>();
 
 const isAgentIdle = computed(
@@ -43,43 +44,6 @@ const handleKeydown = (event: KeyboardEvent) => {
     handleSend();
   }
 };
-
-const models = [
-  {
-    label: "Claude",
-    items: [
-      {
-        name: "Claude 3.5 Sonnet",
-        isRecommended: true,
-        id: "anthropic/claude-sonnet-3-5-sonnet",
-      },
-      { name: "Claude 4 Sonnet", id: "anthropic/claude-sonnet-4" },
-    ],
-  },
-  {
-    label: "Gemini",
-    items: [
-      {
-        name: "Gemini 2.5 Pro",
-        isRecommended: true,
-        id: "google/gemini-2.5-pro",
-      },
-      { name: "Gemini 2.5 Flash", id: "google/gemini-2.5-flash" },
-      {
-        name: "Gemini 2.5 Flash Lite",
-        id: "google/gemini-2.5-flash-lite-preview-06-17",
-      },
-      { name: "Gemini 2.0 Flash", id: "google/gemini-2.0-flash-001" },
-    ],
-  },
-  {
-    label: "GPT",
-    items: [
-      { name: "GPT 4.1", isRecommended: true, id: "openai/gpt-4.1" },
-      { name: "GPT o4 Mini High", id: "openai/o4-mini-high" },
-    ],
-  },
-];
 </script>
 
 <template>
@@ -107,55 +71,85 @@ const models = [
 
     <div class="flex justify-between gap-2 items-center">
       <Select
-        v-model="selectedModel"
-        :options="models"
+        v-model="configStore.model"
+        :options="configStore.models"
         option-label="name"
-        option-value="name"
+        option-value="id"
         option-group-label="label"
         option-group-children="items"
-        class="text-sm font-mono"
+        class="text-sm font-mono w-50"
+        :pt="{
+          list: {
+            class: 'w-60',
+          },
+        }"
       >
         <template #option="slotProps">
           <div class="flex items-center justify-between w-full">
             <span>{{ slotProps.option.name }}</span>
-            <i
-              v-if="slotProps.option.isRecommended"
-              class="fas fa-star text-secondary-400 text-xs ml-2"
-              title="This model is recommended"
-            />
+            <div class="flex items-center gap-2">
+              <i
+                v-if="slotProps.option.reasoningModel"
+                class="fas fa-brain text-blue-400 text-xs"
+                title="This model supports reasoning"
+              />
+              <i
+                v-if="slotProps.option.isRecommended"
+                class="fas fa-star text-secondary-400 text-xs"
+                title="This model is recommended"
+              />
+            </div>
           </div>
         </template>
       </Select>
 
-      <Button
-        v-if="isAgentIdle"
-        severity="tertiary"
-        icon="fas fa-arrow-circle-up"
-        :disabled="!canSendMessage"
-        :pt="{
-          root: {
-            class: canSendMessage
-              ? 'bg-surface-700/50 text-surface-200 text-sm py-1.5 px-2 flex items-center justify-center rounded-md hover:text-white transition-colors duration-200 h-8 w-8 cursor-pointer'
-              : 'bg-surface-700/20 text-surface-400 text-sm py-1.5 px-2 flex items-center justify-center rounded-md h-8 w-8 cursor-not-allowed',
-          },
-        }"
-        @click="handleSend"
-      />
-      <Button
-        v-else
-        severity="danger"
-        icon="fas fa-square"
-        :pt="{
-          root: {
-            class:
-              'bg-red-400/10 text-red-400 py-1 px-1.5 flex items-center justify-center rounded-md hover:bg-red-400/20 transition-colors duration-200 h-8 w-8 cursor-pointer',
-          },
-          icon: {
-            class: 'text-sm',
-          },
-        }"
-        @click="abortMessage"
-      />
+      <div class="flex items-center gap-2">
+        <Button
+          v-if="configStore.selectedModel?.reasoningModel"
+          severity="tertiary"
+          icon="fas fa-brain"
+          disabled
+          :pt="{
+            root: {
+              class:
+                'bg-secondary-400/20 text-secondary-400 py-1 px-1.5 flex items-center justify-center rounded-md h-8 w-8 opacity-75',
+            },
+            icon: {
+              class: 'text-sm',
+            },
+          }"
+        />
+
+        <Button
+          v-if="isAgentIdle"
+          severity="tertiary"
+          icon="fas fa-arrow-circle-up"
+          :disabled="!canSendMessage"
+          :pt="{
+            root: {
+              class: canSendMessage
+                ? 'bg-surface-700/50 text-surface-200 text-sm py-1.5 px-2 flex items-center justify-center rounded-md hover:text-white transition-colors duration-200 h-8 w-8 cursor-pointer'
+                : 'bg-surface-700/20 text-surface-400 text-sm py-1.5 px-2 flex items-center justify-center rounded-md h-8 w-8 cursor-not-allowed',
+            },
+          }"
+          @click="handleSend"
+        />
+        <Button
+          v-else
+          severity="danger"
+          icon="fas fa-square"
+          :pt="{
+            root: {
+              class:
+                'bg-red-400/10 text-red-400 py-1 px-1.5 flex items-center justify-center rounded-md hover:bg-red-400/20 transition-colors duration-200 h-8 w-8 cursor-pointer',
+            },
+            icon: {
+              class: 'text-sm',
+            },
+          }"
+          @click="abortMessage"
+        />
+      </div>
     </div>
   </div>
 </template>

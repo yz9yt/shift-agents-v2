@@ -4,8 +4,7 @@ export type AgentStatus =
   | "idle"
   | "queryingAI"
   | "callingTools"
-  | "sendingReplayRequest"
-  | "error";
+  | "sendingReplayRequest";
 
 export const APIToolCallSchema = z.object({
   id: z.string(),
@@ -19,10 +18,12 @@ export const APIToolCallSchema = z.object({
 export const DeltaToolCallSchema = z.object({
   index: z.number(),
   id: z.string().optional(),
-  function: z.object({
-    name: z.string().optional(),
-    arguments: z.string().optional(),
-  }).optional(),
+  function: z
+    .object({
+      name: z.string().optional(),
+      arguments: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const APIMessageSchema = z.object({

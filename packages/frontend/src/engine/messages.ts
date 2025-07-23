@@ -213,6 +213,14 @@ export class MessageManager {
     return [...this.uiMessages.values()];
   }
 
+  cleanupPendingToolMessages(): void {
+    this.uiMessages.forEach((message, index) => {
+      if (message.kind === "tool" && message.status === "processing") {
+        this.deleteMessage(index);
+      }
+    });
+  }
+
   clear(): void {
     this.apiMessages.clear();
     this.uiMessages.clear();

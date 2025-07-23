@@ -7,9 +7,8 @@ const agentStore = useAgentStore();
 <template>
   <div class="flex-1 flex items-center justify-center text-surface-400">
     <div class="text-center">
-      <div class="text-lg mb-2">Start a conversation</div>
-      <div class="text-sm">Send a message to begin</div>
-      <pre>[debug] session ID: {{ agentStore.selectedId }}</pre>
+      <i class="fas fa-robot text-4xl mb-2" />
+      <div class="text-lg">Send a message to begin</div>
     </div>
   </div>
 </template>

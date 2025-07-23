@@ -31,7 +31,7 @@ const toolIcon = computed(() => {
     <div class="flex items-center gap-2">
       <i :class="toolIcon" class="text-sm" />
       <span
-        class="text-sm font-mono font-thin flex items-center gap-1 justify-between w-full overflow-hidden text-ellipsis"
+        class="text-sm font-mono font-thin flex items-center gap-1 justify-between w-full overflow-hidden text-ellipsis text-nowrap"
         :class="[
           toolDetails ? 'cursor-pointer hover:text-surface-200' : '',
           isProcessing ? 'shimmer' : '',
@@ -75,10 +75,10 @@ const toolIcon = computed(() => {
     background-position: -4rem top;
   }
   70% {
-    background-position: 10rem top;
+    background-position: 12rem top;
   }
   100% {
-    background-position: 10rem top;
+    background-position: 12rem top;
   }
 }
 
@@ -87,10 +87,10 @@ const toolIcon = computed(() => {
     background-position: -4rem top;
   }
   70% {
-    background-position: 10rem top;
+    background-position: 12rem top;
   }
   100% {
-    background-position: 10rem top;
+    background-position: 12rem top;
   }
 }
 </style>
