@@ -35,8 +35,9 @@ const { showReasoning, reasoningText, renderedMarkdown, toggleReasoning } =
       <div
         v-if="showReasoning"
         class="mt-2 p-3 bg-surface-900 border border-surface-700 rounded text-surface-300 whitespace-pre-wrap break-words text-sm select-text font-mono"
-        v-html="message.reasoning"
-      ></div>
+      >
+        {{ message.reasoning }}
+      </div>
     </div>
     <div
       class="text-surface-200 break-words select-text font-mono prose dark:prose-invert markdown-content"
