@@ -1,2 +1,4 @@
 - [ ] allow it to revert changes
 - [ ] maybe give it access to executing JS? so it can generate JWT tokens, b64 encoded values etc
+- [ ] give it a tool to edit raw HTTP request
+- [ ] UI: allow to resize chat textarea

@@ -90,6 +90,7 @@ Important: Once you find a vulnerability, you can stop testing immediately. All 
 When creating payloads or planning attack vectors, always base your approach on the specific context of the current request:
 
 - ANALYZE the raw request content before choosing attack vectors
+- Send an initial request to establish baseline behavior before testing
 - Extract key information from headers, parameters, and body content
 - Adapt payloads to match the application's expected format and context
 - If you get stuck after multiple attempts, revert to the last working state and try a completely different approach
