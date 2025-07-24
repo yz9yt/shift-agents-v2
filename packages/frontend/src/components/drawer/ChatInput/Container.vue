@@ -1,32 +1,34 @@
 <script setup lang="ts">
 import Button from "primevue/button";
 import Select from "primevue/select";
-import { computed, onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 
 import { useChat } from "./useChat";
 
-import { useAgentStore } from "@/stores/agent";
 import { useConfigStore } from "@/stores/config";
+import { useAgentStore } from "@/stores/agent";
 
 const {
-  sendMessage,
   abortMessage,
   inputMessage,
   isEditingMessage,
+  isAgentIdle,
+  canSendMessage,
+  handleSend,
+  handleKeydown,
 } = useChat();
 
-const agentStore = useAgentStore();
 const configStore = useConfigStore();
-const selectedAgent = computed(() => agentStore.selectedAgent);
-
+const agentStore = useAgentStore();
 const textareaRef = ref<HTMLTextAreaElement>();
 
-const isAgentIdle = computed(
-  () => selectedAgent.value?.currentStatus === "idle"
-);
-const canSendMessage = computed(
-  () => isAgentIdle.value && inputMessage.value.trim() !== ""
-);
+const promptOptions = computed(() => {
+  const options = [
+    { id: undefined, title: "None" },
+    ...configStore.customPrompts
+  ];
+  return options;
+});
 
 onMounted(() => {
   textareaRef.value?.focus();
@@ -41,23 +43,6 @@ watch(
   },
   { flush: "post" }
 );
-
-const handleSend = () => {
-  if (!canSendMessage.value) {
-    return;
-  }
-
-  const messageToSend = inputMessage.value.trim();
-  inputMessage.value = "";
-  sendMessage(messageToSend);
-};
-
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    handleSend();
-  }
-};
 </script>
 
 <template>
@@ -84,38 +69,47 @@ const handleKeydown = (event: KeyboardEvent) => {
     />
 
     <div class="flex justify-between gap-2 items-center">
-      <Select
-        v-model="configStore.model"
-        :options="configStore.models"
-        option-label="name"
-        option-value="id"
-        option-group-label="label"
-        option-group-children="items"
-        class="text-sm font-mono w-50"
-        :pt="{
-          list: {
-            class: 'w-60',
-          },
-        }"
-      >
-        <template #option="slotProps">
-          <div class="flex items-center justify-between w-full">
-            <span>{{ slotProps.option.name }}</span>
-            <div class="flex items-center gap-2">
-              <i
-                v-if="slotProps.option.reasoningModel"
-                class="fas fa-brain text-blue-400 text-xs"
-                title="This model supports reasoning"
-              />
-              <i
-                v-if="slotProps.option.isRecommended"
-                class="fas fa-star text-secondary-400 text-xs"
-                title="This model is recommended"
-              />
+      <div class="flex gap-2">
+        <Select
+          v-model="configStore.model"
+          :options="configStore.models"
+          option-label="name"
+          option-value="id"
+          option-group-label="label"
+          option-group-children="items"
+          filter
+          filter-placeholder="Search models..."
+          class="text-sm font-mono w-50"
+        >
+          <template #option="slotProps">
+            <div class="flex items-center justify-between w-full">
+              <span>{{ slotProps.option.name }}</span>
+              <div class="flex items-center gap-2">
+                <i
+                  v-if="slotProps.option.reasoningModel"
+                  class="fas fa-brain text-blue-400 text-xs"
+                  title="This model supports reasoning"
+                />
+                <i
+                  v-if="slotProps.option.isRecommended"
+                  class="fas fa-star text-secondary-400 text-xs"
+                  title="This model is recommended"
+                />
+              </div>
             </div>
-          </div>
-        </template>
-      </Select>
+          </template>
+        </Select>
+
+        <Select
+          v-if="agentStore.selectedAgent && promptOptions.length > 1"
+          v-model="agentStore.selectedAgent.selectedPromptId"
+          :options="promptOptions"
+          option-label="title"
+          option-value="id"
+          placeholder="Select prompt"
+          class="text-sm font-mono"
+        />
+      </div>
 
       <div class="flex items-center gap-2">
         <Button

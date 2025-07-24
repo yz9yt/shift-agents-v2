@@ -16,11 +16,11 @@ export const useTodos = () => {
   const hasTodos = computed(() => todos.value.length > 0);
 
   const pendingTodos = computed(() =>
-    todos.value.filter(todo => todo.status === "pending")
+    todos.value.filter((todo) => todo.status === "pending"),
   );
 
   const completedTodos = computed(() =>
-    todos.value.filter(todo => todo.status === "completed")
+    todos.value.filter((todo) => todo.status === "completed"),
   );
 
   return {

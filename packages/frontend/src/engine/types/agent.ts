@@ -54,6 +54,7 @@ export type StreamChunk =
   | {
       kind: "reasoning";
       content: string;
+      completed: boolean;
     }
   | {
       kind: "toolCall";
@@ -75,6 +76,9 @@ export type UIMessage =
       kind: "assistant";
       content: string;
       reasoning?: string;
+      reasoningCompleted?: boolean;
+      createdAt: number;
+      completedAt?: number;
     }
   | {
       id: string;

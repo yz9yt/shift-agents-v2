@@ -35,3 +35,10 @@ export type ModelGroup = {
   label: string;
   items: ModelItem[];
 };
+
+export type CustomPrompt = {
+  id: string;
+  title: string;
+  content: string;
+  isDefault?: boolean;
+};

@@ -33,10 +33,8 @@ export const setPath: ToolFunction<SetPathArgs, string> = {
           throw new Error("Invalid HTTP request - malformed request line");
         }
 
-        // Extract query parameters from original path if they exist
         const queryString = path.includes("?") ? path.split("?")[1] : "";
 
-        // Construct new path, preserving query parameters if they exist
         const newPath =
           queryString !== "" ? `${args.path}?${queryString}` : args.path;
 

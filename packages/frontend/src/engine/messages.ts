@@ -39,6 +39,14 @@ export class MessageManager {
     return id;
   }
 
+  updateSystemMessage(content: string): void {
+    this.apiMessages.forEach((message) => {
+      if (message.role === "system") {
+        message.content = content;
+      }
+    });
+  }
+
   addAssistantMessage(content: string): string {
     const id = generateId();
     const apiMessage: APIMessage = {
@@ -49,6 +57,7 @@ export class MessageManager {
       id,
       kind: "assistant",
       content,
+      createdAt: Date.now(),
     };
 
     this.apiMessages.set(id, apiMessage);
@@ -108,7 +117,7 @@ export class MessageManager {
 
   completeToolMessage<TOutput>(
     id: string,
-    toolCall: ToolResult<TOutput>
+    toolCall: ToolResult<TOutput>,
   ): void {
     switch (toolCall.kind) {
       case "success":
@@ -171,7 +180,7 @@ export class MessageManager {
     updater: {
       api?: (draft: APIMessage) => APIMessage;
       ui?: (draft: UIMessage) => UIMessage;
-    }
+    },
   ): void {
     if (updater.api !== undefined) {
       const apiMessage = this.apiMessages.get(id);
@@ -239,10 +248,23 @@ export class MessageManager {
     return false;
   }
 
-  cleanupPendingToolMessages(): void {
+  cleanupPending(): void {
     this.uiMessages.forEach((message, index) => {
       if (message.kind === "tool" && message.status === "processing") {
         this.deleteMessage(index);
+      }
+
+      if (
+        message.kind === "assistant" &&
+        message.reasoning !== undefined &&
+        message.reasoningCompleted !== true
+      ) {
+        this.updateMessage(index, {
+          ui: (draft) => ({
+            ...draft,
+            reasoningCompleted: true,
+          }),
+        });
       }
     });
   }
@@ -254,14 +276,14 @@ export class MessageManager {
 
   removeMessagesAfter(messageId: string): void {
     const uiMessages = this.getUiMessages();
-    const messageIndex = uiMessages.findIndex(msg => msg.id === messageId);
+    const messageIndex = uiMessages.findIndex((msg) => msg.id === messageId);
 
     if (messageIndex === -1) {
       return;
     }
 
     const messagesToRemove = uiMessages.slice(messageIndex + 1);
-    messagesToRemove.forEach(message => {
+    messagesToRemove.forEach((message) => {
       this.apiMessages.delete(message.id);
       this.uiMessages.delete(message.id);
     });

@@ -13,7 +13,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
   const sdk = useSDK();
   const configStore = useConfigStore();
 
-  const createAgentFromSessionId = (replaySessionId: string) => {
+  const createAgent = (replaySessionId: string) => {
     const maxIterations = 35;
 
     const agent = new Agent(sdk, {
@@ -26,7 +26,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
       }),
       jitConfig: {
         replaySessionId,
-        jitInstructions: "You are a helpful assistant.",
+        jitInstructions: "You are a Shift Agent.",
         maxIterations,
       },
       openRouterConfig: {
@@ -34,27 +34,20 @@ export const useAgentStore = defineStore("stores.agent", () => {
         model: configStore.model,
         reasoningEnabled: configStore.selectedModel?.reasoningModel ?? false,
         reasoning: configStore.reasoningConfig,
-      },
+      }
     });
     agents.value.set(replaySessionId, agent);
     return agent;
   };
 
-  const removeAgent = (id: string) => {
-    agents.value.delete(id);
-  };
-
   const selectAgent = (id: string) => {
     if (!agents.value.has(id)) {
-      createAgentFromSessionId(id);
+      createAgent(id);
     }
 
     selectedId.value = id;
   };
 
-  const resetSelection = () => {
-    selectedId.value = undefined;
-  };
 
   const getAgent = (id: string) => agents.value.get(id);
 
@@ -92,7 +85,10 @@ export const useAgentStore = defineStore("stores.agent", () => {
     }
   };
 
-  const setInputMessage = (content: string, isEditing: boolean = false): void => {
+  const setInputMessage = (
+    content: string,
+    isEditing: boolean = false
+  ): void => {
     if (selectedId.value === undefined) {
       return;
     }
@@ -128,12 +124,9 @@ export const useAgentStore = defineStore("stores.agent", () => {
   return {
     agents: computed(() => Array.from(agents.value.values())),
     getAgent,
-    removeAgent,
-    createAgentFromSessionId,
     selectedAgent: computed(() => getAgent(selectedId.value ?? "")),
     selectedId,
     selectAgent,
-    resetSelection,
     abortSelectedAgent,
     updateUserMessage,
     removeMessagesAfter,

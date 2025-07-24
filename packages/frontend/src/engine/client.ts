@@ -1,5 +1,5 @@
-import type { Agent } from "@/engine/agent";
 import { toolDefinitions } from "@/engine/tools";
+import { type OpenRouterConfig } from "@/engine/types";
 import {
   type APIMessage,
   type APIToolCall,
@@ -14,15 +14,13 @@ type StreamingState = {
   buffer: string;
   reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
   decoder: TextDecoder;
+  isReasoningActive: boolean;
 };
 
 export class LLMClient {
-  private agent: Agent;
   private abortController: AbortController | undefined;
 
-  constructor(agent: Agent) {
-    this.agent = agent;
-  }
+  constructor(private readonly openRouterConfig: OpenRouterConfig) {}
 
   public async *streamText(
     messages: APIMessage[],
@@ -31,21 +29,21 @@ export class LLMClient {
 
     try {
       const requestBody: Record<string, unknown> = {
-        model: this.agent.config.openRouterConfig.model,
+        model: this.openRouterConfig.model,
         messages: messages,
         tools: toolDefinitions,
         stream: true,
       };
 
-      if (this.agent.config.openRouterConfig.reasoningEnabled) {
-        requestBody.reasoning = this.agent.config.openRouterConfig.reasoning;
+      if (this.openRouterConfig.reasoningEnabled) {
+        requestBody.reasoning = this.openRouterConfig.reasoning;
       }
 
       const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${this.agent.config.openRouterConfig.apiKey}`,
+          Authorization: `Bearer ${this.openRouterConfig.apiKey}`,
         },
         body: JSON.stringify(requestBody),
         signal: this.abortController.signal,
@@ -67,6 +65,7 @@ export class LLMClient {
         buffer: "",
         reader: response.body.getReader(),
         decoder: new TextDecoder(),
+        isReasoningActive: false,
       };
 
       try {
@@ -109,9 +108,21 @@ export class LLMClient {
                 }
 
                 if (delta.reasoning !== undefined && delta.reasoning !== null) {
+                  state.isReasoningActive = true;
                   yield {
                     kind: "reasoning",
                     content: delta.reasoning,
+                    completed: false,
+                  };
+                } else if (
+                  state.isReasoningActive &&
+                  (delta.reasoning === null || delta.reasoning === undefined)
+                ) {
+                  state.isReasoningActive = false;
+                  yield {
+                    kind: "reasoning",
+                    content: "",
+                    completed: true,
                   };
                 }
 
@@ -140,6 +151,13 @@ export class LLMClient {
                 state.toolCallsMap.clear();
                 break;
               } else if (finishReason === "stop") {
+                if (state.isReasoningActive) {
+                  yield {
+                    kind: "reasoning",
+                    content: "",
+                    completed: true,
+                  };
+                }
                 break;
               }
             } catch (parseError) {

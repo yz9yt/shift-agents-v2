@@ -1,4 +1,4 @@
-import { Todo } from "@/engine/types";
+import { type Todo } from "@/engine/types";
 
 export class TodoManager {
   private todos: Todo[] = [];
@@ -21,13 +21,13 @@ export class TodoManager {
 
   updateTodo(id: string, updatedTodo: Todo) {
     this.todos = this.todos.map((todo) =>
-      todo.id === id ? updatedTodo : todo
+      todo.id === id ? updatedTodo : todo,
     );
   }
 
   completeTodo(id: string) {
     this.todos = this.todos.map((todo) =>
-      todo.id === id ? { ...todo, status: "completed" } : todo
+      todo.id === id ? { ...todo, status: "completed" } : todo,
     );
   }
 

@@ -32,13 +32,11 @@ export const setHeader: ToolFunction<SetHeaderArgs, string> = {
         const headers = lines.slice(0, headerEnd);
         const rest = lines.slice(headerEnd);
 
-        // Find position of existing header if it exists
         const existingHeaderIndex = headers.findIndex((line) => {
           const [headerName] = line.split(":");
           return headerName?.toLowerCase() === args.name.toLowerCase();
         });
 
-        // Create new headers array
         const newHeaders = [...headers];
         const newHeaderLine = `${args.name}: ${args.value}`;
 

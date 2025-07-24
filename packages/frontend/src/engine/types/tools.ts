@@ -1,8 +1,8 @@
 import { type z } from "zod";
 
+import { type TodoManager } from "@/engine/todo";
 import { type FrontendMetadata } from "@/engine/types/agent";
 import { type FrontendSDK } from "@/types";
-import { TodoManager } from "@/engine/todo";
 
 export type ToolContext = {
   sdk: FrontendSDK;

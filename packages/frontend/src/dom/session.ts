@@ -44,8 +44,8 @@ export const useSessionManager = (sdk: FrontendSDK) => {
   };
 
   const inject = () => {
-    console.log("inject");
-    const treeCollection = document.querySelector(".c-tree-collection");
+    const treeCollection =
+      document.querySelector(".c-tree-collection")?.parentElement;
     if (!treeCollection) {
       setTimeout(inject, 100);
       return;
@@ -93,7 +93,7 @@ export const useSessionManager = (sdk: FrontendSDK) => {
     });
 
     const initialSelected = treeCollection.querySelector(
-      '.c-tree-session[data-is-selected="true"]'
+      '.c-tree-session[data-is-selected="true"]',
     );
     if (initialSelected) {
       const sessionId =
@@ -109,7 +109,7 @@ export const useSessionManager = (sdk: FrontendSDK) => {
 
   const selectCurrentSession = () => {
     const currentSessionId = getCurrentSessionId();
-    if (currentSessionId) {
+    if (currentSessionId !== undefined) {
       if (onSelectedCallback) {
         onSelectedCallback(currentSessionId);
       }
@@ -117,13 +117,14 @@ export const useSessionManager = (sdk: FrontendSDK) => {
   };
 
   const getCurrentSessionId = () => {
-    const treeCollection = document.querySelector(".c-tree-collection");
+    const treeCollection =
+      document.querySelector(".c-tree-collection")?.parentElement;
     if (!treeCollection) {
       return undefined;
     }
 
     const currentSelected = treeCollection.querySelector(
-      '.c-tree-session[data-is-selected="true"]'
+      '.c-tree-session[data-is-selected="true"]',
     );
     if (!currentSelected) {
       return undefined;

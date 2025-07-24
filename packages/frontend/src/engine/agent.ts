@@ -1,7 +1,7 @@
-import { TodoManager } from "@/engine/todo";
 import { LLMClient } from "./client";
 
 import { MessageManager } from "@/engine/messages";
+import { TodoManager } from "@/engine/todo";
 import { executeTool, TOOLS } from "@/engine/tools";
 import {
   type AgentConfig,
@@ -14,28 +14,32 @@ import {
   type UIMessage,
 } from "@/engine/types";
 import { type FrontendSDK } from "@/types";
-import { getCurrentReplayRequest } from "@/utils";
+import { getCurrentReplayRequest, type ReplayRequest } from "@/utils";
 
 export class Agent {
   public llmClient: LLMClient;
   public messageManager: MessageManager;
   public todoManager: TodoManager;
   public status: AgentStatus = "idle";
-  private aborted: boolean = false;
   public inputMessage: string = "";
   public isEditingMessage: boolean = false;
+  public selectedPromptId: string | undefined = undefined;
+  private aborted: boolean = false;
 
   constructor(public sdk: FrontendSDK, public config: AgentConfig) {
-    this.llmClient = new LLMClient(this);
+    this.llmClient = new LLMClient(this.config.openRouterConfig);
     this.todoManager = new TodoManager();
     this.messageManager = new MessageManager();
-    this.status = "idle";
-    this.aborted = false;
-    this.generateSystemPrompt();
+    this.applySystemPrompt();
   }
 
-  private generateSystemPrompt(): void {
-    const systemPrompt = `<SYSTEM_PROMPT>${this.config.systemPrompt}</SYSTEM_PROMPT><JIT_INSTRUCTIONS>${this.config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>`;
+  private applySystemPrompt(): void {
+    const systemPrompt = `
+      <SYSTEM_PROMPT>${this.config.systemPrompt}</SYSTEM_PROMPT>
+      <JIT_INSTRUCTIONS>${this.config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>
+    `;
+
+    console.log("systemPrompt", systemPrompt);
 
     const hasSystemMessages = this.messageManager
       .getApiMessages()
@@ -43,6 +47,8 @@ export class Agent {
 
     if (!hasSystemMessages) {
       this.messageManager.addSystemMessage(systemPrompt);
+    } else {
+      this.messageManager.updateSystemMessage(systemPrompt);
     }
   }
 
@@ -50,11 +56,12 @@ export class Agent {
     const draft = { ...this.config };
     updater(draft);
     this.config = draft;
-    this.generateSystemPrompt();
+    this.applySystemPrompt();
   }
 
   async sendMessage(message: string): Promise<void> {
     this.aborted = false;
+    this.applySystemPrompt();
     this.messageManager.addUserMessage(message);
     this.clearInputMessage();
 
@@ -62,67 +69,95 @@ export class Agent {
       await this.processMessages();
     } catch (error) {
       console.error(error);
+      this.status = "idle";
       this.messageManager.addErrorMessage(
         error instanceof Error ? error.message : String(error)
       );
     }
   }
 
+  private contextMessages({
+    currentRequest,
+  }: {
+    currentRequest: ReplayRequest;
+  }): APIMessage[] {
+    const messages: APIMessage[] = [];
+
+    switch (currentRequest.kind) {
+      case "Ok":
+        messages.push({
+          role: "user",
+          content: `Here is the current HTTP request that you are analyzing: <request>${currentRequest.raw}</request> <host>${currentRequest.host}</host> <port>${currentRequest.port}</port>`,
+        });
+        break;
+
+      case "Error":
+        messages.push({
+          role: "user",
+          content: `There was an error getting the current HTTP request: ${currentRequest.error}`,
+        });
+        break;
+    }
+
+    const allTodos = this.todoManager.getTodos();
+    if (allTodos.length > 0) {
+      const pendingTodos = allTodos.filter((todo) => todo.status === "pending");
+      const completedTodos = allTodos.filter(
+        (todo) => todo.status === "completed"
+      );
+
+      let message = "Here is the current status of todos:\n";
+
+      if (completedTodos.length > 0) {
+        message += "\nCompleted todos:\n";
+        message += completedTodos
+          .map((todo) => `- [x] ${todo.content} (ID: ${todo.id})`)
+          .join("\n");
+      }
+
+      if (pendingTodos.length > 0) {
+        message += "\nPending todos:\n";
+        message += pendingTodos
+          .map((todo) => `- [ ] ${todo.content} (ID: ${todo.id})`)
+          .join("\n");
+      }
+
+      message +=
+        "\n\nYou can mark pending todos as finished using the todo tool with their IDs.";
+
+      messages.push({
+        role: "user",
+        content: message,
+      });
+    }
+
+    return messages;
+  }
+
   private async processMessages(): Promise<void> {
     let iterations = 0;
     const currentRequest = await getCurrentReplayRequest(
+      this.sdk,
       this.config.jitConfig.replaySessionId
     );
 
+    if (currentRequest.kind === "Error") {
+      this.messageManager.addErrorMessage(currentRequest.error);
+      this.status = "idle";
+      return;
+    }
+
     while (iterations < this.config.jitConfig.maxIterations && !this.aborted) {
       this.status = "queryingAI";
-
-      const messages: APIMessage[] = [
-        ...this.messageManager.getApiMessages(),
-        {
-          role: "user",
-          content: `Here is the current HTTP request that you are analyzing: <request>${currentRequest.raw}</request> <host>${currentRequest.host}</host> <port>${currentRequest.port}</port>`,
-        },
-      ];
-
-      const allTodos = this.todoManager.getTodos();
-      if (allTodos.length > 0) {
-        const pendingTodos = allTodos.filter(
-          (todo) => todo.status === "pending"
-        );
-        const completedTodos = allTodos.filter(
-          (todo) => todo.status === "completed"
-        );
-
-        let message = "Here is the current status of todos:\n";
-
-        if (completedTodos.length > 0) {
-          message += "\nCompleted todos:\n";
-          message += completedTodos
-            .map((todo) => `- [x] ${todo.content} (ID: ${todo.id})`)
-            .join("\n");
-        }
-
-        if (pendingTodos.length > 0) {
-          message += "\nPending todos:\n";
-          message += pendingTodos
-            .map((todo) => `- [ ] ${todo.content} (ID: ${todo.id})`)
-            .join("\n");
-        }
-
-        message +=
-          "\n\nYou can mark pending todos as finished using the todo tool with their IDs.";
-
-        messages.push({
-          role: "user",
-          content: message,
-        });
-      }
 
       let currentContent = "";
       let currentReasoning = "";
       let hasToolCalls = false;
       const toolCallManager = new ToolCallManager(this.messageManager);
+      const messages = [
+        ...this.messageManager.getApiMessages(),
+        ...this.contextMessages({ currentRequest }),
+      ];
 
       let assistantMessageID = "";
       try {
@@ -148,9 +183,14 @@ export class Agent {
               this.messageManager.updateMessage(assistantMessageID, {
                 ui: (draft) => {
                   if (draft.kind === "assistant") {
+                    if (chunk.completed) {
+                      draft.completedAt = Date.now();
+                    }
+
                     return {
                       ...draft,
                       reasoning: currentReasoning.trim(),
+                      reasoningCompleted: chunk.completed,
                     };
                   }
                   return draft;
@@ -160,6 +200,7 @@ export class Agent {
                   reasoning: currentReasoning,
                 }),
               });
+
               break;
 
             case "partialToolCall":
@@ -307,6 +348,14 @@ export class Agent {
     this.isEditingMessage = false;
   }
 
+  setSelectedPromptId(id: string): void {
+    this.selectedPromptId = id;
+  }
+
+  clearSelectedPromptId(): void {
+    this.selectedPromptId = undefined;
+  }
+
   editMessage(messageId: string, content: string): void {
     this.removeMessagesAfter(messageId);
     this.removeMessage(messageId);
@@ -317,7 +366,7 @@ export class Agent {
     this.aborted = true;
     this.llmClient.abort();
     this.status = "idle";
-    this.messageManager.cleanupPendingToolMessages();
+    this.messageManager.cleanupPending();
     this.todoManager.clearTodos();
   }
 }

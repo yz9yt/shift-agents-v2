@@ -21,31 +21,31 @@ const GrepResponseSchema = z
       .number()
       .optional()
       .describe(
-        "Byte offset to start reading from (only used when no content/regex is specified, default: 0)"
+        "Byte offset to start reading from (only used when no content/regex is specified, default: 0)",
       ),
     length: z
       .number()
       .optional()
       .describe(
-        "When content/regex is specified: number of bytes to return after the match. When no content/regex: number of bytes to read from offset (default: 5000)"
+        "When content/regex is specified: number of bytes to return after the match. When no content/regex: number of bytes to read from offset (default: 5000)",
       ),
     content: z
       .string()
       .optional()
       .describe(
-        "String content to search for in the entire response. When specified, offset is ignored. Cannot be used with regex parameter"
+        "String content to search for in the entire response. When specified, offset is ignored. Cannot be used with regex parameter",
       ),
     regex: z
       .string()
       .optional()
       .describe(
-        "Regular expression pattern to search for in the entire response. When specified, offset is ignored. Cannot be used with content parameter"
+        "Regular expression pattern to search for in the entire response. When specified, offset is ignored. Cannot be used with content parameter",
       ),
     occurrence: z
       .number()
       .optional()
       .describe(
-        "Which occurrence of the content/regex to return (1-based index, default: 1). Only used with content or regex parameter"
+        "Which occurrence of the content/regex to return (1-based index, default: 1). Only used with content or regex parameter",
       ),
   })
   .refine(
@@ -56,7 +56,7 @@ const GrepResponseSchema = z
     },
     {
       message: "Cannot specify both content and regex parameters",
-    }
+    },
   );
 type GrepResponseArgs = z.infer<typeof GrepResponseSchema>;
 
@@ -133,7 +133,7 @@ export const grepResponse: ToolFunction<GrepResponseArgs, GrepResponseResult> =
             while (searchIndex < fullResponse.length) {
               const foundIndex = fullResponse.indexOf(
                 args.content,
-                searchIndex
+                searchIndex,
               );
               if (foundIndex === -1) break;
               allMatches.push(foundIndex);

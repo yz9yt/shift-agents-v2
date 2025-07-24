@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRefs } from "vue";
+import { useToolMessage } from "./useMessage";
 
 import type { UIMessage } from "@/engine/types/agent";
 
@@ -7,41 +7,32 @@ const props = defineProps<{
   message: UIMessage & { kind: "tool" };
 }>();
 
-const { message } = toRefs(props);
-
-const showDetails = ref(false);
-
-const isProcessing = computed(() => message.value.status === "processing");
-
-const formatToolCalls = computed(() => {
-  return message.value.metadata.message;
-});
-
-const toolDetails = computed(() => {
-  return message.value.metadata.details;
-});
-
-const toolIcon = computed(() => {
-  return message.value.metadata.icon;
-});
+const {
+  showDetails,
+  isProcessing,
+  formatToolCalls,
+  toolDetails,
+  toolIcon,
+  toggleDetails,
+} = useToolMessage(props);
 </script>
 
 <template>
   <div class="flex flex-col gap-2 text-surface-300 px-2">
-    <div class="flex items-center gap-2">
-      <i :class="toolIcon" class="text-sm" />
+    <div class="flex items-center gap-2 hover:text-surface-200">
+      <i :class="toolIcon" class="text-sm w-4 text-left" />
       <span
         class="text-sm font-mono font-thin flex items-center gap-1 justify-between w-full overflow-hidden text-ellipsis text-nowrap"
         :class="[
-          toolDetails ? 'cursor-pointer hover:text-surface-200' : '',
+          toolDetails ? 'cursor-pointer' : '',
           isProcessing ? 'shimmer' : '',
         ]"
-        @click="toolDetails && (showDetails = !showDetails)"
+        @click="toggleDetails"
       >
         {{ formatToolCalls }}
         <i
           v-if="toolDetails"
-          class="text-sm"
+          class="text-sm w-4"
           :class="showDetails ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"
         />
       </span>

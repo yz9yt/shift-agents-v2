@@ -11,8 +11,8 @@ const id = "shift-agents";
 export default defineConfig({
   id,
   name: "Shift Agents",
-  description: "Plugin template with frontend using VueJS",
-  version: "0.0.0",
+  description: "Delegate your work to Shift Agents",
+  version: "1.0.0",
   author: {
     name: "Caido Labs Inc.",
     email: "dev@caido.io",

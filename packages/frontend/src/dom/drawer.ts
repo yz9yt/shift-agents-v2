@@ -4,6 +4,7 @@ import { type App, createApp } from "vue";
 
 import { Drawer } from "@/components/drawer";
 import { type FrontendSDK } from "@/types";
+import { SDKPlugin } from "@/plugins/sdk";
 
 export const useDrawerManager = (sdk: FrontendSDK) => {
   let app: App | undefined = undefined;
@@ -49,6 +50,7 @@ export const useDrawerManager = (sdk: FrontendSDK) => {
 
     if (!app) {
       app = createApp(Drawer, {});
+      app.use(SDKPlugin, sdk);
       app.use(PrimeVue, {
         unstyled: true,
         pt: Classic,

@@ -1,5 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { SettingsContainer } from "@/components/settings";
+</script>
 
 <template>
-  <h1>Hello World</h1>
+  <SettingsContainer />
 </template>

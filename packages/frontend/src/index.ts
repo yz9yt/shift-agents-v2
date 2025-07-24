@@ -39,9 +39,9 @@ export const init = (sdk: FrontendSDK) => {
     body: root,
   });
 
-  sdk.sidebar.registerItem("Shift Agents", "/shift-agents");
-
-  useUIStore().toggleDrawer();
+  sdk.sidebar.registerItem("Shift Agents", "/shift-agents", {
+    icon: "fas fa-robot",
+  });
 
   sdk.replay.addToSlot("topbar", {
     type: "Button",
@@ -77,7 +77,9 @@ export const init = (sdk: FrontendSDK) => {
   };
 
   // @ts-expect-error temporary workaround for missing onPageChange type
-  sdk.navigation.removePageChangeListener = (callback: (page: string) => void) => {
+  sdk.navigation.removePageChangeListener = (
+    callback: (page: string) => void,
+  ) => {
     pageChangeSubscribers.delete(callback);
   };
 
@@ -87,11 +89,11 @@ export const init = (sdk: FrontendSDK) => {
     if (currentPage !== newPage) {
       currentPage = newPage;
       // Notify all subscribers
-      pageChangeSubscribers.forEach(callback => {
+      pageChangeSubscribers.forEach((callback) => {
         try {
           callback(newPage);
         } catch (error) {
-          console.error('Error in page change callback:', error);
+          console.error("Error in page change callback:", error);
         }
       });
     }
