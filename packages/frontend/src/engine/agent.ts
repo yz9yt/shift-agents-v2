@@ -39,8 +39,6 @@ export class Agent {
       <JIT_INSTRUCTIONS>${this.config.jitConfig.jitInstructions}</JIT_INSTRUCTIONS>
     `;
 
-    console.log("systemPrompt", systemPrompt);
-
     const hasSystemMessages = this.messageManager
       .getApiMessages()
       .some((message) => message.role === "system");

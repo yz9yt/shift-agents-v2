@@ -60,8 +60,6 @@ export const useChat = () => {
           (prompt) => prompt.id === agentStore.selectedAgent?.selectedPromptId
         );
 
-        console.log("selectedPrompt", selectedPrompt);
-
         draft.openRouterConfig.model = configStore.model;
         draft.openRouterConfig.reasoningEnabled =
           configStore.selectedModel?.reasoningModel ?? false;

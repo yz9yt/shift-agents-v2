@@ -20,7 +20,6 @@ export type ReplayRequest =
       kind: "Error";
       error: string;
     };
-
 export async function getCurrentReplayRequest(
   sdk: FrontendSDK,
   replaySessionId: string,
@@ -32,12 +31,24 @@ export async function getCurrentReplayRequest(
     };
   }
 
-  const result = await sdk.graphql.replayEntry({
+  const sessionResult = await sdk.graphql.replaySessionEntries({
     id: replaySessionId,
   });
-  const activeEntry = result.replayEntry;
+  const activeEntry = sessionResult.replaySession?.activeEntry;
 
   if (activeEntry === undefined || activeEntry === null) {
+    return {
+      kind: "Error",
+      error: "No active entry found",
+    };
+  }
+
+  const entryResult = await sdk.graphql.replayEntry({
+    id: activeEntry.id,
+  });
+  const replayEntry = entryResult.replayEntry;
+
+  if (replayEntry === undefined || replayEntry === null) {
     return {
       kind: "Error",
       error: "No request found",
@@ -46,10 +57,10 @@ export async function getCurrentReplayRequest(
 
   return {
     kind: "Ok",
-    raw: activeEntry.raw,
-    host: activeEntry.connection.host,
-    port: activeEntry.connection.port,
-    isTLS: activeEntry.connection.isTLS,
-    SNI: activeEntry.connection.SNI,
+    raw: replayEntry.raw,
+    host: replayEntry.connection.host,
+    port: replayEntry.connection.port,
+    isTLS: replayEntry.connection.isTLS,
+    SNI: replayEntry.connection.SNI,
   } as ReplayRequest;
 }

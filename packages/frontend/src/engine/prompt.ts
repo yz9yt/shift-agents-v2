@@ -1,7 +1,5 @@
 type PromptContext = {
   model: string;
-  replaySessionId?: string;
-  maxIterations?: number;
 };
 
 type ModelPrompt = {

@@ -21,8 +21,6 @@ export const useAgentStore = defineStore("stores.agent", () => {
       name: "Shift Agent",
       systemPrompt: generateSystemPrompt({
         model: configStore.model,
-        replaySessionId,
-        maxIterations,
       }),
       jitConfig: {
         replaySessionId,
@@ -34,7 +32,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
         model: configStore.model,
         reasoningEnabled: configStore.selectedModel?.reasoningModel ?? false,
         reasoning: configStore.reasoningConfig,
-      }
+      },
     });
     agents.value.set(replaySessionId, agent);
     return agent;
@@ -47,7 +45,6 @@ export const useAgentStore = defineStore("stores.agent", () => {
 
     selectedId.value = id;
   };
-
 
   const getAgent = (id: string) => agents.value.get(id);
 
