@@ -2,3 +2,7 @@
 - [ ] maybe give it access to executing JS? so it can generate JWT tokens, b64 encoded values etc
 - [ ] give it a tool to edit raw HTTP request
 - [ ] UI: allow to resize chat textarea
+- [ ] Automatically pause after creating a finding that accomplishes the attacker's goal
+- [ ] Correlate the finding in Replay to the finding when a finding is created
+- [ ] Add a way to close the pane from within the pane
+- [ ] Add a way to set max # of requests an AI can send so it doesn't churn forever.
