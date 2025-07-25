@@ -7,3 +7,4 @@
 - [ ] Add a way to close the pane from within the pane
 - [ ] Add a way to set max # of requests an AI can send so it doesn't churn forever.
 - [ ] Add a way to reset the conversation
+- [ ] Make an easy way to share agents
