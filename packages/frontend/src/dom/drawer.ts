@@ -1,5 +1,6 @@
 import { Classic } from "@caido/primevue";
 import PrimeVue from "primevue/config";
+import Tooltip from 'primevue/tooltip';
 import { type App, createApp } from "vue";
 
 import { Drawer } from "@/components/drawer";
@@ -55,6 +56,7 @@ export const useDrawerManager = (sdk: FrontendSDK) => {
         unstyled: true,
         pt: Classic,
       });
+      app.directive('tooltip', Tooltip);
     }
     app.mount(container);
   };

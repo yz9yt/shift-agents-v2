@@ -22,7 +22,7 @@ const clearConversation = () => {
     <div class="flex items-center justify-end h-full">
       <div class="flex items-center gap-2">
         <i
-          class="fas fa-trash text-surface-400 hover:text-surface-200 cursor-pointer p-1"
+          class="fas fa-trash text-surface-400 hover:text-surface-200 cursor-pointer p-1 text-sm"
           @click="clearConversation"
           v-tooltip.bottom="'Clear conversation'"
           :class="{
@@ -30,7 +30,7 @@ const clearConversation = () => {
           }"
         />
         <i
-          class="fas fa-times text-surface-400 hover:text-surface-200 cursor-pointer p-1"
+          class="fas fa-times text-surface-400 hover:text-surface-200 cursor-pointer p-1 text-sm"
           @click="closeDrawer"
           v-tooltip.bottom="'Close'"
         />
