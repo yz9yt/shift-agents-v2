@@ -1,4 +1,4 @@
-import { ref, toRefs, watch } from "vue";
+import { ref, toRefs } from "vue";
 
 import { useSDK } from "@/plugins/sdk";
 import { useConfigStore } from "@/stores/config/store";
@@ -6,22 +6,17 @@ import { useConfigStore } from "@/stores/config/store";
 export const useForm = () => {
   const sdk = useSDK();
   const configStore = useConfigStore();
-  const { openRouterApiKey } = toRefs(configStore);
+  const { openRouterApiKey, maxIterations } = toRefs(configStore);
 
-  const localApiKey = ref(openRouterApiKey.value);
   const isApiKeyVisible = ref(false);
   const isValidating = ref(false);
-
-  const updateApiKey = async () => {
-    await configStore.setOpenRouterApiKey(localApiKey.value);
-  };
 
   const toggleApiKeyVisibility = () => {
     isApiKeyVisible.value = !isApiKeyVisible.value;
   };
 
   const validateApiKey = async () => {
-    if (!localApiKey.value?.trim()) {
+    if (!openRouterApiKey.value?.trim()) {
       sdk.window.showToast("Please enter an API key", { variant: "error" });
       return;
     }
@@ -31,7 +26,7 @@ export const useForm = () => {
       const response = await fetch("https://openrouter.ai/api/v1/credits", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${localApiKey.value.trim()}`,
+          Authorization: `Bearer ${openRouterApiKey.value.trim()}`,
           "Content-Type": "application/json",
         },
       });
@@ -56,15 +51,11 @@ export const useForm = () => {
     }
   };
 
-  watch(openRouterApiKey, (newValue) => {
-    localApiKey.value = newValue;
-  });
-
   return {
-    localApiKey,
+    openRouterApiKey,
+    maxIterations,
     isApiKeyVisible,
     isValidating,
-    updateApiKey,
     toggleApiKeyVisibility,
     validateApiKey,
   };

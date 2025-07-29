@@ -5,6 +5,6 @@
 - [ ] Automatically pause after creating a finding that accomplishes the attacker's goal
 - [x] Correlate the finding in Replay to the finding when a finding is created
 - [ ] Add a way to close the pane from within the pane
-- [ ] Add a way to set max # of requests an AI can send so it doesn't churn forever.
+- [x] Add a way to set max # of requests an AI can send so it doesn't churn forever.
 - [ ] Add a way to reset the conversation
 - [ ] Make an easy way to share agents

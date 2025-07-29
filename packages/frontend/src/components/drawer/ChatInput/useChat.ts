@@ -64,6 +64,7 @@ export const useChat = () => {
         draft.openRouterConfig.reasoningEnabled =
           configStore.selectedModel?.reasoningModel ?? false;
         draft.openRouterConfig.apiKey = configStore.openRouterApiKey;
+        draft.jitConfig.maxIterations = configStore.maxIterations;
         draft.jitConfig.jitInstructions = selectedPrompt?.content ?? "";
       });
 

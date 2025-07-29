@@ -7,8 +7,6 @@ import {
   type StreamChunk,
 } from "@/engine/types/agent";
 
-const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
-
 type StreamingState = {
   toolCallsMap: Map<number, APIToolCall>;
   buffer: string;
@@ -39,15 +37,18 @@ export class LLMClient {
         requestBody.reasoning = this.openRouterConfig.reasoning;
       }
 
-      const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.openRouterConfig.apiKey}`,
+      const response = await fetch(
+        `https://openrouter.ai/api/v1/chat/completions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.openRouterConfig.apiKey}`,
+          },
+          body: JSON.stringify(requestBody),
+          signal: this.abortController.signal,
         },
-        body: JSON.stringify(requestBody),
-        signal: this.abortController.signal,
-      });
+      );
 
       if (!response.ok) {
         const body = await response.text();

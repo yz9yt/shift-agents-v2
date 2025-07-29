@@ -12,19 +12,51 @@ export const useConfigStore = defineStore("stores.config", () => {
   const sdk = useSDK();
 
   const customPrompts = ref<CustomPrompt[]>(defaultCustomPrompts);
-  const openRouterApiKey = ref<string>("");
-  const model = ref<string>("anthropic/claude-sonnet-4");
+  const _openRouterApiKey = ref<string>("");
+  const _model = ref<string>("anthropic/claude-sonnet-4");
+  const _maxIterations = ref<number>(25);
   const reasoningConfig = ref<ReasoningConfig>({
     enabled: true,
     max_tokens: 1500,
   });
 
+  const openRouterApiKey = computed({
+    get() {
+      return _openRouterApiKey.value;
+    },
+    set(value: string) {
+      _openRouterApiKey.value = value;
+      saveSettings();
+    },
+  });
+
+  const model = computed({
+    get() {
+      return _model.value;
+    },
+    set(value: string) {
+      _model.value = value;
+      saveSettings();
+    },
+  });
+
+  const maxIterations = computed({
+    get() {
+      return _maxIterations.value;
+    },
+    set(value: number) {
+      _maxIterations.value = value;
+      saveSettings();
+    },
+  });
+
   const saveSettings = async () => {
     const settings: PluginStorage = {
-      openRouterApiKey: openRouterApiKey.value,
-      model: model.value,
+      openRouterApiKey: _openRouterApiKey.value,
+      model: _model.value,
       reasoningConfig: reasoningConfig.value,
       customPrompts: customPrompts.value,
+      maxIterations: _maxIterations.value,
     };
     await sdk.storage.set(settings);
   };
@@ -33,10 +65,10 @@ export const useConfigStore = defineStore("stores.config", () => {
     const settings = sdk.storage.get() as PluginStorage | undefined;
     if (settings) {
       if (settings.openRouterApiKey !== undefined) {
-        openRouterApiKey.value = settings.openRouterApiKey;
+        _openRouterApiKey.value = settings.openRouterApiKey;
       }
       if (settings.model !== undefined) {
-        model.value = settings.model;
+        _model.value = settings.model;
       }
       if (settings.reasoningConfig !== undefined) {
         reasoningConfig.value = settings.reasoningConfig;
@@ -44,17 +76,10 @@ export const useConfigStore = defineStore("stores.config", () => {
       if (settings.customPrompts !== undefined) {
         customPrompts.value = settings.customPrompts;
       }
+      if (settings.maxIterations !== undefined) {
+        _maxIterations.value = settings.maxIterations;
+      }
     }
-  };
-
-  const setOpenRouterApiKey = async (key: string) => {
-    openRouterApiKey.value = key;
-    await saveSettings();
-  };
-
-  const setModel = async (newModel: string) => {
-    model.value = newModel;
-    await saveSettings();
   };
 
   const setReasoningConfig = async (config: ReasoningConfig) => {
@@ -91,10 +116,10 @@ export const useConfigStore = defineStore("stores.config", () => {
     const settings = newSettings as PluginStorage | undefined;
     if (settings) {
       if (settings.openRouterApiKey !== undefined) {
-        openRouterApiKey.value = settings.openRouterApiKey;
+        _openRouterApiKey.value = settings.openRouterApiKey;
       }
       if (settings.model !== undefined) {
-        model.value = settings.model;
+        _model.value = settings.model;
       }
       if (settings.reasoningConfig !== undefined) {
         reasoningConfig.value = settings.reasoningConfig;
@@ -102,23 +127,25 @@ export const useConfigStore = defineStore("stores.config", () => {
       if (settings.customPrompts !== undefined) {
         customPrompts.value = settings.customPrompts;
       }
+      if (settings.maxIterations !== undefined) {
+        _maxIterations.value = settings.maxIterations;
+      }
     }
   });
 
   const selectedModel = computed(() => {
     return models
       .flatMap((group) => group.items)
-      .find((item) => item.id === model.value);
+      .find((item) => item.id === _model.value);
   });
 
   return {
     openRouterApiKey,
+    maxIterations,
     model,
     models,
     reasoningConfig,
     selectedModel,
-    setOpenRouterApiKey,
-    setModel,
     setReasoningConfig,
     updateReasoningConfig,
     customPrompts,

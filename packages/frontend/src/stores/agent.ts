@@ -14,7 +14,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
   const configStore = useConfigStore();
 
   const createAgent = (replaySessionId: string) => {
-    const maxIterations = 35;
+    const maxIterations = configStore.maxIterations;
 
     const agent = new Agent(sdk, {
       id: replaySessionId,

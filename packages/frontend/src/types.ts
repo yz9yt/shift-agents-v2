@@ -8,5 +8,6 @@ export type PluginStorage = {
   openRouterApiKey: string;
   model: string;
   reasoningConfig: ReasoningConfig;
+  maxIterations: number;
   customPrompts: CustomPrompt[];
 };

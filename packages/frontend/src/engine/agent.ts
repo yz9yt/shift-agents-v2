@@ -82,21 +82,22 @@ export class Agent {
   }: {
     currentRequest: ReplayRequest;
   }): APIMessage[] {
-    const messages: APIMessage[] = [];
+    let contextContent = "Here is the current context for this request:\n\n";
 
     switch (currentRequest.kind) {
       case "Ok":
-        messages.push({
-          role: "user",
-          content: `Here is the current HTTP request that you are analyzing: <request>${currentRequest.raw}</request> <host>${currentRequest.host}</host> <port>${currentRequest.port}</port>`,
-        });
+        contextContent += `<current_request>
+The HTTP request you are analyzing:
+<raw>${currentRequest.raw}</raw>
+<host>${currentRequest.host}</host>
+<port>${currentRequest.port}</port>
+</current_request>\n\n`;
         break;
 
       case "Error":
-        messages.push({
-          role: "user",
-          content: `There was an error getting the current HTTP request: ${currentRequest.error}`,
-        });
+        contextContent += `<current_request>
+There was an error getting the current HTTP request: ${currentRequest.error}
+</current_request>\n\n`;
         break;
     }
 
@@ -107,32 +108,39 @@ export class Agent {
         (todo) => todo.status === "completed",
       );
 
-      let message = "Here is the current status of todos:\n";
+      contextContent += `<todos>
+Current status of todos:`;
 
       if (completedTodos.length > 0) {
-        message += "\nCompleted todos:\n";
-        message += completedTodos
-          .map((todo) => `- [x] ${todo.content} (ID: ${todo.id})`)
-          .join("\n");
+        contextContent += `
+
+Completed todos:
+${completedTodos
+  .map((todo) => `- [x] ${todo.content} (ID: ${todo.id})`)
+  .join("\n")}`;
       }
 
       if (pendingTodos.length > 0) {
-        message += "\nPending todos:\n";
-        message += pendingTodos
-          .map((todo) => `- [ ] ${todo.content} (ID: ${todo.id})`)
-          .join("\n");
+        contextContent += `
+
+Pending todos:
+${pendingTodos
+  .map((todo) => `- [ ] ${todo.content} (ID: ${todo.id})`)
+  .join("\n")}`;
       }
 
-      message +=
-        "\n\nYou can mark pending todos as finished using the todo tool with their IDs.";
+      contextContent += `
 
-      messages.push({
-        role: "user",
-        content: message,
-      });
+You can mark pending todos as finished using the todo tool with their IDs.
+</todos>\n\n`;
     }
 
-    return messages;
+    return [
+      {
+        role: "user",
+        content: contextContent.trim(),
+      },
+    ];
   }
 
   private async processMessages(): Promise<void> {
