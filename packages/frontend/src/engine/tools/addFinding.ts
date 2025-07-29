@@ -19,10 +19,19 @@ export const addFinding: ToolFunction<AddFindingArgs, string> = {
     message: () => `Created a new finding`,
     details: ({ markdown }) => markdown,
   },
-  handler: ({ title, markdown }, context) => {
+  handler: async ({ title, markdown }, context) => {
     try {
-      // TODO: We need to find a way to get the correct requestId from the currentReplayRequest.For now, using replaySessionID even tho that's wrong.
-      context.sdk.findings.createFinding(context.replaySession.id.toString(), {
+      const sessionId = context.replaySession.id.toString();
+      const requestId =
+        (await context.sdk.graphql
+          .replayEntriesBySession({
+            sessionId,
+          })
+          .then((data) =>
+            data.replaySession?.activeEntry?.request?.id.toString(),
+          )) ?? "0";
+
+      context.sdk.findings.createFinding(requestId, {
         title,
         description: markdown,
         reporter: "Shift Agent: " + context.agent.name,
