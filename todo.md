@@ -8,3 +8,5 @@
 - [x] Add a way to set max # of requests an AI can send so it doesn't churn forever.
 - [x] Add a way to reset the conversation
 - [ ] Make an easy way to share agents
+- [ ] test all tools that modify request (maybe add vitest tests?) - i remember having issue with one of them
+- [ ] improve tool descriptions, add example usages to each one like tools/grepResponse.ts

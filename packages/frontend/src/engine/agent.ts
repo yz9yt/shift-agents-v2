@@ -82,7 +82,7 @@ export class Agent {
   }: {
     currentRequest: ReplayRequest;
   }): APIMessage[] {
-    let contextContent = "Here is the current context for this request:\n\n";
+    let contextContent = "This message gets automatically attached. Here is the current context about the environment and replay session:\n\n";
 
     switch (currentRequest.kind) {
       case "Ok":

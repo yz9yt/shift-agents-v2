@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { addFinding } from "./addFinding";
 import { addTodo } from "./addTodo";
-import { alert } from "./alert";
 import { grepResponse } from "./grepResponse";
 import { matchAndReplace } from "./matchAndReplace";
 import { removeHeader } from "./removeHeader";
@@ -13,6 +12,7 @@ import { setHeader } from "./setHeader";
 import { setMethod } from "./setMethod";
 import { setPath } from "./setPath";
 import { setQueryParameter } from "./setQueryParameter";
+import { setRaw } from "./setRaw";
 import { updateTodo } from "./updateTodo";
 
 import {
@@ -22,7 +22,6 @@ import {
 } from "@/engine/types";
 
 export const TOOLS = [
-  alert,
   matchAndReplace,
   setBody,
   setPath,
@@ -31,6 +30,7 @@ export const TOOLS = [
   setQueryParameter,
   removeQueryParameter,
   removeHeader,
+  setRaw,
   addFinding,
   sendRequest,
   grepResponse,
@@ -74,14 +74,14 @@ export async function executeTool(
     }
 
     const validatedArgs = tool.schema.parse(parsedArgs);
-    // @ts-expect-error - tool.handler is not typed
+    // @ts-expect-error - TODO: fix
     const result = await tool.handler(validatedArgs, context);
 
     const uiMessage: FrontendMetadata = {
       icon: tool.frontend.icon,
-      // @ts-expect-error - tool.frontend.message is not typed
+      // @ts-expect-error - TODO: fix
       message: tool.frontend.message(validatedArgs),
-      // @ts-expect-error - tool.frontend.details is not typed
+      // @ts-expect-error - TODO: fix
       details: tool.frontend.details?.(validatedArgs, result),
     };
 
