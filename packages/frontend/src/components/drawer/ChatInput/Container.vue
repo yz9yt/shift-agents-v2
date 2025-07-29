@@ -53,9 +53,8 @@ watch(
       ref="textareaRef"
       v-model="inputMessage"
       placeholder="Message the Shift agent"
-      :disabled="!isAgentIdle"
       :class="{
-        'opacity-50 cursor-not-allowed': !isAgentIdle,
+        'opacity-60': !isAgentIdle,
         'text-surface-200': isAgentIdle,
         'text-surface-400': !isAgentIdle,
       }"
