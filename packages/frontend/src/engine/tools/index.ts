@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { addFinding } from "./addFinding";
 import { addTodo } from "./addTodo";
+import { evalJs } from "./eval";
 import { grepResponse } from "./grepResponse";
 import { matchAndReplace } from "./matchAndReplace";
 import { removeHeader } from "./removeHeader";
@@ -36,6 +37,7 @@ export const TOOLS = [
   grepResponse,
   addTodo,
   updateTodo,
+  evalJs,
 ] as const;
 
 export const toolDefinitions = TOOLS.map((tool) => ({
