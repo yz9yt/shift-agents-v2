@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChatTopbar } from "./ChatTopbar";
 import { ChatContent } from "./ChatContent";
 import { ChatInput } from "./ChatInput";
 import { ChatTodos } from "./ChatTodos";
@@ -20,6 +21,7 @@ const uiStore = useUIStore();
       class="absolute top-0 right-0 bg-surface-800 shadow-lg pointer-events-auto h-full w-[35rem] border-l border-t border-surface-700"
     >
       <div class="flex flex-col h-full">
+        <ChatTopbar />
         <ChatContent />
         <div v-if="agentStore.selectedId" class="flex-shrink-0 flex-grow-1">
           <ChatTodos />
