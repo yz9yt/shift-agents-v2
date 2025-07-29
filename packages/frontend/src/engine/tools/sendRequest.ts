@@ -31,7 +31,6 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
     },
   },
   handler: async (args, context) => {
-    // @ts-expect-error - no types yet for sendRequest
     context.sdk.replay.sendRequest(context.replaySession.id, {
       connectionInfo: {
         host: context.replaySession.request.host,
@@ -39,6 +38,7 @@ export const sendRequest: ToolFunction<SendRequestArgs, SendRequestResult> = {
         port: context.replaySession.request.port,
       },
       raw: context.replaySession.request.raw,
+      background: true,
     });
 
     try {
