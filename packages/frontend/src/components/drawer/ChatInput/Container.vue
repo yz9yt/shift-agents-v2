@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import Button from "primevue/button";
 import Select from "primevue/select";
-import { onMounted, ref, watch, computed } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import { useChat } from "./useChat";
 
-import { useConfigStore } from "@/stores/config";
 import { useAgentStore } from "@/stores/agent";
+import { useConfigStore } from "@/stores/config";
 
 const {
   abortMessage,
@@ -25,7 +25,7 @@ const textareaRef = ref<HTMLTextAreaElement>();
 const promptOptions = computed(() => {
   const options = [
     { id: undefined, title: "None" },
-    ...configStore.customPrompts
+    ...configStore.customPrompts,
   ];
   return options;
 });
@@ -41,7 +41,7 @@ watch(
       textareaRef.value.focus();
     }
   },
-  { flush: "post" }
+  { flush: "post" },
 );
 </script>
 

@@ -1,4 +1,4 @@
-import { CustomPrompt } from "@/engine/types";
+import { type CustomPrompt } from "@/engine/types";
 
 export const defaultCustomPrompts: CustomPrompt[] = [
   {
@@ -13,8 +13,8 @@ export const defaultCustomPrompts: CustomPrompt[] = [
 - Check for filter bypasses using case variations, broken tags, event handlers
 - Remember to test multiple inputs
 
-Below is example monologue of an expert attempting to exploit this vulnerability. This is similar to how your testing should look, 
-except this doesn't include the way in which you will call tools. REMEMBER, this just an example. Do not follow these exact steps. 
+Below is example monologue of an expert attempting to exploit this vulnerability. This is similar to how your testing should look,
+except this doesn't include the way in which you will call tools. REMEMBER, this just an example. Do not follow these exact steps.
 Use your knowledge and intuition. Think critically and be relatively innovative. Here's the example:
 
 target: example.com/search?q=
@@ -49,7 +49,7 @@ svg tags aren't encoded, but the event is stripped. curious. maybe they’re onl
 
 input: <img src="javascript:alert(1)">
 output: <img src="javascript:alert(1)">
-whoa, no sanitization on the src attribute? that’s a red flag. let me have the user confirm if this executes in a browser context 
+whoa, no sanitization on the src attribute? that’s a red flag. let me have the user confirm if this executes in a browser context
 `,
     isDefault: true,
   },
@@ -65,8 +65,8 @@ whoa, no sanitization on the src attribute? that’s a red flag. let me have the
 - Check for open redirects that can be chained with SSRF
 - Look for PDF generators, image processors, and webhook functionalities
 
-Below is example monologue of an expert attempting to exploit this vulnerability. This is similar to how your testing should look, 
-except this doesn't include the way in which you will call tools. REMEMBER, this just an example. Do not follow these exact steps. 
+Below is example monologue of an expert attempting to exploit this vulnerability. This is similar to how your testing should look,
+except this doesn't include the way in which you will call tools. REMEMBER, this just an example. Do not follow these exact steps.
 Use your knowledge and intuition. Think critically and be relatively innovative. Here's the example:
 
 target: example.com/api/fetch-url?url=
@@ -149,8 +149,8 @@ JACKPOT! There's an internal proxy service on port 8080 that doesn't have the sa
 - Test absolute paths: /etc/passwd, C:\\windows\\win.ini
 - Look for file inclusion in templates, downloads, and file operations
 
-Below is example monologue of an expert attempting to exploit this vulnerability. This is similar to how your testing should look, 
-except this doesn't include the way in which you will call tools. REMEMBER, this just an example. Do not follow these exact steps. 
+Below is example monologue of an expert attempting to exploit this vulnerability. This is similar to how your testing should look,
+except this doesn't include the way in which you will call tools. REMEMBER, this just an example. Do not follow these exact steps.
 Use your knowledge and intuition. Think critically and be relatively innovative. Here's the example:
 
 target: example.com/download?file=report.pdf
@@ -224,7 +224,7 @@ output: {"error": "Access denied"}
 logs exist too. let me think... what if there's a misconfiguration in the access control?
 
 input: ../.htaccess
-output: {"content": "AuthType Basic\nAuthName \"Restricted\"\nRequire valid-user"}
+output: {"content": "AuthType Basic\nAuthName "Restricted"\nRequire valid-user"}
 WAIT WHAT?! I can read .htaccess files! let me try more
 
 input: ../.env
@@ -248,8 +248,8 @@ HOLY SHIT! The .env file is readable! They're not blocking hidden files! Full da
 - Test numeric vs string contexts
 - Check for WAF bypasses using encoding, case variations, and alternative syntax
 
-Below is example monologue of an expert attempting to exploit this vulnerability. This is similar to how your testing should look, 
-except this doesn't include the way in which you will call tools. REMEMBER, this just an example. Do not follow these exact steps. 
+Below is example monologue of an expert attempting to exploit this vulnerability. This is similar to how your testing should look,
+except this doesn't include the way in which you will call tools. REMEMBER, this just an example. Do not follow these exact steps.
 Use your knowledge and intuition. Think critically and be relatively innovative. Here's the example:
 
 Target: https://example.com/products?id=123

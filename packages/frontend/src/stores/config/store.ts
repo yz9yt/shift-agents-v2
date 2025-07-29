@@ -6,7 +6,7 @@ import { defaultCustomPrompts } from "./prompts";
 
 import type { CustomPrompt, ReasoningConfig } from "@/engine/types/config";
 import { useSDK } from "@/plugins/sdk";
-import { PluginStorage } from "@/types";
+import { type PluginStorage } from "@/types";
 
 export const useConfigStore = defineStore("stores.config", () => {
   const sdk = useSDK();

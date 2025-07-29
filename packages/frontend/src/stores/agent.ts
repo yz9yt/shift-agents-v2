@@ -84,7 +84,7 @@ export const useAgentStore = defineStore("stores.agent", () => {
 
   const setInputMessage = (
     content: string,
-    isEditing: boolean = false
+    isEditing: boolean = false,
   ): void => {
     if (selectedId.value === undefined) {
       return;

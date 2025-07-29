@@ -1,5 +1,6 @@
-import { CustomPrompt, ReasoningConfig } from "@/engine/types";
 import { type Caido } from "@caido/sdk-frontend";
+
+import { type CustomPrompt, type ReasoningConfig } from "@/engine/types";
 
 export type FrontendSDK = Caido<Record<string, never>, Record<string, never>>;
 

@@ -1,4 +1,4 @@
-import { ModelGroup } from "@/engine/types";
+import { type ModelGroup } from "@/engine/types";
 
 export const models: ModelGroup[] = [
   {

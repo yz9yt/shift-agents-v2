@@ -14,17 +14,17 @@ export const useChat = () => {
     set: (value: string) => {
       agentStore.setInputMessage(
         value,
-        agentStore.selectedAgent?.isEditingMessage ?? false
+        agentStore.selectedAgent?.isEditingMessage ?? false,
       );
     },
   });
 
   const isEditingMessage = computed(
-    () => agentStore.selectedAgent?.isEditingMessage ?? false
+    () => agentStore.selectedAgent?.isEditingMessage ?? false,
   );
 
   const isAgentIdle = computed(
-    () => agentStore.selectedAgent?.currentStatus === "idle"
+    () => agentStore.selectedAgent?.currentStatus === "idle",
   );
 
   const canSendMessage = computed(() => {
@@ -49,7 +49,7 @@ export const useChat = () => {
         "OpenRouter API key is required. Please go to the Shift Agents page to configure your API key.",
         {
           variant: "error",
-        }
+        },
       );
       return;
     }
@@ -57,7 +57,7 @@ export const useChat = () => {
     try {
       agentStore.selectedAgent.updateConfig((draft) => {
         const selectedPrompt = configStore.customPrompts.find(
-          (prompt) => prompt.id === agentStore.selectedAgent?.selectedPromptId
+          (prompt) => prompt.id === agentStore.selectedAgent?.selectedPromptId,
         );
 
         draft.openRouterConfig.model = configStore.model;

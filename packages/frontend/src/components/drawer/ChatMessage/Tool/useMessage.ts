@@ -24,7 +24,7 @@ export const useToolMessage = (props: {
   });
 
   const toggleDetails = () => {
-    if (toolDetails.value) {
+    if (toolDetails.value !== undefined) {
       showDetails.value = !showDetails.value;
     }
   };

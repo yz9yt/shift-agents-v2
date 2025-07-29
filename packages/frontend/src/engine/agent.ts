@@ -26,7 +26,10 @@ export class Agent {
   public selectedPromptId: string | undefined = undefined;
   private aborted: boolean = false;
 
-  constructor(public sdk: FrontendSDK, public config: AgentConfig) {
+  constructor(
+    public sdk: FrontendSDK,
+    public config: AgentConfig,
+  ) {
     this.llmClient = new LLMClient(this.config.openRouterConfig);
     this.todoManager = new TodoManager();
     this.messageManager = new MessageManager();
@@ -69,7 +72,7 @@ export class Agent {
       console.error(error);
       this.status = "idle";
       this.messageManager.addErrorMessage(
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : String(error),
       );
     }
   }
@@ -101,7 +104,7 @@ export class Agent {
     if (allTodos.length > 0) {
       const pendingTodos = allTodos.filter((todo) => todo.status === "pending");
       const completedTodos = allTodos.filter(
-        (todo) => todo.status === "completed"
+        (todo) => todo.status === "completed",
       );
 
       let message = "Here is the current status of todos:\n";
@@ -136,7 +139,7 @@ export class Agent {
     let iterations = 0;
     const currentRequest = await getCurrentReplayRequest(
       this.sdk,
-      this.config.jitConfig.replaySessionId
+      this.config.jitConfig.replaySessionId,
     );
 
     if (currentRequest.kind === "Error") {
@@ -172,7 +175,7 @@ export class Agent {
               currentContent += chunk.content;
               this.messageManager.updateAssistantMessage(
                 assistantMessageID,
-                currentContent.trim()
+                currentContent.trim(),
               );
               break;
 
@@ -223,7 +226,7 @@ export class Agent {
                 toolCallManager.handleCompleteToolCall(toolCall);
 
                 const tool = TOOLS.find(
-                  (tool) => tool.name === toolCall.function.name
+                  (tool) => tool.name === toolCall.function.name,
                 ) as ToolFunction;
 
                 if (tool !== undefined) {
@@ -233,7 +236,7 @@ export class Agent {
                       request: currentRequest,
                       id: this.config.jitConfig.replaySessionId,
                       updateRequestRaw: (
-                        updater: (draft: string) => string
+                        updater: (draft: string) => string,
                       ) => {
                         const newRequestRaw = updater(currentRequest.raw);
                         const hasChanged = newRequestRaw !== currentRequest.raw;
@@ -251,7 +254,7 @@ export class Agent {
                     toolCall.id,
                     toolCall.function.name,
                     toolCall.function.arguments,
-                    toolContext
+                    toolContext,
                   );
 
                   if (this.aborted) {
@@ -290,7 +293,7 @@ export class Agent {
         console.error(error);
         this.messageManager.deleteMessage(assistantMessageID);
         this.messageManager.addErrorMessage(
-          error instanceof Error ? error.message : String(error)
+          error instanceof Error ? error.message : String(error),
         );
 
         this.todoManager.clearTodos();
@@ -303,7 +306,7 @@ export class Agent {
 
     if (iterations >= this.config.jitConfig.maxIterations) {
       this.messageManager.addAssistantMessage(
-        "This agent hit max iterations. Please try again."
+        "This agent hit max iterations. Please try again.",
       );
     }
   }
@@ -418,7 +421,7 @@ class ToolCallManager {
 
   private updateToolMessage(
     toolKey: string,
-    metadata: { icon: string; message: string }
+    metadata: { icon: string; message: string },
   ): void {
     const id = this.toolMessages.get(toolKey)!;
     this.messageManager.updateMessage(id, {

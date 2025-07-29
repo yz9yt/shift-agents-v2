@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, toRefs } from "vue";
 import Button from "primevue/button";
+import Column from "primevue/column";
+import DataTable from "primevue/datatable";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
+import { ref, toRefs } from "vue";
 
-import { useConfigStore } from "@/stores/config";
 import type { CustomPrompt } from "@/engine/types/config";
+import { useConfigStore } from "@/stores/config";
 
 const configStore = useConfigStore();
 const { customPrompts } = toRefs(configStore);
@@ -26,7 +26,7 @@ const openCreateDialog = () => {
 };
 
 const openEditDialog = (prompt: CustomPrompt) => {
-  if (prompt.isDefault) return;
+  if (prompt.isDefault !== undefined) return;
 
   editingPrompt.value = prompt;
   promptTitle.value = prompt.title;
@@ -64,7 +64,7 @@ const savePrompt = async () => {
 };
 
 const deletePrompt = async (id: string, isDefault?: boolean) => {
-  if (isDefault) return;
+  if (isDefault !== undefined) return;
   await configStore.deleteCustomPrompt(id);
 };
 </script>
@@ -111,14 +111,20 @@ const deletePrompt = async (id: string, isDefault?: boolean) => {
           class="h-full w-full"
           :pt="{
             wrapper: { class: 'h-full w-full' },
-            table: { class: 'h-full w-full' }
+            table: { class: 'h-full w-full' },
           }"
         >
           <Column field="title" header="Title" class="w-1/4">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
-                <span class="font-medium text-surface-100">{{ data.title }}</span>
-                <span v-if="data.isDefault" class="text-xs bg-surface-700 text-surface-300 px-2 py-1 rounded">Default</span>
+                <span class="font-medium text-surface-100">{{
+                  data.title
+                }}</span>
+                <span
+                  v-if="data.isDefault"
+                  class="text-xs bg-surface-700 text-surface-300 px-2 py-1 rounded"
+                  >Default</span
+                >
               </div>
             </template>
           </Column>

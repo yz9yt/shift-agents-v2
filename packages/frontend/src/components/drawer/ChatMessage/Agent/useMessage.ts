@@ -8,9 +8,9 @@ const md = new MarkdownIt({
   linkify: false,
 });
 
-export const useAgentMessage = (
-  props: { message: UIMessage & { kind: "assistant" } },
-) => {
+export const useAgentMessage = (props: {
+  message: UIMessage & { kind: "assistant" };
+}) => {
   const { message } = toRefs(props);
 
   const shouldShowReasoningByDefault = computed(() => {

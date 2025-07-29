@@ -3,8 +3,8 @@ import PrimeVue from "primevue/config";
 import { type App, createApp } from "vue";
 
 import { Drawer } from "@/components/drawer";
-import { type FrontendSDK } from "@/types";
 import { SDKPlugin } from "@/plugins/sdk";
+import { type FrontendSDK } from "@/types";
 
 export const useDrawerManager = (sdk: FrontendSDK) => {
   let app: App | undefined = undefined;
