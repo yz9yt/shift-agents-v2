@@ -42,8 +42,8 @@ importers:
         specifier: ^14.1.2
         version: 14.1.2
       '@vueuse/core':
-        specifier: ^13.5.0
-        version: 13.5.0(vue@3.5.18(typescript@5.5.4))
+        specifier: ^13.6.0
+        version: 13.6.0(vue@3.5.18(typescript@5.5.4))
       markdown-it:
         specifier: ^14.1.0
         version: 14.1.0
@@ -57,21 +57,21 @@ importers:
         specifier: 3.5.18
         version: 3.5.18(typescript@5.5.4)
       zod:
-        specifier: 4.0.7
-        version: 4.0.7
+        specifier: 4.0.13
+        version: 4.0.13
     devDependencies:
       '@caido/sdk-backend':
-        specifier: ^0.49.0
-        version: 0.49.0
+        specifier: ^0.50.1
+        version: 0.50.1
       '@caido/sdk-frontend':
-        specifier: ^0.49.0
-        version: 0.49.0(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(vue@3.5.18(typescript@5.5.4))
+        specifier: ^0.50.1
+        version: 0.50.1(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(vue@3.5.18(typescript@5.5.4))
       '@codemirror/view':
         specifier: 6.38.1
         version: 6.38.1
       vue-tsc:
-        specifier: 3.0.3
-        version: 3.0.3(typescript@5.5.4)
+        specifier: 3.0.4
+        version: 3.0.4(typescript@5.5.4)
 
 packages:
 
@@ -92,8 +92,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  '@babel/types@7.28.1':
-    resolution: {integrity: sha512-x0LvFTekgSX+83TI28Y9wYPUfzrnl2aT5+5QLnO6v7mSJYtEEevuDRN0F0uSHRk1G1IWZC43o00Y0xDDrpBGPQ==, tarball: https://registry.npmjs.org/@babel/types/-/types-7.28.1.tgz}
+  '@babel/types@7.28.2':
+    resolution: {integrity: sha512-ruv7Ae4J5dUYULmeXw1gmb7rYRz57OWCPM57pHojnLq/3Z1CK2lNSLTCVjxVk1F/TZHwOZZrOWi0ur95BbLxNQ==, tarball: https://registry.npmjs.org/@babel/types/-/types-7.28.2.tgz}
     engines: {node: '>=6.9.0'}
 
   '@caido-community/dev@0.1.6':
@@ -115,14 +115,14 @@ packages:
     peerDependencies:
       primevue: 4.1.0
 
-  '@caido/quickjs-types@0.19.1':
-    resolution: {integrity: sha512-8r/JS5jZVfMgW4qDTORzk3rIbcO/z3nbG5hWb2fA1GVcbf6EB3uCU2Gqk8vF9jqLRli1FR2SO4JXio2JcFP3+g==, tarball: https://registry.npmjs.org/@caido/quickjs-types/-/quickjs-types-0.19.1.tgz}
+  '@caido/quickjs-types@0.19.3':
+    resolution: {integrity: sha512-ReIj7GylOPGPGlYHODVWHxbctCv22kbYcmZzv6b5PQe2w8AMsIdaVRYST24KoZ0xaSGwxMrFi8Wvo/N6VSTnuw==, tarball: https://registry.npmjs.org/@caido/quickjs-types/-/quickjs-types-0.19.3.tgz}
 
-  '@caido/sdk-backend@0.49.0':
-    resolution: {integrity: sha512-cKfcfn2fcy2Y5LzQj+UexZQJEt3YKbrYlNmfl6Ae2icBvuX09JTaAQMzKKvlt9BkGNzhY5UP6KUqfpyznt4k2Q==, tarball: https://registry.npmjs.org/@caido/sdk-backend/-/sdk-backend-0.49.0.tgz}
+  '@caido/sdk-backend@0.50.1':
+    resolution: {integrity: sha512-PzcMBuPCChFir2thDRUiuX3sk0GsLaXpTp/6bOs41vNHKGfH4IpYFsQFJikW1iLO4XKQYHEDPggZVIiFqnJB3w==, tarball: https://registry.npmjs.org/@caido/sdk-backend/-/sdk-backend-0.50.1.tgz}
 
-  '@caido/sdk-frontend@0.49.0':
-    resolution: {integrity: sha512-dvt4FzFWj4MMCtFH0XiuoEgEWmUwDsmFQo3iCZiCeZzybKpYDs2/fh1wz7/Ue/rCsHMIwqI5NtvKy5a9V0sGNg==, tarball: https://registry.npmjs.org/@caido/sdk-frontend/-/sdk-frontend-0.49.0.tgz}
+  '@caido/sdk-frontend@0.50.1':
+    resolution: {integrity: sha512-nwVNS6K4vx9Bc+5rFJAgsmLlbIhJ6PlgLkLS8vkxWI6Xsdx5+7p0vCIFsiIgsg3AZqyTFGT2H9sBYp34zL6EVg==, tarball: https://registry.npmjs.org/@caido/sdk-frontend/-/sdk-frontend-0.50.1.tgz}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
@@ -403,12 +403,12 @@ packages:
     resolution: {integrity: sha512-fdDH1LSGfZdTH2sxdpVMw31BanV28K/Gry0cVFxaNP77neJSkd82mM8ErPNYs9e+0O7SdHBLTDzDgwUuy18RnQ==, tarball: https://registry.npmjs.org/@pkgr/core/-/core-0.1.2.tgz}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
-  '@primeuix/styled@0.7.0':
-    resolution: {integrity: sha512-xUqMdQb75izeDkNWFK1QlU15aUl5LIU97Fq68IXOhrqqLsKEBnj5ftntFZrENQW70jAHwALdWP4EOGi/poc9Tg==, tarball: https://registry.npmjs.org/@primeuix/styled/-/styled-0.7.0.tgz}
+  '@primeuix/styled@0.7.1':
+    resolution: {integrity: sha512-4L42Vlse/uL68ND0nLB0T7x0NKQJXeYY9dVLMt/aSv7VU/IFdKEi/1awPZkHKCKgN2jO5cxB/BJfB+1Wxy4T1w==, tarball: https://registry.npmjs.org/@primeuix/styled/-/styled-0.7.1.tgz}
     engines: {node: '>=12.11.0'}
 
-  '@primeuix/styles@1.2.1':
-    resolution: {integrity: sha512-Tri7pPgZgxrVmhJG8ijZZFolQ6vu27xnkGoAB9EFY8YlaKTM5iqkWzEcqdxy2KmgFWMXi+BrPHwO0RdQ6JCT+g==, tarball: https://registry.npmjs.org/@primeuix/styles/-/styles-1.2.1.tgz}
+  '@primeuix/styles@1.2.2':
+    resolution: {integrity: sha512-yOyEVLYXJ+ec1qBzE83hJeaCRJZEKcEIa+WPTycHbTPAJ75HdZwqVgQQnxPpzPNz6vb7XbxRkIDTqAL3OPyy0Q==, tarball: https://registry.npmjs.org/@primeuix/styles/-/styles-1.2.2.tgz}
 
   '@primeuix/utils@0.6.0':
     resolution: {integrity: sha512-ULpB87ImNAiX36OMtyDeRceWB7N/mVlh6gGLqp/lx8UMKZlLIQH/UAFND86hYXHwNpXeNKcWfMGreb0Oc0hcZA==, tarball: https://registry.npmjs.org/@primeuix/utils/-/utils-0.6.0.tgz}
@@ -638,8 +638,8 @@ packages:
   '@vue/devtools-shared@7.7.7':
     resolution: {integrity: sha512-+udSj47aRl5aKb0memBvcUG9koarqnxNM5yjuREvqwK6T3ap4mn3Zqqc17QrBFTqSMjr3HK1cvStEZpMDpfdyw==, tarball: https://registry.npmjs.org/@vue/devtools-shared/-/devtools-shared-7.7.7.tgz}
 
-  '@vue/language-core@3.0.3':
-    resolution: {integrity: sha512-I9wY0ULMN9tMSua+2C7g+ez1cIziVMUzIHlDYGSl2rtru3Eh4sXj95vZ+4GBuXwwPnEmYfzSApVbXiVbI8V5Gg==, tarball: https://registry.npmjs.org/@vue/language-core/-/language-core-3.0.3.tgz}
+  '@vue/language-core@3.0.4':
+    resolution: {integrity: sha512-BvueED4LfBCSNH66eeUQk37MQCb7hjdezzGgxniM0LbriW53AJIyLorgshAtStmjfsAuOCcTl/c1b+nz/ye8xQ==, tarball: https://registry.npmjs.org/@vue/language-core/-/language-core-3.0.4.tgz}
     peerDependencies:
       typescript: '*'
     peerDependenciesMeta:
@@ -663,16 +663,16 @@ packages:
   '@vue/shared@3.5.18':
     resolution: {integrity: sha512-cZy8Dq+uuIXbxCZpuLd2GJdeSO/lIzIspC2WtkqIpje5QyFbvLaI5wZtdUjLHjGZrlVX6GilejatWwVYYRc8tA==, tarball: https://registry.npmjs.org/@vue/shared/-/shared-3.5.18.tgz}
 
-  '@vueuse/core@13.5.0':
-    resolution: {integrity: sha512-wV7z0eUpifKmvmN78UBZX8T7lMW53Nrk6JP5+6hbzrB9+cJ3jr//hUlhl9TZO/03bUkMK6gGkQpqOPWoabr72g==, tarball: https://registry.npmjs.org/@vueuse/core/-/core-13.5.0.tgz}
+  '@vueuse/core@13.6.0':
+    resolution: {integrity: sha512-DJbD5fV86muVmBgS9QQPddVX7d9hWYswzlf4bIyUD2dj8GC46R1uNClZhVAmsdVts4xb2jwp1PbpuiA50Qee1A==, tarball: https://registry.npmjs.org/@vueuse/core/-/core-13.6.0.tgz}
     peerDependencies:
       vue: ^3.5.0
 
-  '@vueuse/metadata@13.5.0':
-    resolution: {integrity: sha512-euhItU3b0SqXxSy8u1XHxUCdQ8M++bsRs+TYhOLDU/OykS7KvJnyIFfep0XM5WjIFry9uAPlVSjmVHiqeshmkw==, tarball: https://registry.npmjs.org/@vueuse/metadata/-/metadata-13.5.0.tgz}
+  '@vueuse/metadata@13.6.0':
+    resolution: {integrity: sha512-rnIH7JvU7NjrpexTsl2Iwv0V0yAx9cw7+clymjKuLSXG0QMcLD0LDgdNmXic+qL0SGvgSVPEpM9IDO/wqo1vkQ==, tarball: https://registry.npmjs.org/@vueuse/metadata/-/metadata-13.6.0.tgz}
 
-  '@vueuse/shared@13.5.0':
-    resolution: {integrity: sha512-K7GrQIxJ/ANtucxIXbQlUHdB0TPA8c+q5i+zbrjxuhJCnJ9GtBg75sBSnvmLSxHKPg2Yo8w62PWksl9kwH0Q8g==, tarball: https://registry.npmjs.org/@vueuse/shared/-/shared-13.5.0.tgz}
+  '@vueuse/shared@13.6.0':
+    resolution: {integrity: sha512-pDykCSoS2T3fsQrYqf9SyF0QXWHmcGPQ+qiOVjlYSzlWd9dgppB2bFSM1GgKKkt7uzn0BBMV3IbJsUfHG2+BCg==, tarball: https://registry.npmjs.org/@vueuse/shared/-/shared-13.6.0.tgz}
     peerDependencies:
       vue: ^3.5.0
 
@@ -2391,8 +2391,8 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
-  vue-tsc@3.0.3:
-    resolution: {integrity: sha512-uU1OMSzWE8/y0+kDTc0iEIu9v82bmFkGyJpAO/x3wQqBkkHkButKgtygREyOkxL4E/xtcf/ExvgNhhjdzonldw==, tarball: https://registry.npmjs.org/vue-tsc/-/vue-tsc-3.0.3.tgz}
+  vue-tsc@3.0.4:
+    resolution: {integrity: sha512-kZmSEjGtROApVBuaIcoprrXZsFNGon5ggkTJokmhQ/H1hMzCFRPQ0Ed8IHYFsmYJYvHBcdmEQVGVcRuxzPzNbw==, tarball: https://registry.npmjs.org/vue-tsc/-/vue-tsc-3.0.4.tgz}
     hasBin: true
     peerDependencies:
       typescript: '>=5.0.0'
@@ -2478,8 +2478,8 @@ packages:
   zod@3.24.1:
     resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==, tarball: https://registry.npmjs.org/zod/-/zod-3.24.1.tgz}
 
-  zod@4.0.7:
-    resolution: {integrity: sha512-AKvYUuvqmyRf21eNxjuO++WPrQHhWg8i/4POzBLL//qVhcxA6gOptSDxXKM2S+uh8FtPV3MU/QZKOxqwsRV5kg==, tarball: https://registry.npmjs.org/zod/-/zod-4.0.7.tgz}
+  zod@4.0.13:
+    resolution: {integrity: sha512-jv+zRxuZQxTrFHzxZ46ezL2FtnE+M4HIJHJEwLsZ7UjrXHltdG6HrxvqM0twoVCWxJiYf8WqKjAcjztegpkB+Q==, tarball: https://registry.npmjs.org/zod/-/zod-4.0.13.tgz}
 
 snapshots:
 
@@ -2491,9 +2491,9 @@ snapshots:
 
   '@babel/parser@7.28.0':
     dependencies:
-      '@babel/types': 7.28.1
+      '@babel/types': 7.28.2
 
-  '@babel/types@7.28.1':
+  '@babel/types@7.28.2':
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
@@ -2560,14 +2560,14 @@ snapshots:
     dependencies:
       primevue: 4.3.6(vue@3.5.18(typescript@5.5.4))
 
-  '@caido/quickjs-types@0.19.1': {}
+  '@caido/quickjs-types@0.19.3': {}
 
-  '@caido/sdk-backend@0.49.0':
+  '@caido/sdk-backend@0.50.1':
     dependencies:
-      '@caido/quickjs-types': 0.19.1
+      '@caido/quickjs-types': 0.19.3
       '@caido/sdk-shared': 0.1.1
 
-  '@caido/sdk-frontend@0.49.0(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(vue@3.5.18(typescript@5.5.4))':
+  '@caido/sdk-frontend@0.50.1(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(vue@3.5.18(typescript@5.5.4))':
     dependencies:
       '@codemirror/state': 6.5.2
       '@codemirror/view': 6.38.1
@@ -2776,19 +2776,19 @@ snapshots:
 
   '@pkgr/core@0.1.2': {}
 
-  '@primeuix/styled@0.7.0':
+  '@primeuix/styled@0.7.1':
     dependencies:
       '@primeuix/utils': 0.6.0
 
-  '@primeuix/styles@1.2.1':
+  '@primeuix/styles@1.2.2':
     dependencies:
-      '@primeuix/styled': 0.7.0
+      '@primeuix/styled': 0.7.1
 
   '@primeuix/utils@0.6.0': {}
 
   '@primevue/core@4.3.6(vue@3.5.18(typescript@5.5.4))':
     dependencies:
-      '@primeuix/styled': 0.7.0
+      '@primeuix/styled': 0.7.1
       '@primeuix/utils': 0.6.0
       vue: 3.5.18(typescript@5.5.4)
 
@@ -3030,7 +3030,7 @@ snapshots:
     dependencies:
       rfdc: 1.4.1
 
-  '@vue/language-core@3.0.3(typescript@5.5.4)':
+  '@vue/language-core@3.0.4(typescript@5.5.4)':
     dependencies:
       '@volar/language-core': 2.4.20
       '@vue/compiler-dom': 3.5.18
@@ -3067,16 +3067,16 @@ snapshots:
 
   '@vue/shared@3.5.18': {}
 
-  '@vueuse/core@13.5.0(vue@3.5.18(typescript@5.5.4))':
+  '@vueuse/core@13.6.0(vue@3.5.18(typescript@5.5.4))':
     dependencies:
       '@types/web-bluetooth': 0.0.21
-      '@vueuse/metadata': 13.5.0
-      '@vueuse/shared': 13.5.0(vue@3.5.18(typescript@5.5.4))
+      '@vueuse/metadata': 13.6.0
+      '@vueuse/shared': 13.6.0(vue@3.5.18(typescript@5.5.4))
       vue: 3.5.18(typescript@5.5.4)
 
-  '@vueuse/metadata@13.5.0': {}
+  '@vueuse/metadata@13.6.0': {}
 
-  '@vueuse/shared@13.5.0(vue@3.5.18(typescript@5.5.4))':
+  '@vueuse/shared@13.6.0(vue@3.5.18(typescript@5.5.4))':
     dependencies:
       vue: 3.5.18(typescript@5.5.4)
 
@@ -4434,8 +4434,8 @@ snapshots:
 
   primevue@4.3.6(vue@3.5.18(typescript@5.5.4)):
     dependencies:
-      '@primeuix/styled': 0.7.0
-      '@primeuix/styles': 1.2.1
+      '@primeuix/styled': 0.7.1
+      '@primeuix/styles': 1.2.2
       '@primeuix/utils': 0.6.0
       '@primevue/core': 4.3.6(vue@3.5.18(typescript@5.5.4))
       '@primevue/icons': 4.3.6(vue@3.5.18(typescript@5.5.4))
@@ -4994,10 +4994,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vue-tsc@3.0.3(typescript@5.5.4):
+  vue-tsc@3.0.4(typescript@5.5.4):
     dependencies:
       '@volar/typescript': 2.4.20
-      '@vue/language-core': 3.0.3(typescript@5.5.4)
+      '@vue/language-core': 3.0.4(typescript@5.5.4)
       typescript: 5.5.4
 
   vue@3.5.18(typescript@5.5.4):
@@ -5091,4 +5091,4 @@ snapshots:
 
   zod@3.24.1: {}
 
-  zod@4.0.7: {}
+  zod@4.0.13: {}
