@@ -64,4 +64,15 @@ export const models: ModelGroup[] = [
       },
     ],
   },
+  {
+    label: "Moonshot",
+    items: [
+      {
+        name: "Kimi K2",
+        reasoningModel: true,
+        isRecommended: true,
+        id: "moonshotai/kimi-k2",
+      },
+    ],
+  },
 ];
