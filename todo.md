@@ -1,6 +1,6 @@
 - [ ] allow it to revert changes
 - [x] maybe give it access to executing JS? so it can generate JWT tokens, b64 encoded values etc
-- [ ] give it a tool to edit raw HTTP request
+- [x] give it a tool to edit raw HTTP request
 - [ ] UI: allow to resize chat textarea
 - [ ] Automatically pause after creating a finding that accomplishes the attacker's goal
 - [x] Correlate the finding in Replay to the finding when a finding is created
@@ -8,7 +8,7 @@
 - [x] Add a way to set max # of requests an AI can send so it doesn't churn forever.
 - [x] Add a way to reset the conversation
 - [ ] Make an easy way to share agents
-- [ ] test all tools that modify request (maybe add vitest tests?) - i remember having issue with one of them
+- [x] test all tools that modify request (maybe add vitest tests?) - i remember having issue with one of them. EDIT: built this https://github.com/bebiksior/ts-http-forge and used that instead in the tool calls, much more stable and has lots of tests
 - [ ] improve tool descriptions, add example usages to each one like tools/grepResponse.ts
 - [ ] we need to figure out a way to give agent more info about the target it's hacking, maybe we could allow it to read requests/responses from the http history page, search with httpql so it could look for IDs and stuff
 - [ ] add example of explioiting some more tricky bug to base system prompt
