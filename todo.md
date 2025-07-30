@@ -10,3 +10,6 @@
 - [ ] Make an easy way to share agents
 - [ ] test all tools that modify request (maybe add vitest tests?) - i remember having issue with one of them
 - [ ] improve tool descriptions, add example usages to each one like tools/grepResponse.ts
+- [ ] we need to figure out a way to give agent more info about the target it's hacking, maybe we could allow it to read requests/responses from the http history page, search with httpql so it could look for IDs and stuff
+- [ ] add example of explioiting some more tricky bug to base system prompt
+- [ ] create a knowledge base and give it a tool call to read parts of it, f.e. it could retrieve url bypass techniques, we could even make it auto-select user defined prompts

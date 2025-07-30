@@ -4,12 +4,14 @@ import { nextTick, ref, watch } from "vue";
 import { ChatMessage } from "../ChatMessage";
 
 import { useContent } from "./useContent";
+import { useUIStore } from "@/stores/ui";
 
 const { messages, agentStatus } = useContent();
 const scrollContainer = ref<HTMLElement | undefined>();
+const uiStore = useUIStore();
 
 watch(
-  [messages, agentStatus],
+  [messages, agentStatus, uiStore.drawerVisible],
   async () => {
     if (!scrollContainer.value) {
       return;
