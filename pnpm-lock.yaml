@@ -53,6 +53,9 @@ importers:
       primevue:
         specifier: 4.3.6
         version: 4.3.6(vue@3.5.18(typescript@5.5.4))
+      ts-http-forge:
+        specifier: ^0.1.1
+        version: 0.1.1
       vue:
         specifier: 3.5.18
         version: 3.5.18(typescript@5.5.4)
@@ -2239,6 +2242,9 @@ packages:
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
+
+  ts-http-forge@0.1.1:
+    resolution: {integrity: sha512-oH7vwMdcm0xnKmD9BqPPHfNDer+5CIAciPl74qX5to4jhLJXR/bmqbHFs4VQfW+Fv4DU8KgmDYlsJZmk9UH29w==, tarball: https://registry.npmjs.org/ts-http-forge/-/ts-http-forge-0.1.1.tgz}
 
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==, tarball: https://registry.npmjs.org/ts-interface-checker/-/ts-interface-checker-0.1.13.tgz}
@@ -4842,6 +4848,8 @@ snapshots:
   ts-api-utils@2.1.0(typescript@5.5.4):
     dependencies:
       typescript: 5.5.4
+
+  ts-http-forge@0.1.1: {}
 
   ts-interface-checker@0.1.13: {}
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
@@ -19,22 +20,9 @@ export const setBody: ToolFunction<SetBodyArgs, string> = {
   handler: (args, context) => {
     try {
       context.replaySession.updateRequestRaw((draft) => {
-        const lines = draft.split("\r\n");
-        const headerEnd = lines.findIndex((line, index) => {
-          return line === "" && lines[index + 1] === "";
-        });
-
-        if (headerEnd === -1) {
-          throw new Error(
-            "Invalid HTTP request - no double newline separator found",
-          );
-        }
-
-        // Keep headers up to the double newline
-        const headers = lines.slice(0, headerEnd + 1).join("\r\n");
-
-        // Replace everything after the double newline with new body
-        return `${headers}\r\n${args.body}`;
+        return HttpForge.create(draft)
+          .body(args.body)
+          .build();
       });
 
       return "Request has been updated";

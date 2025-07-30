@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
@@ -20,30 +21,9 @@ export const setQueryParameter: ToolFunction<SetQueryParameterArgs, string> = {
   handler: (args, context) => {
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {
-        const lines = draft.split("\r\n");
-        if (lines.length === 0 || lines[0] === undefined) {
-          throw new Error("Invalid HTTP request - empty request");
-        }
-        const [method, path, protocol] = lines[0].split(" ");
-        if (path === undefined) {
-          throw new Error("Invalid HTTP request - no path found");
-        }
-        const [basePath, queryString] = path.split("?");
-
-        let params: string[] = [];
-        if (queryString !== undefined) {
-          params = queryString.split("&").filter((param) => {
-            const [name] = param.split("=");
-            return name !== args.name;
-          });
-        }
-
-        params.push(`${args.name}=${args.value}`);
-        const newPath = `${basePath}?${params.join("&")}`;
-
-        return `${method} ${newPath} ${protocol}\r\n${lines
-          .slice(1)
-          .join("\r\n")}`;
+        return HttpForge.create(draft)
+          .upsertQueryParam(args.name, args.value)
+          .build();
       });
 
       return hasChanged

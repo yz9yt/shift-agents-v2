@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
@@ -19,28 +20,9 @@ export const setPath: ToolFunction<SetPathArgs, string> = {
   handler: (args, context) => {
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {
-        const lines = draft.split("\r\n");
-        if (lines.length === 0 || lines[0] === undefined) {
-          throw new Error("Invalid HTTP request - empty request");
-        }
-
-        const [method, path, protocol] = lines[0].split(" ");
-        if (
-          method === undefined ||
-          protocol === undefined ||
-          path === undefined
-        ) {
-          throw new Error("Invalid HTTP request - malformed request line");
-        }
-
-        const queryString = path.includes("?") ? path.split("?")[1] : "";
-
-        const newPath =
-          queryString !== "" ? `${args.path}?${queryString}` : args.path;
-
-        return `${method} ${newPath} ${protocol}\r\n${lines
-          .slice(1)
-          .join("\r\n")}`;
+        return HttpForge.create(draft)
+          .path(args.path)
+          .build();
       });
 
       return hasChanged

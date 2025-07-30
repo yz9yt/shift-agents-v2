@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
@@ -19,23 +20,9 @@ export const removeHeader: ToolFunction<RemoveHeaderArgs, string> = {
   handler: (args, context) => {
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {
-        const lines = draft.split("\r\n");
-        const headerEnd = lines.findIndex((line) => line === "");
-        if (headerEnd === -1) {
-          throw new Error(
-            "Invalid HTTP request - no header/body separator found",
-          );
-        }
-
-        const headers = lines.slice(0, headerEnd);
-        const rest = lines.slice(headerEnd);
-
-        const filteredHeaders = headers.filter((line) => {
-          const [headerName] = line.split(":");
-          return headerName?.toLowerCase() !== args.name.toLowerCase();
-        });
-
-        return [...filteredHeaders, ...rest].join("\r\n");
+        return HttpForge.create(draft)
+          .removeHeader(args.name)
+          .build();
       });
 
       return hasChanged
