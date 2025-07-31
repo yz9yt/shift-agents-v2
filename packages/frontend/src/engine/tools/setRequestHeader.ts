@@ -3,18 +3,18 @@ import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
-const SetHeaderSchema = z.object({
-  name: z.string().min(1),
-  value: z.string(),
+const SetRequestHeaderSchema = z.object({
+  name: z.string().min(1).describe("The header name (e.g., Authorization, Content-Type, User-Agent)"),
+  value: z.string().describe("The header value"),
 });
 
-type SetHeaderArgs = z.infer<typeof SetHeaderSchema>;
+type SetRequestHeaderArgs = z.infer<typeof SetRequestHeaderSchema>;
 
-export const setHeader: ToolFunction<SetHeaderArgs, string> = {
-  name: "setHeader",
-  schema: SetHeaderSchema,
+export const setRequestHeader: ToolFunction<SetRequestHeaderArgs, string> = {
+  name: "setRequestHeader",
+  schema: SetRequestHeaderSchema,
   description:
-    "Set a request header with the given name and value. If header exists, it will be replaced. If header does not exist, it will be added.",
+    "Add or update an HTTP header in the current request. Use this to set authentication tokens, content types, user agents, or any other HTTP headers needed for testing. If the header exists, it will be replaced.",
   frontend: {
     icon: "fas fa-edit",
     message: ({ name, value }) => `Set a header ${name} to ${value}`,

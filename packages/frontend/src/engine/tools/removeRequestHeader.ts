@@ -3,16 +3,16 @@ import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
-const RemoveHeaderSchema = z.object({
-  name: z.string().min(1),
+const RemoveRequestHeaderSchema = z.object({
+  name: z.string().min(1).describe("The header name to remove from the request"),
 });
 
-type RemoveHeaderArgs = z.infer<typeof RemoveHeaderSchema>;
+type RemoveRequestHeaderArgs = z.infer<typeof RemoveRequestHeaderSchema>;
 
-export const removeHeader: ToolFunction<RemoveHeaderArgs, string> = {
-  name: "removeHeader",
-  schema: RemoveHeaderSchema,
-  description: "Remove a request header with the given name",
+export const removeRequestHeader: ToolFunction<RemoveRequestHeaderArgs, string> = {
+  name: "removeRequestHeader",
+  schema: RemoveRequestHeaderSchema,
+  description: "Remove an HTTP header from the current request. Use this to eliminate unwanted headers, remove authentication tokens, or test behavior without specific headers.",
   frontend: {
     icon: "fas fa-edit",
     message: ({ name }) => `Removed header ${name} from the request`,

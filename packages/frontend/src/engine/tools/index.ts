@@ -2,18 +2,18 @@ import { z } from "zod";
 
 import { addFinding } from "./addFinding";
 import { addTodo } from "./addTodo";
-import { evalJs } from "./eval";
 import { grepResponse } from "./grepResponse";
-import { matchAndReplace } from "./matchAndReplace";
-import { removeHeader } from "./removeHeader";
-import { removeQueryParameter } from "./removeQueryParameter";
+import { removeRequestHeader } from "./removeRequestHeader";
+import { removeRequestQuery } from "./removeRequestQuery";
+import { replaceRequestText } from "./replaceRequestText";
+import { runJavaScript } from "./runJavaScript";
 import { sendRequest } from "./sendRequest";
-import { setBody } from "./setBody";
-import { setHeader } from "./setHeader";
-import { setMethod } from "./setMethod";
-import { setPath } from "./setPath";
-import { setQueryParameter } from "./setQueryParameter";
-import { setRaw } from "./setRaw";
+import { setRequestBody } from "./setRequestBody";
+import { setRequestHeader } from "./setRequestHeader";
+import { setRequestMethod } from "./setRequestMethod";
+import { setRequestPath } from "./setRequestPath";
+import { setRequestQuery } from "./setRequestQuery";
+import { setRequestRaw } from "./setRequestRaw";
 import { updateTodo } from "./updateTodo";
 
 import {
@@ -23,21 +23,21 @@ import {
 } from "@/engine/types";
 
 export const TOOLS = [
-  matchAndReplace,
-  setBody,
-  setPath,
-  setMethod,
-  setHeader,
-  setQueryParameter,
-  removeQueryParameter,
-  removeHeader,
-  setRaw,
-  addFinding,
+  setRequestHeader,
+  setRequestQuery,
+  setRequestBody,
+  setRequestMethod,
+  setRequestPath,
+  removeRequestHeader,
+  removeRequestQuery,
   sendRequest,
   grepResponse,
+  addFinding,
   addTodo,
   updateTodo,
-  evalJs,
+  runJavaScript,
+  replaceRequestText,
+  setRequestRaw,
 ] as const;
 
 export const toolDefinitions = TOOLS.map((tool) => ({

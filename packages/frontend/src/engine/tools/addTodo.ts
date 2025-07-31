@@ -4,7 +4,7 @@ import type { ToolFunction } from "@/engine/types";
 
 const AddTodoSchema = z.object({
   id: z.string().min(1),
-  content: z.string().min(1),
+  content: z.string().min(1).describe("The content of the todo item. Keep it short and concise."),
   status: z.enum(["pending", "completed"]).default("pending"),
 });
 

@@ -3,18 +3,18 @@ import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
-const RemoveQueryParameterSchema = z.object({
-  name: z.string().min(1),
+const RemoveRequestQuerySchema = z.object({
+  name: z.string().min(1).describe("The query parameter name to remove from the request URL"),
 });
 
-type RemoveQueryParameterArgs = z.infer<typeof RemoveQueryParameterSchema>;
-export const removeQueryParameter: ToolFunction<
-  RemoveQueryParameterArgs,
+type RemoveRequestQueryArgs = z.infer<typeof RemoveRequestQuerySchema>;
+export const removeRequestQuery: ToolFunction<
+  RemoveRequestQueryArgs,
   string
 > = {
-  name: "removeQueryParameter",
-  schema: RemoveQueryParameterSchema,
-  description: "Remove a query parameter with the given name",
+  name: "removeRequestQuery",
+  schema: RemoveRequestQuerySchema,
+  description: "Remove a query parameter from the current HTTP request URL. Use this to eliminate unwanted parameters, test behavior without specific query data, or simplify requests.",
   frontend: {
     icon: "fas fa-edit",
     message: ({ name }) => `Removed query parameter ${name} from the request`,

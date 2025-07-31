@@ -3,16 +3,16 @@ import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
-const SetPathSchema = z.object({
-  path: z.string().min(1),
+const SetRequestPathSchema = z.object({
+  path: z.string().min(1).describe("The URL path to set (e.g., /api/users, /admin/login). This will modify the first line of the request, so note to not use uncommon chars like spaces or newlines."),
 });
 
-type SetPathArgs = z.infer<typeof SetPathSchema>;
+type SetRequestPathArgs = z.infer<typeof SetRequestPathSchema>;
 
-export const setPath: ToolFunction<SetPathArgs, string> = {
-  name: "setPath",
-  schema: SetPathSchema,
-  description: "Set the request path",
+export const setRequestPath: ToolFunction<SetRequestPathArgs, string> = {
+  name: "setRequestPath",
+  schema: SetRequestPathSchema,
+  description: "Change the URL path of the current request. Use this to test different endpoints, access restricted paths, or modify the target resource being requested.",
   frontend: {
     icon: "fas fa-edit",
     message: ({ path }) => `Set the request path to ${path}`,

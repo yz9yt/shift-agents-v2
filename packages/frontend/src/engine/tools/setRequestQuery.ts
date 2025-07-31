@@ -3,17 +3,17 @@ import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
-const SetQueryParameterSchema = z.object({
-  name: z.string().min(1),
-  value: z.string(),
+const SetRequestQuerySchema = z.object({
+  name: z.string().min(1).describe("The query parameter name"),
+  value: z.string().describe("The query parameter value"),
 });
 
-type SetQueryParameterArgs = z.infer<typeof SetQueryParameterSchema>;
+type SetRequestQueryArgs = z.infer<typeof SetRequestQuerySchema>;
 
-export const setQueryParameter: ToolFunction<SetQueryParameterArgs, string> = {
-  name: "setQueryParameter",
-  schema: SetQueryParameterSchema,
-  description: "Set a query parameter with the given name and value",
+export const setRequestQuery: ToolFunction<SetRequestQueryArgs, string> = {
+  name: "setRequestQuery",
+  schema: SetRequestQuerySchema,
+  description: "Add or update a query parameter in the current HTTP request URL. Use this when you need to modify GET parameters, add new ones, or change existing values. The parameter will be properly URL-encoded.",
   frontend: {
     icon: "fas fa-edit",
     message: ({ name, value }) => `Set a query parameter ${name} to ${value}`,

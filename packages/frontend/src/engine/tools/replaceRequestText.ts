@@ -2,17 +2,17 @@ import { z } from "zod";
 
 import type { ToolFunction } from "@/engine/types";
 
-const MatchAndReplaceSchema = z.object({
-  match: z.string().min(1),
-  replace: z.string(),
+const ReplaceRequestTextSchema = z.object({
+  match: z.string().min(1).describe("The exact text string to find and replace"),
+  replace: z.string().describe("The replacement text"),
 });
 
-type MatchAndReplaceArgs = z.infer<typeof MatchAndReplaceSchema>;
+type ReplaceRequestTextArgs = z.infer<typeof ReplaceRequestTextSchema>;
 
-export const matchAndReplace: ToolFunction<MatchAndReplaceArgs, string> = {
-  name: "matchAndReplace",
-  schema: MatchAndReplaceSchema,
-  description: "Match and replace text content",
+export const replaceRequestText: ToolFunction<ReplaceRequestTextArgs, string> = {
+  name: "replaceRequestText",
+  schema: ReplaceRequestTextSchema,
+  description: "Find and replace specific text strings anywhere in the HTTP request (headers, body, path, etc.). Use this for precise string replacements when other specific tools don't cover your needs. Supports literal string matching only.",
   frontend: {
     icon: "fas fa-edit",
     message: () => `Replaced text in the request`,

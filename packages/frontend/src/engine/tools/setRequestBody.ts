@@ -3,15 +3,15 @@ import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
-const SetBodySchema = z.object({
-  body: z.string(),
+const SetRequestBodySchema = z.object({
+  body: z.string().describe("The request body content (JSON, form data, raw text, etc.)"),
 });
 
-type SetBodyArgs = z.infer<typeof SetBodySchema>;
-export const setBody: ToolFunction<SetBodyArgs, string> = {
-  name: "setBody",
-  schema: SetBodySchema,
-  description: "Set the request body content",
+type SetRequestBodyArgs = z.infer<typeof SetRequestBodySchema>;
+export const setRequestBody: ToolFunction<SetRequestBodyArgs, string> = {
+  name: "setRequestBody",
+  schema: SetRequestBodySchema,
+  description: "Replace the entire request body content. Use this to send JSON data, form data, XML, or any other payload format for POST/PUT requests or testing purposes.",
   frontend: {
     icon: "fas fa-edit",
     message: () => `Updated the request body`,

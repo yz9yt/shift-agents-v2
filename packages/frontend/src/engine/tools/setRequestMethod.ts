@@ -3,16 +3,16 @@ import { HttpForge } from "ts-http-forge";
 
 import type { ToolFunction } from "@/engine/types";
 
-const SetMethodSchema = z.object({
-  method: z.string().min(1),
+const SetRequestMethodSchema = z.object({
+  method: z.string().min(1).describe("The HTTP method to set (e.g., GET, POST, PUT, DELETE)"),
 });
 
-type SetMethodArgs = z.infer<typeof SetMethodSchema>;
+type SetRequestMethodArgs = z.infer<typeof SetRequestMethodSchema>;
 
-export const setMethod: ToolFunction<SetMethodArgs, string> = {
-  name: "setMethod",
-  schema: SetMethodSchema,
-  description: "Set the request method",
+export const setRequestMethod: ToolFunction<SetRequestMethodArgs, string> = {
+  name: "setRequestMethod",
+  schema: SetRequestMethodSchema,
+  description: "Change the HTTP method of the current request (GET, POST, PUT, DELETE, etc.). Use this when you need to test different HTTP verbs or modify the request method for testing purposes.",
   frontend: {
     icon: "fas fa-edit",
     message: ({ method }) => `Set the request method to ${method}`,

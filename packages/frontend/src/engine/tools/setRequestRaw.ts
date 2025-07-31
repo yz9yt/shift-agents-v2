@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type { ToolFunction } from "@/engine/types";
 
-const SetRawSchema = z.object({
+const SetRequestRawSchema = z.object({
   raw: z
     .string()
     .describe(
@@ -10,14 +10,14 @@ const SetRawSchema = z.object({
     ),
 });
 
-type SetRawArgs = z.infer<typeof SetRawSchema>;
+type SetRequestRawArgs = z.infer<typeof SetRequestRawSchema>;
 
 // TODO: figure out a better way, i tried adding `line` input parameter but AI models seem to be bad at counting lines
-export const setRaw: ToolFunction<SetRawArgs, string> = {
-  name: "setRaw",
-  schema: SetRawSchema,
+export const setRequestRaw: ToolFunction<SetRequestRawArgs, string> = {
+  name: "setRequestRaw",
+  schema: SetRequestRawSchema,
   description:
-    "Set the entire raw HTTP request content. Use this rarely, only when you need to modify the request in a way that cannot be done with other tools.",
+    "Replace the entire raw HTTP request with custom content. This is an advanced tool - use this only when you need to craft malformed requests, test HTTP parsing vulnerabilities, or make modifications that other tools cannot handle.",
   frontend: {
     icon: "fas fa-edit",
     message: () => `Updated the raw HTTP request`,
