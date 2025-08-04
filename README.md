@@ -1,10 +1,22 @@
-# VueJS Frontend Template
+# Shift Agents
 
-This template should be used as a starting point for creating a new plugin with a VueJS frontend.
+Shift Agents, the new micro-agent framework for Caido users. 
 
-## Features
+Build personalized micro-agents for tasks like XSS exploitation, WAF bypassing, or anything you can think of.
 
-- [pnpm](https://pnpm.io/) as package manager
-- [TypeScript](https://www.typescriptlang.org/)
-- [VueJS](https://vuejs.org/)
-- [PrimeVue](https://primevue.org/) for UI components
+## Installation
+
+1. Install dependencies:
+
+   ```bash
+   pnpm install
+   ```
+
+2. Build the plugin:
+
+   ```bash
+   pnpm build
+   ```
+
+3. Install in Caido:
+   - Upload the `dist/plugin_package.zip` file in Caido by clicking on the "Install Package" button in-app
