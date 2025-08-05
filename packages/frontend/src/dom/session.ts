@@ -1,4 +1,5 @@
 import { type FrontendSDK } from "@/types";
+import { onLocationChange } from "@/dom";
 
 export const useSessionManager = (sdk: FrontendSDK) => {
   let currentSelectedId: string | undefined = undefined;
@@ -13,10 +14,8 @@ export const useSessionManager = (sdk: FrontendSDK) => {
       inject();
     }
 
-    // @ts-expect-error temporary workaround for missing onPageChange type
-    unsubscribe = sdk.navigation.onPageChange((page) => {
-      console.log("onPageChange", page);
-      if (page === "#/replay") {
+    unsubscribe = onLocationChange(({ newHash }) => {
+      if (newHash === "#/replay") {
         inject();
       } else {
         remove();

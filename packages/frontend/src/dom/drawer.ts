@@ -6,16 +6,20 @@ import { type App, createApp } from "vue";
 import { Drawer } from "@/components/drawer";
 import { SDKPlugin } from "@/plugins/sdk";
 import { type FrontendSDK } from "@/types";
+import { onLocationChange } from "@/dom";
 
 export const useDrawerManager = (sdk: FrontendSDK) => {
   let app: App | undefined = undefined;
   let unsubscribe: (() => void) | undefined = undefined;
 
   const start = () => {
-    // @ts-expect-error temporary workaround for missing onPageChange type
-    unsubscribe = sdk.navigation.onPageChange((page) => {
-      console.log("onPageChange", page);
-      if (page === "#/replay") {
+    if (location.hash === "#/replay") {
+      inject();
+    }
+
+    unsubscribe = onLocationChange(({ newHash }) => {
+      console.log("onLocationChange", newHash);
+      if (newHash === "#/replay") {
         inject();
       } else {
         remove();

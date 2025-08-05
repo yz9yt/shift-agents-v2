@@ -40,8 +40,8 @@ const { showReasoning, reasoningText, renderedMarkdown, toggleReasoning } =
       </div>
     </div>
     <div
+      v-if="message.content !== undefined && message.content.length > 0"
       class="text-surface-200 break-words select-text font-mono prose dark:prose-invert markdown-content"
-      :class="{ 'py-1': message.content !== undefined }"
       v-html="renderedMarkdown"
     ></div>
   </div>

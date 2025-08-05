@@ -64,11 +64,11 @@ importers:
         version: 4.0.13
     devDependencies:
       '@caido/sdk-backend':
-        specifier: ^0.50.1
-        version: 0.50.1
+        specifier: ^0.50.2
+        version: 0.50.2
       '@caido/sdk-frontend':
-        specifier: ^0.50.1
-        version: 0.50.1(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(vue@3.5.18(typescript@5.5.4))
+        specifier: ^0.50.2
+        version: 0.50.2(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(vue@3.5.18(typescript@5.5.4))
       '@codemirror/view':
         specifier: 6.38.1
         version: 6.38.1
@@ -121,11 +121,11 @@ packages:
   '@caido/quickjs-types@0.19.3':
     resolution: {integrity: sha512-ReIj7GylOPGPGlYHODVWHxbctCv22kbYcmZzv6b5PQe2w8AMsIdaVRYST24KoZ0xaSGwxMrFi8Wvo/N6VSTnuw==, tarball: https://registry.npmjs.org/@caido/quickjs-types/-/quickjs-types-0.19.3.tgz}
 
-  '@caido/sdk-backend@0.50.1':
-    resolution: {integrity: sha512-PzcMBuPCChFir2thDRUiuX3sk0GsLaXpTp/6bOs41vNHKGfH4IpYFsQFJikW1iLO4XKQYHEDPggZVIiFqnJB3w==, tarball: https://registry.npmjs.org/@caido/sdk-backend/-/sdk-backend-0.50.1.tgz}
+  '@caido/sdk-backend@0.50.2':
+    resolution: {integrity: sha512-1RIplV6gvPvdFMO9jP83LdWhFJsRxhy4WEFzHyQbG3WJlrigDvpIBEB/zc7GE9YrGq/8gRus1hB+zb9fsjG5TA==, tarball: https://registry.npmjs.org/@caido/sdk-backend/-/sdk-backend-0.50.2.tgz}
 
-  '@caido/sdk-frontend@0.50.1':
-    resolution: {integrity: sha512-nwVNS6K4vx9Bc+5rFJAgsmLlbIhJ6PlgLkLS8vkxWI6Xsdx5+7p0vCIFsiIgsg3AZqyTFGT2H9sBYp34zL6EVg==, tarball: https://registry.npmjs.org/@caido/sdk-frontend/-/sdk-frontend-0.50.1.tgz}
+  '@caido/sdk-frontend@0.50.2':
+    resolution: {integrity: sha512-ERNtas4INAY4Kpau3D3UmaKu3xSJGbLGInQTk4K7CNShexbg8irnTZ0w6q+PPWjoYsp2N1uq0nUqnEQft3LSTg==, tarball: https://registry.npmjs.org/@caido/sdk-frontend/-/sdk-frontend-0.50.2.tgz}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
@@ -2568,12 +2568,12 @@ snapshots:
 
   '@caido/quickjs-types@0.19.3': {}
 
-  '@caido/sdk-backend@0.50.1':
+  '@caido/sdk-backend@0.50.2':
     dependencies:
       '@caido/quickjs-types': 0.19.3
       '@caido/sdk-shared': 0.1.1
 
-  '@caido/sdk-frontend@0.50.1(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(vue@3.5.18(typescript@5.5.4))':
+  '@caido/sdk-frontend@0.50.2(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)(vue@3.5.18(typescript@5.5.4))':
     dependencies:
       '@codemirror/state': 6.5.2
       '@codemirror/view': 6.38.1
