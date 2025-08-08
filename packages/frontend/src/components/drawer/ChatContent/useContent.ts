@@ -1,21 +1,21 @@
 import { computed } from "vue";
 
-import { useAgentStore } from "@/stores/agent";
+import { useAgentsStore } from "@/stores/agents";
 
 export const useContent = () => {
-  const agentStore = useAgentStore();
+  const agentStore = useAgentsStore();
 
   const messages = computed(() => {
     if (!agentStore.selectedAgent) {
       return [];
     }
 
-    return agentStore.selectedAgent.uiMessages;
+    return agentStore.selectedAgent.messages;
   });
 
   const hasMessages = computed(() => messages.value.length > 0);
   const hasSelectedAgent = computed(() => !!agentStore.selectedAgent);
-  const agentStatus = computed(() => agentStore.selectedAgent?.currentStatus);
+  const agentStatus = computed(() => agentStore.selectedAgent?.status);
 
   return {
     messages,

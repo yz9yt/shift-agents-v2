@@ -1,4 +1,4 @@
-import { type CustomPrompt } from "@/engine/types";
+import { type CustomPrompt } from "@/agents/types";
 
 // https://hacktricks.boitatech.com.br/pentesting-web/open-redirect
 const urlBypassTechniques = `

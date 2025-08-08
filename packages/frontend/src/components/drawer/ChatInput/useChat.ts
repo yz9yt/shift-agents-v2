@@ -1,30 +1,29 @@
 import { computed } from "vue";
 
 import { useSDK } from "@/plugins/sdk";
-import { useAgentStore } from "@/stores/agent";
+import { useAgentsStore } from "@/stores/agents";
 import { useConfigStore } from "@/stores/config";
+import { useUIStore } from "@/stores/ui";
 
 export const useChat = () => {
-  const agentStore = useAgentStore();
+  const agentStore = useAgentsStore();
+  const uiStore = useUIStore();
   const configStore = useConfigStore();
   const sdk = useSDK();
 
   const inputMessage = computed({
-    get: () => agentStore.selectedAgent?.inputMessage ?? "",
+    get: () => uiStore.getInput(agentStore.selectedId ?? ""),
     set: (value: string) => {
-      agentStore.setInputMessage(
-        value,
-        agentStore.selectedAgent?.isEditingMessage ?? false,
-      );
+      uiStore.setInput(agentStore.selectedId ?? "", value);
     },
   });
 
   const isEditingMessage = computed(
-    () => agentStore.selectedAgent?.isEditingMessage ?? false,
+    () => uiStore.getInput(agentStore.selectedId ?? "") !== "",
   );
 
   const isAgentIdle = computed(
-    () => agentStore.selectedAgent?.currentStatus === "idle",
+    () => agentStore.selectedAgent?.status === "ready",
   );
 
   const canSendMessage = computed(() => {
@@ -36,7 +35,7 @@ export const useChat = () => {
       return [];
     }
 
-    return agentStore.selectedAgent.messageManager.getApiMessages();
+    return agentStore.selectedAgent.messages
   });
 
   const sendMessage = (message: string) => {
@@ -55,20 +54,7 @@ export const useChat = () => {
     }
 
     try {
-      agentStore.selectedAgent.updateConfig((draft) => {
-        const selectedPrompt = configStore.customPrompts.find(
-          (prompt) => prompt.id === agentStore.selectedAgent?.selectedPromptId,
-        );
-
-        draft.openRouterConfig.model = configStore.model;
-        draft.openRouterConfig.reasoningEnabled =
-          configStore.selectedModel?.reasoningModel ?? false;
-        draft.openRouterConfig.apiKey = configStore.openRouterApiKey;
-        draft.jitConfig.maxIterations = configStore.maxIterations;
-        draft.jitConfig.jitInstructions = selectedPrompt?.content ?? "";
-      });
-
-      agentStore.selectedAgent.sendMessage(message);
+      agentStore.selectedAgent.sendMessage({ text: message });
     } catch (error) {
       sdk.window.showToast("Error sending message", {
         variant: "error",
@@ -82,9 +68,9 @@ export const useChat = () => {
       return;
     }
 
-    const messageToSend = inputMessage.value.trim();
+    const message = inputMessage.value.trim();
     inputMessage.value = "";
-    sendMessage(messageToSend);
+    sendMessage(message);
   };
 
   const handleKeydown = (event: KeyboardEvent) => {
@@ -99,11 +85,11 @@ export const useChat = () => {
   };
 
   const editMessage = (messageId: string, content: string) => {
-    agentStore.editMessage(messageId, content);
+    throw new Error("Not implemented");
   };
 
   const clearInputMessage = () => {
-    agentStore.clearInputMessage();
+    uiStore.setInput(agentStore.selectedId ?? "", "");
   };
 
   return {

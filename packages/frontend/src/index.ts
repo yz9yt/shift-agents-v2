@@ -10,7 +10,7 @@ import type { FrontendSDK } from "./types";
 import App from "./views/App.vue";
 
 import { createDOMManager } from "@/dom";
-import { useAgentStore } from "@/stores/agent";
+import { useAgentsStore } from "@/stores/agents";
 import { useUIStore } from "@/stores/ui";
 
 export const init = (sdk: FrontendSDK) => {
@@ -64,7 +64,7 @@ export const init = (sdk: FrontendSDK) => {
   domManager.session.start();
 
   domManager.session.onSelected((sessionId) => {
-    const agentStore = useAgentStore();
+    const agentStore = useAgentsStore();
     if (sessionId !== undefined) {
       agentStore.selectAgent(sessionId);
     }

@@ -6,9 +6,12 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/vue": "^2.0.8",
     "@caido/primevue": "0.2.1",
+    "@openrouter/ai-sdk-provider": "1.1.0",
     "@types/markdown-it": "^14.1.2",
     "@vueuse/core": "^13.6.0",
+    "ai": "^5.0.8",
     "markdown-it": "^14.1.0",
     "pinia": "^3.0.3",
     "primevue": "4.3.6",

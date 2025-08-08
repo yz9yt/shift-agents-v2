@@ -7,7 +7,7 @@ import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import { ref, toRefs } from "vue";
 
-import type { CustomPrompt } from "@/engine/types/config";
+import type { CustomPrompt } from "@/agents/types";
 import { useConfigStore } from "@/stores/config";
 
 const configStore = useConfigStore();

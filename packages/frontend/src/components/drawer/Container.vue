@@ -4,10 +4,10 @@ import { ChatContent } from "./ChatContent";
 import { ChatInput } from "./ChatInput";
 import { ChatTodos } from "./ChatTodos";
 
-import { useAgentStore } from "@/stores/agent";
+import { useAgentsStore } from "@/stores/agents";
 import { useUIStore } from "@/stores/ui";
 
-const agentStore = useAgentStore();
+const agentStore = useAgentsStore();
 const uiStore = useUIStore();
 </script>
 

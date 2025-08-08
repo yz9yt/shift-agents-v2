@@ -27,7 +27,7 @@ watch(
   },
   {
     deep: true,
-  },
+  }
 );
 </script>
 

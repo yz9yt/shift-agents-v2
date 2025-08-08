@@ -5,8 +5,9 @@ import { computed, onMounted, ref, watch } from "vue";
 
 import { useChat } from "./useChat";
 
-import { useAgentStore } from "@/stores/agent";
+import { useAgentsStore } from "@/stores/agents";
 import { useConfigStore } from "@/stores/config";
+import { useUIStore } from "@/stores/ui";
 
 const {
   abortMessage,
@@ -19,7 +20,19 @@ const {
 } = useChat();
 
 const configStore = useConfigStore();
-const agentStore = useAgentStore();
+const agentStore = useAgentsStore();
+const uiStore = useUIStore();
+
+const selectedAgent = computed(() => agentStore.selectedAgent);
+
+const selectedModel = computed(() =>
+  uiStore.selectedModel
+);
+
+const selectedPromptId = computed(() =>
+  uiStore.getSelectedPromptId(agentStore.selectedId ?? "")
+);
+
 const textareaRef = ref<HTMLTextAreaElement>();
 
 const promptOptions = computed(() => {
@@ -41,7 +54,7 @@ watch(
       textareaRef.value.focus();
     }
   },
-  { flush: "post" },
+  { flush: "post" }
 );
 </script>
 
@@ -70,7 +83,7 @@ watch(
     <div class="flex justify-between gap-2 items-center">
       <div class="flex gap-2">
         <Select
-          v-model="configStore.model"
+          v-model="selectedModel"
           :options="configStore.models"
           option-label="name"
           option-value="id"
@@ -100,8 +113,8 @@ watch(
         </Select>
 
         <Select
-          v-if="agentStore.selectedAgent && promptOptions.length > 1"
-          v-model="agentStore.selectedAgent.selectedPromptId"
+          v-if="selectedAgent && promptOptions.length > 1"
+          v-model="selectedPromptId"
           :options="promptOptions"
           option-label="title"
           option-value="id"
@@ -112,7 +125,7 @@ watch(
 
       <div class="flex items-center gap-2">
         <Button
-          v-if="configStore.selectedModel?.reasoningModel"
+          v-if="selectedModel?.isReasoningModel"
           severity="tertiary"
           icon="fas fa-brain"
           disabled

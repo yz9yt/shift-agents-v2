@@ -1,8 +1,9 @@
+import { ReplaySession } from "@/agents/types";
 import { type FrontendSDK } from "@/types";
 
 export const getCurrentlySelectedReplayTabSessionId = () => {
   const activeTab = document.querySelector(
-    '[data-is-selected="true"][data-session-id]',
+    '[data-is-selected="true"][data-session-id]'
   );
   return activeTab ? activeTab.getAttribute("data-session-id") : "";
 };
@@ -10,19 +11,16 @@ export const getCurrentlySelectedReplayTabSessionId = () => {
 export type ReplayRequest =
   | {
       kind: "Ok";
-      raw: string;
-      host: string;
-      port: number;
-      isTLS: boolean;
-      SNI: string;
+      session: ReplaySession;
     }
   | {
       kind: "Error";
       error: string;
     };
-export async function getCurrentReplayRequest(
+
+export async function getReplaySession(
   sdk: FrontendSDK,
-  replaySessionId: string,
+  replaySessionId: string
 ): Promise<ReplayRequest> {
   if (typeof replaySessionId !== "string") {
     return {
@@ -57,10 +55,15 @@ export async function getCurrentReplayRequest(
 
   return {
     kind: "Ok",
-    raw: replayEntry.raw,
-    host: replayEntry.connection.host,
-    port: replayEntry.connection.port,
-    isTLS: replayEntry.connection.isTLS,
-    SNI: replayEntry.connection.SNI,
+    session: {
+      id: replaySessionId,
+      request: {
+        raw: replayEntry.raw,
+        host: replayEntry.connection.host,
+        port: replayEntry.connection.port,
+        isTLS: replayEntry.connection.isTLS,
+        SNI: replayEntry.connection.SNI,
+      },
+    },
   } as ReplayRequest;
 }

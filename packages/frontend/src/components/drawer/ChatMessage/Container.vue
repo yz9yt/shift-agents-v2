@@ -1,23 +1,12 @@
 <script setup lang="ts">
-import { ChatMessageAgent } from "./Agent";
-import { ChatMessageError } from "./Error";
-import { ChatMessageTool } from "./Tool";
-import { ChatMessageUser } from "./User";
+import { UIMessage } from "ai";
+import { toRefs } from "vue";
 
-import type { UIMessage } from "@/engine/types/agent";
+const props = defineProps<{ message: UIMessage }>();
 
-defineProps<{
-  message: UIMessage;
-}>();
+const { message } = toRefs(props);
 </script>
 
 <template>
-  <ChatMessageUser v-if="message.kind === 'user'" :message="message" />
-  <ChatMessageAgent
-    v-else-if="message.kind === 'assistant'"
-    :message="message"
-  />
-  <ChatMessageError v-else-if="message.kind === 'error'" :message="message" />
-  <ChatMessageTool v-else-if="message.kind === 'tool'" :message="message" />
-  <div v-else>Unknown message kind: {{ message }}</div>
+  <pre>{{ JSON.stringify(message, null, 2) }}</pre>
 </template>

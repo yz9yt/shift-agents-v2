@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useUIStore } from "@/stores/ui";
-import { useAgentStore } from "@/stores/agent";
+import { useAgentsStore } from "@/stores/agents";
 
 const uiStore = useUIStore();
-const agentStore = useAgentStore();
+const agentStore = useAgentsStore();
 
 const closeDrawer = () => {
   uiStore.toggleDrawer();
@@ -11,8 +11,8 @@ const closeDrawer = () => {
 
 const clearConversation = () => {
   if (agentStore.selectedAgent) {
-    agentStore.selectedAgent.messageManager.clear();
-    agentStore.selectedAgent.todoManager.clearTodos();
+    agentStore.selectedAgent.messages = [];
+    agentStore.selectedToolContext?.todoManager.clearTodos();
   }
 };
 </script>

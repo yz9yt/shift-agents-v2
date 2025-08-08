@@ -18,7 +18,6 @@ export const useDrawerManager = (sdk: FrontendSDK) => {
     }
 
     unsubscribe = onLocationChange(({ newHash }) => {
-      console.log("onLocationChange", newHash);
       if (newHash === "#/replay") {
         inject();
       } else {

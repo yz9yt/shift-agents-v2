@@ -1,4 +1,4 @@
-import { type ModelGroup } from "@/engine/types";
+import { ModelGroup } from "@/agents/types";
 
 export const models: ModelGroup[] = [
   {
@@ -7,14 +7,14 @@ export const models: ModelGroup[] = [
       {
         name: "Claude 4 Sonnet",
         id: "anthropic/claude-sonnet-4",
-        reasoningModel: true,
+        isReasoningModel: true,
         isRecommended: true,
       },
       {
         name: "Claude 3.7 Sonnet",
         isRecommended: true,
         id: "anthropic/claude-3.7-sonnet",
-        reasoningModel: true,
+        isReasoningModel: true,
       },
       {
         name: "Claude 3.5 Sonnet",
@@ -31,6 +31,11 @@ export const models: ModelGroup[] = [
         isRecommended: true,
         id: "openai/gpt-4.1",
       },
+      {
+        name: "GPT 5 Mini",
+        isRecommended: true,
+        id: "openai/gpt-5-mini",
+      },
     ],
   },
   {
@@ -38,13 +43,13 @@ export const models: ModelGroup[] = [
     items: [
       {
         name: "Gemini 2.5 Pro",
-        reasoningModel: true,
+        isReasoningModel: true,
         id: "google/gemini-2.5-pro",
       },
       {
         name: "Gemini 2.5 Flash",
         id: "google/gemini-2.5-flash",
-        reasoningModel: true,
+        isReasoningModel: true,
       },
       {
         name: "Gemini 2.5 Flash Lite",
@@ -58,7 +63,7 @@ export const models: ModelGroup[] = [
     items: [
       {
         name: "DeepSeek R1",
-        reasoningModel: true,
+        isReasoningModel: true,
         isRecommended: true,
         id: "deepseek/deepseek-r1-0528",
       },
@@ -69,7 +74,7 @@ export const models: ModelGroup[] = [
     items: [
       {
         name: "Kimi K2",
-        reasoningModel: true,
+        isReasoningModel: true,
         isRecommended: true,
         id: "moonshotai/kimi-k2",
       },
