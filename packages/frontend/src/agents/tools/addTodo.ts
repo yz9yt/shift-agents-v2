@@ -9,7 +9,6 @@ const AddTodoSchema = z.object({
     .string()
     .min(1)
     .describe("The content of the todo item. Keep it short and concise."),
-  status: z.enum(["pending", "completed"]).default("pending"),
 });
 
 export const addTodoTool = tool({
@@ -17,7 +16,11 @@ export const addTodoTool = tool({
   inputSchema: AddTodoSchema,
   execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
-    const todo = { id: input.id, content: input.content, status: input.status };
+    const todo = {
+      id: input.id,
+      content: input.content,
+      status: "pending" as const,
+    };
     context.todoManager.addTodo(todo);
     return { message: "Todo item added successfully", todo };
   },

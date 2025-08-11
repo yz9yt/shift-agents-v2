@@ -42,32 +42,47 @@ const isGenerating = computed(() => {
 const isAborted = computed(() => {
   return message.value.metadata?.state === "abort";
 });
+
+const hasPendingStep = computed(() => {
+  if (message.value.metadata?.state !== "streaming") {
+    return false;
+  }
+  const parts = message.value.parts;
+  return parts.length > 0 && parts[parts.length - 1]?.type === "step-start";
+});
 </script>
 
 <template>
   <div class="px-3">
     <template v-if="!noContentYet">
-      <template v-for="part in message.parts">
-        <template v-if="part.type === 'text'">
+      <template v-for="(part, index) in message.parts" :key="index">
+        <template v-if="part && part.type === 'text'">
           <div class="text-surface-200">
-            <Markdown :content="part.text" />
+            <Markdown :content="part.text ?? ''" />
           </div>
         </template>
-        <template v-else-if="part.type === 'reasoning'">
+        <template v-else-if="part && part.type === 'reasoning'">
           <Reasoning
-            :content="part.text"
+            :content="part.text ?? ''"
             :state="part.state"
             :message-state="message.metadata?.state"
           />
         </template>
-        <template v-else-if="isToolUIPart(part)">
+        <template v-else-if="part && isToolUIPart(part)">
           <ChatMessageTool
             :tool-name="getToolName(part)"
             :state="part.state"
             :output="part.output"
+            :message-state="message.metadata?.state"
           />
         </template>
       </template>
+      <div
+        v-if="hasPendingStep"
+        class="flex items-center text-surface-300 text-sm font-mono py-1"
+      >
+        <span :class="{ shimmer: true }">Planning...</span>
+      </div>
     </template>
     <div v-else-if="isGenerating" class="px-2 py-2">
       <div class="flex items-center gap-1 text-surface-400">

@@ -17,7 +17,7 @@ export const markdownJoinerTransform =
       },
       async transform(chunk, controller) {
         if (chunk.type === "text-delta") {
-          const processedText = joiner.processText(chunk.text);
+          const processedText = joiner.processText(chunk.text ?? "");
           if (processedText) {
             controller.enqueue({
               ...chunk,

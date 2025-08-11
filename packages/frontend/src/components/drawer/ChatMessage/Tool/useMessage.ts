@@ -1,6 +1,7 @@
 import { computed, ref, type Ref } from "vue";
 
 import { useAgentsStore } from "@/stores/agents";
+import type { MessageState } from "@/agents/types";
 
 type ToolState =
   | "input-streaming"
@@ -12,8 +13,9 @@ export const useToolMessage = (params: {
   toolName: Ref<string>;
   state: Ref<ToolState>;
   output: Ref<unknown>;
+  messageState: Ref<MessageState | undefined>;
 }) => {
-  const { toolName, state, output } = params;
+  const { toolName, state, output, messageState } = params;
 
   const agentsStore = useAgentsStore();
   const showDetails = ref(false);
@@ -21,6 +23,7 @@ export const useToolMessage = (params: {
   const isProcessing = computed(() => {
     const isActiveState =
       state.value === "input-streaming" || state.value === "input-available";
+    if (messageState.value === "abort") return false;
     return isActiveState && agentsStore.selectedAgent?.status === "streaming";
   });
 
@@ -86,6 +89,10 @@ export const useToolMessage = (params: {
     };
 
   const toolIcon = computed(() => {
+    if (messageState.value === "abort") {
+      return "fas fa-exclamation-triangle";
+    }
+
     switch (state.value) {
       case "input-streaming":
         return "fas fa-spinner fa-spin";
@@ -101,6 +108,9 @@ export const useToolMessage = (params: {
   });
 
   const formatToolCall = computed(() => {
+    if (messageState.value === "abort") {
+      return `Aborted ${toolName.value}`;
+    }
     if (state.value === "input-streaming") {
       return `Preparing ${toolName.value}...`;
     }

@@ -18,12 +18,13 @@ const { isGenerating, handleMessageClick } = useUserMessage();
     class="p-3 rounded-lg bg-surface-900 ml-auto shadow-lg shadow-surface-800 w-full select-text group relative border border-surface-700 hover:border-secondary-400 transition-colors"
   >
     <div
-      v-for="part in message.parts"
+      v-for="(part, index) in message.parts"
+      :key="index"
       class="text-surface-200 whitespace-pre-wrap break-words font-mono text-sm cursor-pointer rounded p-1 -m-1"
       :class="{ 'opacity-80': isGenerating }"
       @click="handleMessageClick(message)"
     >
-      <span v-if="part.type === 'text'">{{ part.text }}</span>
+      <span v-if="part && part.type === 'text'">{{ part.text ?? '' }}</span>
     </div>
   </div>
 </template>

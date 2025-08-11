@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useAgentsStore } from "@/stores/agents";
 import { useContent } from "./useContent";
 
 const { error } = useContent();
+const agentsStore = useAgentsStore();
 </script>
 
 <template>
@@ -13,5 +15,7 @@ const { error } = useContent();
     <pre class="text-surface-400 text-sm whitespace-pre-wrap select-text py-2">
       {{ error }}
     </pre>
+
+    <pre class="max-h-64 overflow-y-auto">{{ agentsStore.selectedAgent }}</pre>
   </div>
 </template>

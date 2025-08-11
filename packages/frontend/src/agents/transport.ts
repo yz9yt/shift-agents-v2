@@ -35,11 +35,12 @@ import {
 } from "@/agents/types";
 import { markdownJoinerTransform } from "@/agents/utils/markdownJoiner";
 import { useConfigStore } from "@/stores/config";
+import { getReplaySession } from "@/utils";
 
 export class ClientSideChatTransport implements ChatTransport<UIMessage> {
   constructor(private toolContext: ToolContext, private systemPrompt: string) {}
 
-  sendMessages(
+  async sendMessages(
     options: {
       chatId: string;
       messages: UIMessage[];
@@ -50,6 +51,21 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
     } & ChatRequestOptions
   ): Promise<ReadableStream<UIMessageChunk>> {
     const { abortSignal, messages } = options;
+
+    const initialSession = await getReplaySession(
+      this.toolContext.sdk,
+      this.toolContext.replaySession.id
+    );
+    if (initialSession.kind === "Error") {
+      throw new Error(initialSession.error);
+    }
+
+    const currentRequest = this.toolContext.replaySession.request;
+    currentRequest.raw = initialSession.session.request.raw;
+    currentRequest.host = initialSession.session.request.host;
+    currentRequest.port = initialSession.session.request.port;
+    currentRequest.isTLS = initialSession.session.request.isTLS;
+    currentRequest.SNI = initialSession.session.request.SNI;
 
     const prompt = convertToModelMessages(messages);
     const configStore = useConfigStore();
@@ -73,7 +89,7 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
           system: `<SYSTEM_PROMPT>${this.systemPrompt}</SYSTEM_PROMPT>`,
           messages: prompt,
           abortSignal: abortSignal,
-          stopWhen: stepCountIs(25),
+          stopWhen: stepCountIs(35),
           tools: {
             sendRequest: sendRequestTool,
             updateTodo: updateTodoTool,
@@ -170,7 +186,7 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
       },
     });
 
-    return Promise.resolve(stream);
+    return stream;
   }
 
   reconnectToStream(): Promise<ReadableStream<UIMessageChunk> | null> {

@@ -2,6 +2,7 @@
 import { toRefs } from "vue";
 
 import { useToolMessage } from "./useMessage";
+import type { MessageState } from "@/agents/types";
 
 const props = defineProps<{
   toolName: string;
@@ -11,9 +12,10 @@ const props = defineProps<{
     | "output-available"
     | "output-error";
   output: unknown;
+  messageState: MessageState | undefined;
 }>();
 
-const { toolName, state, output } = toRefs(props);
+const { toolName, state, output, messageState } = toRefs(props);
 
 const {
   isProcessing,
@@ -22,7 +24,7 @@ const {
   showDetails,
   toggleDetails,
   toolIcon,
-} = useToolMessage({ toolName, state, output });
+} = useToolMessage({ toolName, state, output, messageState });
 </script>
 
 <template>
