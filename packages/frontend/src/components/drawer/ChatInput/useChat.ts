@@ -35,7 +35,7 @@ export const useChat = () => {
       return [];
     }
 
-    return agentStore.selectedAgent.messages
+    return agentStore.selectedAgent.messages;
   });
 
   const sendMessage = (message: string) => {
@@ -85,7 +85,21 @@ export const useChat = () => {
   };
 
   const editMessage = (messageId: string, content: string) => {
-    throw new Error("Not implemented");
+    const agent = agentStore.selectedAgent;
+    const agentId = agentStore.selectedId;
+    if (!agent || agentId === undefined) {
+      return;
+    }
+
+    agentStore.abortSelectedAgent();
+
+    const index = agent.messages.findIndex((m) => m.id === messageId);
+    if (index === -1) {
+      return;
+    }
+
+    agent.messages = agent.messages.slice(0, index);
+    uiStore.setInput(agentId, content);
   };
 
   const clearInputMessage = () => {

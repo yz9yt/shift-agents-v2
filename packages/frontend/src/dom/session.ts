@@ -1,5 +1,5 @@
-import { type FrontendSDK } from "@/types";
 import { onLocationChange } from "@/dom";
+import { type FrontendSDK } from "@/types";
 
 export const useSessionManager = (sdk: FrontendSDK) => {
   let currentSelectedId: string | undefined = undefined;

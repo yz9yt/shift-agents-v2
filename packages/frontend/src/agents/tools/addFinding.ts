@@ -1,6 +1,7 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const AddFindingSchema = z.object({
   title: z.string().min(1),
@@ -18,7 +19,9 @@ export const addFindingTool = tool({
       const requestId =
         (await context.sdk.graphql
           .replayEntriesBySession({ sessionId })
-          .then((data) => data.replaySession?.activeEntry?.request?.id?.toString())) ?? "0";
+          .then((data) =>
+            data.replaySession?.activeEntry?.request?.id?.toString(),
+          )) ?? "0";
 
       await context.sdk.findings.createFinding(requestId, {
         title: input.title,

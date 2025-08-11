@@ -14,9 +14,8 @@ export const runJavaScriptTool = tool({
   description:
     "Execute JavaScript code for data processing, encoding/decoding, calculations, or string manipulation. Use this when you need to transform data, decode Base64, parse JSON, generate timestamps, or perform complex logic that other tools cannot handle.",
   inputSchema: RunJavaScriptSchema,
-  execute: async (input) => {
+  execute: (input) => {
     try {
-      // eslint-disable-next-line no-eval
       const result = eval(input.code);
       if (typeof result === "string") {
         return { result };

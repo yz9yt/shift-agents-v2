@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ChatTopbar } from "./ChatTopbar";
 import { ChatContent } from "./ChatContent";
 import { ChatInput } from "./ChatInput";
 import { ChatTodos } from "./ChatTodos";
+import { ChatTopbar } from "./ChatTopbar";
 
 import { useAgentsStore } from "@/stores/agents";
 import { useUIStore } from "@/stores/ui";

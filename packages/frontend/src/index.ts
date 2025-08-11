@@ -1,7 +1,7 @@
 import { Classic } from "@caido/primevue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
-import Tooltip from 'primevue/tooltip';
+import Tooltip from "primevue/tooltip";
 import { createApp } from "vue";
 
 import { SDKPlugin } from "./plugins/sdk";
@@ -21,7 +21,7 @@ export const init = (sdk: FrontendSDK) => {
     pt: Classic,
   });
 
-  app.directive('tooltip', Tooltip);
+  app.directive("tooltip", Tooltip);
 
   const pinia = createPinia();
   app.use(pinia);

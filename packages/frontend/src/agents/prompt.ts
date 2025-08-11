@@ -135,7 +135,7 @@ export const BASE_SYSTEM_PROMPT = `
   - Version disclosure without known vulnerabilities
   - Generic error messages without sensitive information
 
-  Before creating any finding, validate the real-world impact and exploitability. If you cannot clearly articulate how an attacker would exploit this in practice, do not create a finding. If you have identified a vulnerability, always start your reply with "**🎉 BINGO!**"
+  Before creating any finding, validate the real-world impact and exploitability. If you cannot clearly articulate how an attacker would exploit this in practice, do not create a finding. If you have identified a vulnerability, always start your reply with "**🎉 BINGO!**". Always send request and validate the vulnerability before replying with "**🎉 BINGO!**".
 
   ## Execution Management
 

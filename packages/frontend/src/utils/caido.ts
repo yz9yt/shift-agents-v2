@@ -1,9 +1,9 @@
-import { ReplaySession } from "@/agents/types";
+import { type ReplaySession } from "@/agents/types";
 import { type FrontendSDK } from "@/types";
 
 export const getCurrentlySelectedReplayTabSessionId = () => {
   const activeTab = document.querySelector(
-    '[data-is-selected="true"][data-session-id]'
+    '[data-is-selected="true"][data-session-id]',
   );
   return activeTab ? activeTab.getAttribute("data-session-id") : "";
 };
@@ -20,7 +20,7 @@ export type ReplayRequest =
 
 export async function getReplaySession(
   sdk: FrontendSDK,
-  replaySessionId: string
+  replaySessionId: string,
 ): Promise<ReplayRequest> {
   if (typeof replaySessionId !== "string") {
     return {

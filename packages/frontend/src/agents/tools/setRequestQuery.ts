@@ -1,7 +1,8 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
-import { z } from "zod";
 import { HttpForge } from "ts-http-forge";
+import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const SetRequestQuerySchema = z.object({
   name: z.string().min(1).describe("The query parameter name"),
@@ -12,7 +13,7 @@ export const setRequestQueryTool = tool({
   description:
     "Add or update a query parameter in the current HTTP request URL. Use this when you need to modify GET parameters, add new ones, or change existing values. The parameter will be properly URL-encoded.",
   inputSchema: SetRequestQuerySchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {
@@ -22,7 +23,9 @@ export const setRequestQueryTool = tool({
       });
 
       return {
-        message: hasChanged ? "Request has been updated" : "Request has not changed",
+        message: hasChanged
+          ? "Request has been updated"
+          : "Request has not changed",
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

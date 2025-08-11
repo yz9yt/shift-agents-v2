@@ -1,7 +1,8 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
-import { z } from "zod";
 import { HttpForge } from "ts-http-forge";
+import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const SetRequestPathSchema = z.object({
   path: z
@@ -16,7 +17,7 @@ export const setRequestPathTool = tool({
   description:
     "Change the URL path of the current request. Use this to test different endpoints, access restricted paths, or modify the target resource being requested.",
   inputSchema: SetRequestPathSchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {
@@ -24,7 +25,9 @@ export const setRequestPathTool = tool({
       });
 
       return {
-        message: hasChanged ? "Request has been updated" : "Request has not changed",
+        message: hasChanged
+          ? "Request has been updated"
+          : "Request has not changed",
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

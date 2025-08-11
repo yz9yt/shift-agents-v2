@@ -1,4 +1,5 @@
 import { ref } from "vue";
+
 import { type Todo } from "@/agents/types";
 
 export class TodoManager {
@@ -22,13 +23,13 @@ export class TodoManager {
 
   updateTodo(id: string, updatedTodo: Todo) {
     this.todos.value = this.todos.value.map((todo) =>
-      todo.id === id ? updatedTodo : todo
+      todo.id === id ? updatedTodo : todo,
     );
   }
 
   completeTodo(id: string) {
     this.todos.value = this.todos.value.map((todo) =>
-      todo.id === id ? { ...todo, status: "completed" } : todo
+      todo.id === id ? { ...todo, status: "completed" } : todo,
     );
   }
 

@@ -1,6 +1,7 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const SetRequestRawSchema = z.object({
   raw: z
@@ -14,7 +15,7 @@ export const setRequestRawTool = tool({
   description:
     "Replace the entire raw HTTP request with custom content. This is an advanced tool - use this only when you need to craft malformed requests, test HTTP parsing vulnerabilities, or make modifications that other tools cannot handle.",
   inputSchema: SetRequestRawSchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     try {
       const hasChanged = context.replaySession.updateRequestRaw(() => {
@@ -23,7 +24,9 @@ export const setRequestRawTool = tool({
       });
 
       return {
-        message: hasChanged ? "Request has been updated" : "Request has not changed",
+        message: hasChanged
+          ? "Request has been updated"
+          : "Request has not changed",
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

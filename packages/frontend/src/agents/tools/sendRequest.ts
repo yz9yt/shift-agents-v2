@@ -1,6 +1,7 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const formatTruncatedResponse = (rawResponse: string, responseID: string) => {
   const maxResponseLength = 5000;
@@ -17,9 +18,10 @@ const formatTruncatedResponse = (rawResponse: string, responseID: string) => {
 };
 
 export const sendRequestTool = tool({
-  description: "Send the current HTTP request for this replay session",
+  description: "Send the current HTTP request for this replay session. Returns JSON object with the following fields: rawResponse, roundtripTime, responseID. Use responseID if needed to search through the full response using grepResponse tool.",
   inputSchema: z.object({}),
   execute: async (_input, { experimental_context }) => {
+    console.log("sendRequestTool", _input, experimental_context);
     const context = experimental_context as ToolContext;
     const { sdk, replaySession } = context;
 
@@ -40,7 +42,7 @@ export const sendRequestTool = tool({
       const timeout = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error("Request timeout after 30 seconds")),
-          30000
+          30000,
         );
       });
 
@@ -72,9 +74,9 @@ export const sendRequestTool = tool({
       }
 
       return {
-        responseID,
         rawResponse: formatTruncatedResponse(result.response.raw, responseID),
         roundtripTime: result.response.roundtripTime,
+        responseID,
       };
     } catch (error) {
       return {

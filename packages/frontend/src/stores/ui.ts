@@ -1,6 +1,5 @@
-import { models } from "@/stores/config/models";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 
 type UIState = {
   input: string;
@@ -10,7 +9,6 @@ type UIState = {
 export const useUIStore = defineStore("stores.ui", () => {
   const drawerVisible = ref(false);
   const agentsUI = ref<Record<string, UIState>>({});
-  const selectedModelID = ref<string>("openai/gpt-5-mini");
 
   const toggleDrawer = () => {
     drawerVisible.value = !drawerVisible.value;
@@ -43,12 +41,6 @@ export const useUIStore = defineStore("stores.ui", () => {
     return getUIState(agentId).selectedPromptId;
   }
 
-  const selectedModel = computed(() => {
-    return models
-      .flatMap((group) => group.items)
-      .find((model) => model.id === selectedModelID.value)!;
-  });
-
   return {
     drawerVisible,
     toggleDrawer,
@@ -57,6 +49,5 @@ export const useUIStore = defineStore("stores.ui", () => {
     getInput,
     setSelectedPromptId,
     getSelectedPromptId,
-    selectedModel,
   };
 });

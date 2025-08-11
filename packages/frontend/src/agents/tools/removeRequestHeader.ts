@@ -1,7 +1,8 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
-import { z } from "zod";
 import { HttpForge } from "ts-http-forge";
+import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const RemoveRequestHeaderSchema = z.object({
   name: z
@@ -14,7 +15,7 @@ export const removeRequestHeaderTool = tool({
   description:
     "Remove an HTTP header from the current request. Use this to eliminate unwanted headers, remove authentication tokens, or test behavior without specific headers.",
   inputSchema: RemoveRequestHeaderSchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {

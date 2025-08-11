@@ -16,11 +16,13 @@ export const useContent = () => {
   const hasMessages = computed(() => messages.value.length > 0);
   const hasSelectedAgent = computed(() => !!agentStore.selectedAgent);
   const agentStatus = computed(() => agentStore.selectedAgent?.status);
+  const error = computed(() => agentStore.selectedAgent?.error);
 
   return {
     messages,
     hasMessages,
     hasSelectedAgent,
     agentStatus,
+    error,
   };
 };

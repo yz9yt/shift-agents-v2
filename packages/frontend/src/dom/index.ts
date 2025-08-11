@@ -10,6 +10,12 @@ export const createDOMManager = (sdk: FrontendSDK) => {
   window.addEventListener("hashchange", notify);
   window.addEventListener("locationchange", notify);
 
+  setTimeout(() => {
+    for (const cb of subscribers) {
+      cb({ oldHash: lastHash, newHash: lastHash });
+    }
+  }, 100);
+
   const drawer = useDrawerManager(sdk);
   const session = useSessionManager(sdk);
 
@@ -40,7 +46,9 @@ function notify(): void {
   for (const cb of subscribers) {
     try {
       cb({ oldHash: lastHash, newHash });
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
   lastHash = newHash;
 }

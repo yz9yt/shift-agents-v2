@@ -1,4 +1,4 @@
-import { ModelGroup } from "@/agents/types";
+import { type ModelGroup } from "@/agents/types";
 
 export const models: ModelGroup[] = [
   {
@@ -27,15 +27,23 @@ export const models: ModelGroup[] = [
     label: "GPT",
     items: [
       {
-        name: "GPT 4.1",
+        name: "GPT 5 Nano",
         isRecommended: true,
-        id: "openai/gpt-4.1",
+        id: "openai/gpt-5-nano",
       },
       {
         name: "GPT 5 Mini",
         isRecommended: true,
         id: "openai/gpt-5-mini",
       },
+      {
+        name: "GPT 4.1",
+        id: "openai/gpt-4.1",
+      },
+      {
+        name: "GPT OOS 120B",
+        id: "openai/gpt-oss-120b",
+      }
     ],
   },
   {

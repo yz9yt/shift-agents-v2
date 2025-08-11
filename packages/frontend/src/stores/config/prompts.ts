@@ -57,7 +57,7 @@ Using parameter pollution
 \`\`\`
 ?next=whitelisted.com&next=google.com
 \`\`\`
-`
+`;
 
 export const defaultCustomPrompts: CustomPrompt[] = [
   {

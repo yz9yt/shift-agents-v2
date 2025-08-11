@@ -1,19 +1,20 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
-import { z } from "zod";
 import { HttpForge } from "ts-http-forge";
+import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const SetRequestBodySchema = z.object({
-  body: z.string().describe(
-    "The request body content (JSON, form data, raw text, etc.)",
-  ),
+  body: z
+    .string()
+    .describe("The request body content (JSON, form data, raw text, etc.)"),
 });
 
 export const setRequestBodyTool = tool({
   description:
     "Replace the entire request body content. Use this to send JSON data, form data, XML, or any other payload format for POST/PUT requests or testing purposes.",
   inputSchema: SetRequestBodySchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {
@@ -21,7 +22,9 @@ export const setRequestBodyTool = tool({
       });
 
       return {
-        message: hasChanged ? "Request has been updated" : "Request has not changed",
+        message: hasChanged
+          ? "Request has been updated"
+          : "Request has not changed",
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -29,5 +32,3 @@ export const setRequestBodyTool = tool({
     }
   },
 });
-
-

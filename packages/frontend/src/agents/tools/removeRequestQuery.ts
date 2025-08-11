@@ -1,7 +1,8 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
-import { z } from "zod";
 import { HttpForge } from "ts-http-forge";
+import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const RemoveRequestQuerySchema = z.object({
   name: z
@@ -14,7 +15,7 @@ export const removeRequestQueryTool = tool({
   description:
     "Remove a query parameter from the current HTTP request URL. Use this to eliminate unwanted parameters, test behavior without specific query data, or simplify requests.",
   inputSchema: RemoveRequestQuerySchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {

@@ -1,12 +1,15 @@
 import { Chat } from "@ai-sdk/vue";
-import { ClientSideChatTransport } from "@/agents/transport";
-import { FrontendSDK } from "@/types";
-import { ReplaySession, ToolContext } from "@/agents/types";
-import { TodoManager } from "@/agents/todos";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { SECRET_API_KEY } from "@/secrets";
-import { getReplaySession } from "@/utils";
+
 import { BASE_SYSTEM_PROMPT } from "@/agents/prompt";
+import { TodoManager } from "@/agents/todos";
+import { ClientSideChatTransport } from "@/agents/transport";
+import {
+  type CustomUIMessage,
+  type ReplaySession,
+  type ToolContext,
+} from "@/agents/types";
+import { type FrontendSDK } from "@/types";
+import { getReplaySession } from "@/utils";
 
 export async function createAgent({
   replaySessionId,
@@ -27,17 +30,12 @@ export async function createAgent({
     todoManager,
   });
 
-  const openrouter = createOpenRouter({
-    apiKey: SECRET_API_KEY,
-  });
-  const model = openrouter.chat("openai/gpt-4.1");
   const transport = new ClientSideChatTransport(
-    model,
     toolContext,
-    BASE_SYSTEM_PROMPT
+    BASE_SYSTEM_PROMPT,
   );
 
-  const chat = new Chat({
+  const chat = new Chat<CustomUIMessage>({
     id: replaySessionId,
     transport,
   });

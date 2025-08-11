@@ -25,12 +25,8 @@ const uiStore = useUIStore();
 
 const selectedAgent = computed(() => agentStore.selectedAgent);
 
-const selectedModel = computed(() =>
-  uiStore.selectedModel
-);
-
 const selectedPromptId = computed(() =>
-  uiStore.getSelectedPromptId(agentStore.selectedId ?? "")
+  uiStore.getSelectedPromptId(agentStore.selectedId ?? ""),
 );
 
 const textareaRef = ref<HTMLTextAreaElement>();
@@ -54,7 +50,7 @@ watch(
       textareaRef.value.focus();
     }
   },
-  { flush: "post" }
+  { flush: "post" },
 );
 </script>
 
@@ -83,7 +79,7 @@ watch(
     <div class="flex justify-between gap-2 items-center">
       <div class="flex gap-2">
         <Select
-          v-model="selectedModel"
+          v-model="configStore.model"
           :options="configStore.models"
           option-label="name"
           option-value="id"
@@ -125,7 +121,7 @@ watch(
 
       <div class="flex items-center gap-2">
         <Button
-          v-if="selectedModel?.isReasoningModel"
+          v-if="configStore.selectedModel?.isReasoningModel"
           severity="tertiary"
           icon="fas fa-brain"
           disabled

@@ -1,9 +1,13 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { type ToolContext } from "@/agents/types";
+
 const ReplaceRequestTextSchema = z.object({
-  match: z.string().min(1).describe("The exact text string to find and replace"),
+  match: z
+    .string()
+    .min(1)
+    .describe("The exact text string to find and replace"),
   replace: z.string().describe("The replacement text"),
 });
 
@@ -11,7 +15,7 @@ export const replaceRequestTextTool = tool({
   description:
     "Find and replace specific text strings anywhere in the HTTP request (headers, body, path, etc.). Use this for precise string replacements when other specific tools don't cover your needs. Supports literal string matching only.",
   inputSchema: ReplaceRequestTextSchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {

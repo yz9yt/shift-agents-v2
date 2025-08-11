@@ -1,44 +1,45 @@
-import { ReplaySession, ToolContext } from "@/agents/types";
-import { LanguageModelV2 } from "@openrouter/ai-sdk-provider";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import {
-  ChatTransport,
-  UIMessage,
-  UIMessageChunk,
-  streamText,
+  type ChatRequestOptions,
+  type ChatTransport,
   convertToModelMessages,
-  ChatRequestOptions,
   createUIMessageStream,
-  smoothStream,
   stepCountIs,
+  streamText,
+  type UIMessage,
+  type UIMessageChunk,
 } from "ai";
+
+import { type TodoManager } from "@/agents/todos";
 import {
-  sendRequestTool,
-  updateTodoTool,
-  setRequestRawTool,
-  setRequestQueryTool,
-  setRequestPathTool,
-  setRequestMethodTool,
-  setRequestHeaderTool,
-  setRequestBodyTool,
-  runJavaScriptTool,
-  replaceRequestTextTool,
-  removeRequestQueryTool,
-  removeRequestHeaderTool,
-  grepResponseTool,
-  addTodoTool,
   addFindingTool,
+  addTodoTool,
+  grepResponseTool,
+  removeRequestHeaderTool,
+  removeRequestQueryTool,
+  replaceRequestTextTool,
+  runJavaScriptTool,
+  sendRequestTool,
+  setRequestBodyTool,
+  setRequestHeaderTool,
+  setRequestMethodTool,
+  setRequestPathTool,
+  setRequestQueryTool,
+  setRequestRawTool,
+  updateTodoTool,
 } from "@/agents/tools";
+import {
+  type CustomUIMessage,
+  type ReplaySession,
+  type ToolContext,
+} from "@/agents/types";
 import { markdownJoinerTransform } from "@/agents/utils/markdownJoiner";
-import { TodoManager } from "@/agents/todos";
+import { useConfigStore } from "@/stores/config";
 
 export class ClientSideChatTransport implements ChatTransport<UIMessage> {
-  constructor(
-    private model: LanguageModelV2,
-    private toolContext: ToolContext,
-    private systemPrompt: string
-  ) {}
+  constructor(private toolContext: ToolContext, private systemPrompt: string) {}
 
-  async sendMessages(
+  sendMessages(
     options: {
       chatId: string;
       messages: UIMessage[];
@@ -48,15 +49,30 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
       messageId?: string;
     } & ChatRequestOptions
   ): Promise<ReadableStream<UIMessageChunk>> {
-    const prompt = convertToModelMessages(options.messages);
+    const { abortSignal, messages } = options;
 
-    const stream = createUIMessageStream<UIMessage>({
+    const prompt = convertToModelMessages(messages);
+    const configStore = useConfigStore();
+
+    const openrouter = createOpenRouter({
+      apiKey: configStore.openRouterApiKey,
+      extraBody: {
+        parallel_tool_calls: false,
+        reasoning: {
+          max_tokens: configStore.reasoningConfig.max_tokens,
+          enabled: configStore.reasoningConfig.enabled,
+        },
+      },
+    });
+
+    const model = openrouter(configStore.model);
+    const stream = createUIMessageStream<CustomUIMessage>({
       execute: ({ writer }) => {
         const result = streamText({
-          model: this.model,
-          system: this.systemPrompt,
+          model,
+          system: `<SYSTEM_PROMPT>${this.systemPrompt}</SYSTEM_PROMPT>`,
           messages: prompt,
-          abortSignal: options.abortSignal,
+          abortSignal: abortSignal,
           stopWhen: stepCountIs(25),
           tools: {
             sendRequest: sendRequestTool,
@@ -92,17 +108,16 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
               ],
             };
           },
-          experimental_transform: [
-            smoothStream({
-              delayInMs: 20,
-              chunking: "word",
-            }),
-            markdownJoinerTransform(),
-          ],
+          experimental_transform: [markdownJoinerTransform()],
           experimental_context: this.toolContext,
-          onError: (error) => {
+          onError: ({ error }) => {
             const errorText =
               error instanceof Error ? error.message : String(error);
+
+            // TODO: Temporary workaround for abort error, seems to be a bug in the ai-sdk
+            if (errorText.includes("abort")) {
+              return;
+            }
 
             writer.write({
               type: "error",
@@ -120,15 +135,46 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
           },
         });
 
-        writer.merge(result.toUIMessageStream());
+        writer.merge(
+          result.toUIMessageStream({
+            messageMetadata: ({ part }) => {
+              if (part.type === "start") {
+                return {
+                  state: "streaming",
+                };
+              }
+
+              if (part.type === "finish") {
+                return {
+                  state: "done",
+                };
+              }
+
+              if (part.type === "error") {
+                return {
+                  state: "error",
+                };
+              }
+
+              if (part.type === "abort") {
+                return {
+                  state: "abort",
+                };
+              }
+
+              return {};
+            },
+            sendReasoning: true,
+          })
+        );
       },
     });
 
-    return stream;
+    return Promise.resolve(stream);
   }
 
-  async reconnectToStream(): Promise<ReadableStream<UIMessageChunk> | null> {
-    return null;
+  reconnectToStream(): Promise<ReadableStream<UIMessageChunk> | null> {
+    return Promise.resolve(null);
   }
 }
 
@@ -142,12 +188,13 @@ function contextMessages({
   let contextContent =
     "This message gets automatically attached. Here is the current context about the environment and replay session:\n\n";
 
-  contextContent += `<current_request>
+  contextContent += `<|current_request|>
 The HTTP request you are analyzing:
-<raw>${currentRequest.request.raw}</raw>
-<host>${currentRequest.request.host}</host>
-<port>${currentRequest.request.port}</port>
-</current_request>\n\n`;
+<|raw|>${currentRequest.request.raw}</|raw|>
+<|host|>${currentRequest.request.host}</|host|>
+<|port|>${currentRequest.request.port}</|port|>
+</|current_request|>
+\n\n`;
 
   const allTodos = todoManager.getTodos();
   if (allTodos.length > 0) {

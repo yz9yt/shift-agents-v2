@@ -1,7 +1,8 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
-import { z } from "zod";
 import { HttpForge } from "ts-http-forge";
+import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const SetRequestMethodSchema = z.object({
   method: z
@@ -14,7 +15,7 @@ export const setRequestMethodTool = tool({
   description:
     "Change the HTTP method of the current request (GET, POST, PUT, DELETE, etc.). Use this when you need to test different HTTP verbs or modify the request method for testing purposes.",
   inputSchema: SetRequestMethodSchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     try {
       const hasChanged = context.replaySession.updateRequestRaw((draft) => {
@@ -22,7 +23,9 @@ export const setRequestMethodTool = tool({
       });
 
       return {
-        message: hasChanged ? "Request has been updated" : "Request has not changed",
+        message: hasChanged
+          ? "Request has been updated"
+          : "Request has not changed",
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -30,5 +33,3 @@ export const setRequestMethodTool = tool({
     }
   },
 });
-
-

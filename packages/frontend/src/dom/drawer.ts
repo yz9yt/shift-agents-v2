@@ -1,12 +1,12 @@
 import { Classic } from "@caido/primevue";
 import PrimeVue from "primevue/config";
-import Tooltip from 'primevue/tooltip';
+import Tooltip from "primevue/tooltip";
 import { type App, createApp } from "vue";
 
 import { Drawer } from "@/components/drawer";
+import { onLocationChange } from "@/dom";
 import { SDKPlugin } from "@/plugins/sdk";
 import { type FrontendSDK } from "@/types";
-import { onLocationChange } from "@/dom";
 
 export const useDrawerManager = (sdk: FrontendSDK) => {
   let app: App | undefined = undefined;
@@ -59,7 +59,7 @@ export const useDrawerManager = (sdk: FrontendSDK) => {
         unstyled: true,
         pt: Classic,
       });
-      app.directive('tooltip', Tooltip);
+      app.directive("tooltip", Tooltip);
     }
     app.mount(container);
   };

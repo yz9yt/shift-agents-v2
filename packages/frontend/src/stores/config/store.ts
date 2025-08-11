@@ -6,8 +6,8 @@ import { defaultCustomPrompts } from "./prompts";
 
 import type { CustomPrompt, ReasoningConfig } from "@/agents/types";
 import { useSDK } from "@/plugins/sdk";
-import { type PluginStorage } from "@/types";
 import { SECRET_API_KEY } from "@/secrets";
+import { type PluginStorage } from "@/types";
 
 export const useConfigStore = defineStore("stores.config", () => {
   const sdk = useSDK();

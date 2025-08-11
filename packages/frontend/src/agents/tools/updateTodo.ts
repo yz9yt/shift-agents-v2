@@ -1,6 +1,7 @@
-import { ToolContext } from "@/agents/types";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { type ToolContext } from "@/agents/types";
 
 const UpdateTodoSchema = z.object({
   id: z.string().min(1),
@@ -11,7 +12,7 @@ const UpdateTodoSchema = z.object({
 export const updateTodoTool = tool({
   description: "Update an existing todo item by ID",
   inputSchema: UpdateTodoSchema,
-  execute: async (input, { experimental_context }) => {
+  execute: (input, { experimental_context }) => {
     const context = experimental_context as ToolContext;
     const { todoManager } = context;
 
