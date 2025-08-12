@@ -12,7 +12,7 @@ const RunJavaScriptSchema = z.object({
 
 export const runJavaScriptTool = tool({
   description:
-    "Execute JavaScript code for data processing, encoding/decoding, calculations, or string manipulation. Use this when you need to transform data, decode Base64, parse JSON, generate timestamps, or perform complex logic that other tools cannot handle.",
+    "Execute JavaScript code for data processing, encoding/decoding, calculations, or string manipulation. Use this when you need to transform data, decode Base64, parse JSON, parse URLs, generate timestamps, or perform complex logic that other tools cannot handle.",
   inputSchema: RunJavaScriptSchema,
   execute: (input) => {
     try {

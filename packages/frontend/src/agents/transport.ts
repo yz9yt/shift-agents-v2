@@ -10,6 +10,7 @@ import {
   type UIMessageChunk,
 } from "ai";
 
+import { BASE_SYSTEM_PROMPT } from "@/agents/prompt";
 import { type TodoManager } from "@/agents/todos";
 import {
   addFindingTool,
@@ -35,13 +36,11 @@ import {
 } from "@/agents/types";
 import { markdownJoinerTransform } from "@/agents/utils/markdownJoiner";
 import { useConfigStore } from "@/stores/config";
+import { useUIStore } from "@/stores/ui";
 import { getReplaySession } from "@/utils";
 
 export class ClientSideChatTransport implements ChatTransport<UIMessage> {
-  constructor(
-    private toolContext: ToolContext,
-    private systemPrompt: string,
-  ) {}
+  constructor(private toolContext: ToolContext) {}
 
   async sendMessages(
     options: {
@@ -89,10 +88,10 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
       execute: ({ writer }) => {
         const result = streamText({
           model,
-          system: `<SYSTEM_PROMPT>${this.systemPrompt}</SYSTEM_PROMPT>`,
+          system: buildSystemPrompt(this.toolContext.replaySession.id),
           messages: prompt,
           abortSignal: abortSignal,
-          stopWhen: stepCountIs(35),
+          stopWhen: stepCountIs(configStore.maxIterations),
           tools: {
             sendRequest: sendRequestTool,
             updateTodo: updateTodoTool,
@@ -250,4 +249,27 @@ You can mark pending todos as finished using the todo tool with their IDs.
   }
 
   return contextContent.trim();
+}
+
+function buildSystemPrompt(agentId: string) {
+  const configStore = useConfigStore();
+  const uiStore = useUIStore();
+
+  const selectedPromptsIds = uiStore.getSelectedPrompts(agentId);
+
+  const selectedPrompts = configStore.customPrompts.filter((prompt) =>
+    selectedPromptsIds.includes(prompt.id),
+  );
+
+  let prompt = `<system_prompt>${BASE_SYSTEM_PROMPT}</system_prompt>`;
+
+  if (selectedPrompts.length > 0) {
+    prompt += `\n<additional_instructions>\n`;
+    prompt += selectedPrompts
+      .map((prompt) => `<prompt>${prompt.content}</prompt>`)
+      .join("\n");
+    prompt += `\n</additional_instructions>`;
+  }
+
+  return prompt;
 }

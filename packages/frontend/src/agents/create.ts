@@ -1,6 +1,5 @@
 import { Chat } from "@ai-sdk/vue";
 
-import { BASE_SYSTEM_PROMPT } from "@/agents/prompt";
 import { TodoManager } from "@/agents/todos";
 import { ClientSideChatTransport } from "@/agents/transport";
 import {
@@ -30,10 +29,7 @@ export async function createAgent({
     todoManager,
   });
 
-  const transport = new ClientSideChatTransport(
-    toolContext,
-    BASE_SYSTEM_PROMPT,
-  );
+  const transport = new ClientSideChatTransport(toolContext);
 
   const chat = new Chat<CustomUIMessage>({
     id: replaySessionId,

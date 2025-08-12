@@ -1,6 +1,7 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
 .shimmer {
   display: inline-block;
   color: white;
@@ -13,6 +14,14 @@
   -webkit-animation: shimmer 1s infinite;
   animation: shimmer 1s infinite;
   background-size: 4rem 100%;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }
 
 @-webkit-keyframes shimmer {

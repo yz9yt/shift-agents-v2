@@ -2,7 +2,7 @@ import { type ModelGroup } from "@/agents/types";
 
 export const models: ModelGroup[] = [
   {
-    label: "Claude",
+    label: "Anthropic",
     items: [
       {
         name: "Claude 4 Sonnet",
@@ -24,7 +24,7 @@ export const models: ModelGroup[] = [
     ],
   },
   {
-    label: "GPT",
+    label: "OpenAI",
     items: [
       {
         name: "GPT 5",
@@ -53,7 +53,7 @@ export const models: ModelGroup[] = [
     ],
   },
   {
-    label: "Gemini",
+    label: "Google",
     items: [
       {
         name: "Gemini 2.5 Pro",

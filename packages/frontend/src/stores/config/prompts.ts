@@ -52,10 +52,34 @@ Using null byte "%00" to bypass blacklist filter
 //google%00.com
 \`\`\`
 
+Common regex trick:
+
+Often applications forget to escape the dot character in their regex patterns, leaving wildcards that can be exploited.
+
+For example, if an app uses a regex like \`https://admin\.test\.com/\` but forgets to escape the dots:
+\`https://admin.test.com/\` - the dots become wildcards that match any character
+
+This can be bypassed with:
+\`https://adminatest.com/\` - where the dots are replaced with 'a' characters
+
+The unescaped dots in regex act as wildcards, so \`admin.test.com\` actually matches \`admin[ANY_CHAR]test[ANY_CHAR]com\`
+
+
 Using parameter pollution
 
 \`\`\`
 ?next=whitelisted.com&next=google.com
+\`\`\`
+
+Also, understand how URL parsers work. A URL has these parts: scheme, authority (domain + port), path, query, and fragment.
+
+Common mistakes:
+- https://lvh.me:3001.evil.com - This goes to "lvh.me" on port 3001, not "evil.com"
+- https://lvh.me:3001/@evil.com - This goes to "lvh.me" with path "/@evil.com", not "evil.com"
+
+When in doubt, use the JavaScript execute tool to test URLs:
+\`\`\`
+new URL("https://example.com/@evil.com").hostname
 \`\`\`
 `;
 
@@ -333,6 +357,12 @@ Input: 123' AND (SELECT pg_sleep(5))--
 Output: The browser hangs for 5 seconds before the page loads.
 There it is. The database executed the pg_sleep(5) function, causing a 5-second delay. This confirms it's vulnerable to SQL injection, and I can now use this technique to extract data bit by bit.
 `,
+    isDefault: true,
+  },
+  {
+    id: "5",
+    title: "URL Bypass Techniques",
+    content: urlBypassTechniques,
     isDefault: true,
   },
 ];

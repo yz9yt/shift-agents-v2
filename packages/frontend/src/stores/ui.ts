@@ -3,7 +3,7 @@ import { ref } from "vue";
 
 type UIState = {
   input: string;
-  selectedPromptId: string | undefined;
+  selectedPrompts: string[];
 };
 
 export const useUIStore = defineStore("stores.ui", () => {
@@ -18,7 +18,7 @@ export const useUIStore = defineStore("stores.ui", () => {
     if (!agentsUI.value[agentId]) {
       agentsUI.value[agentId] = {
         input: "",
-        selectedPromptId: undefined,
+        selectedPrompts: [],
       };
     }
 
@@ -33,12 +33,22 @@ export const useUIStore = defineStore("stores.ui", () => {
     return getUIState(agentId).input;
   }
 
-  function setSelectedPromptId(agentId: string, value: string | undefined) {
-    getUIState(agentId).selectedPromptId = value;
+  function selectPrompt(agentId: string, promptId: string) {
+    getUIState(agentId).selectedPrompts.push(promptId);
   }
 
-  function getSelectedPromptId(agentId: string) {
-    return getUIState(agentId).selectedPromptId;
+  function unselectPrompt(agentId: string, promptId: string) {
+    getUIState(agentId).selectedPrompts = getUIState(
+      agentId,
+    ).selectedPrompts.filter((id) => id !== promptId);
+  }
+
+  function setSelectedPrompts(agentId: string, promptIds: string[]) {
+    getUIState(agentId).selectedPrompts = [...promptIds];
+  }
+
+  function getSelectedPrompts(agentId: string) {
+    return getUIState(agentId).selectedPrompts;
   }
 
   return {
@@ -47,7 +57,9 @@ export const useUIStore = defineStore("stores.ui", () => {
     agentsUI,
     setInput,
     getInput,
-    setSelectedPromptId,
-    getSelectedPromptId,
+    selectPrompt,
+    unselectPrompt,
+    setSelectedPrompts,
+    getSelectedPrompts,
   };
 });

@@ -6,16 +6,15 @@ import { defaultCustomPrompts } from "./prompts";
 
 import type { CustomPrompt, ReasoningConfig } from "@/agents/types";
 import { useSDK } from "@/plugins/sdk";
-import { SECRET_API_KEY } from "@/secrets";
 import { type PluginStorage } from "@/types";
 
 export const useConfigStore = defineStore("stores.config", () => {
   const sdk = useSDK();
 
   const customPrompts = ref<CustomPrompt[]>(defaultCustomPrompts);
-  const _openRouterApiKey = ref<string>(SECRET_API_KEY);
+  const _openRouterApiKey = ref<string>("");
   const _model = ref<string>("anthropic/claude-sonnet-4");
-  const _maxIterations = ref<number>(25);
+  const _maxIterations = ref<number>(35);
   const reasoningConfig = ref<ReasoningConfig>({
     enabled: true,
     max_tokens: 1500,

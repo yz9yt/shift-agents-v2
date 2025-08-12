@@ -74,6 +74,10 @@ export const useChat = () => {
   };
 
   const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.stopPropagation();
+      return;
+    }
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleSend();
