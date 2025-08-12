@@ -70,11 +70,11 @@ export const useToolMessage = (params: {
         successIcon: "fas fa-edit",
       },
       runJavaScript: {
-        successLabel: "Ran JavaScript",
+        successLabel: "Executed JavaScript",
         successIcon: "fas fa-code",
       },
       grepResponse: {
-        successLabel: "Searched in response",
+        successLabel: "Grepped through response",
         successIcon: "fas fa-search",
       },
       addTodo: { successLabel: "Added a todo", successIcon: "fas fa-tasks" },
@@ -89,7 +89,10 @@ export const useToolMessage = (params: {
     };
 
   const toolIcon = computed(() => {
-    if (messageState.value === "abort") {
+    if (
+      messageState.value === "abort" &&
+      (state.value === "input-streaming" || state.value === "input-available")
+    ) {
       return "fas fa-exclamation-triangle";
     }
 
@@ -108,7 +111,10 @@ export const useToolMessage = (params: {
   });
 
   const formatToolCall = computed(() => {
-    if (messageState.value === "abort") {
+    if (
+      messageState.value === "abort" &&
+      (state.value === "input-streaming" || state.value === "input-available")
+    ) {
       return `Aborted ${toolName.value}`;
     }
     if (state.value === "input-streaming") {

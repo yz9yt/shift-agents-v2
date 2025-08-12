@@ -4,6 +4,10 @@ import { useContent } from "./useContent";
 
 const { error } = useContent();
 const agentsStore = useAgentsStore();
+
+const restart = () => {
+  agentsStore.selectedAgent?.clearError();
+};
 </script>
 
 <template>
@@ -12,10 +16,14 @@ const agentsStore = useAgentsStore();
   >
     <i class="fas fa-exclamation-triangle text-red-500 text-4xl"></i>
     <h3 class="text-lg font-semibold text-surface-200">Error Occurred</h3>
-    <pre class="text-surface-400 text-sm whitespace-pre-wrap select-text py-2">
+    <span class="text-surface-400 text-sm whitespace-pre-wrap select-text py-2">
       {{ error }}
-    </pre>
-
-    <pre class="max-h-64 overflow-y-auto">{{ agentsStore.selectedAgent }}</pre>
+    </span>
+    <button
+      class="mt-4 px-4 py-2 bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-lg text-sm"
+      @click="restart"
+    >
+      Clear Error
+    </button>
   </div>
 </template>

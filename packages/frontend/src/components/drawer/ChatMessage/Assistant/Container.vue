@@ -8,12 +8,14 @@ import { Markdown } from "./Markdown";
 import { Reasoning } from "./Reasoning";
 
 import { type CustomUIMessage } from "@/agents/types";
+import { useAgentsStore } from "@/stores/agents";
 
 const props = defineProps<{
   message: CustomUIMessage & { role: "assistant" };
 }>();
 
 const { message } = toRefs(props);
+const agentsStore = useAgentsStore();
 
 const noContentYet = computed(() => {
   if (message.value.metadata?.state !== "streaming") {
@@ -36,7 +38,10 @@ const noContentYet = computed(() => {
 });
 
 const isGenerating = computed(() => {
-  return message.value.metadata?.state === "streaming";
+  return (
+    message.value.metadata?.state === "streaming" &&
+    agentsStore.selectedAgent?.status === "streaming"
+  );
 });
 
 const isAborted = computed(() => {

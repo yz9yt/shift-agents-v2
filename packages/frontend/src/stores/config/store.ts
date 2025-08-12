@@ -14,7 +14,7 @@ export const useConfigStore = defineStore("stores.config", () => {
 
   const customPrompts = ref<CustomPrompt[]>(defaultCustomPrompts);
   const _openRouterApiKey = ref<string>(SECRET_API_KEY);
-  const _model = ref<string>("openai/gpt-5-mini");
+  const _model = ref<string>("anthropic/claude-sonnet-4");
   const _maxIterations = ref<number>(25);
   const reasoningConfig = ref<ReasoningConfig>({
     enabled: true,

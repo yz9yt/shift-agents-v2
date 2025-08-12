@@ -27,18 +27,24 @@ export const models: ModelGroup[] = [
     label: "GPT",
     items: [
       {
+        name: "GPT 5",
+        id: "openai/gpt-5",
+        isReasoningModel: true,
+      },
+      {
         name: "GPT 5 Nano",
-        isRecommended: true,
         id: "openai/gpt-5-nano",
+        isReasoningModel: true,
       },
       {
         name: "GPT 5 Mini",
-        isRecommended: true,
         id: "openai/gpt-5-mini",
+        isReasoningModel: true,
       },
       {
         name: "GPT 4.1",
         id: "openai/gpt-4.1",
+        isReasoningModel: true,
       },
       {
         name: "GPT OOS 120B",
@@ -75,6 +81,10 @@ export const models: ModelGroup[] = [
         isRecommended: true,
         id: "deepseek/deepseek-r1-0528",
       },
+      {
+        name: "DeepSeek V3",
+        id: "deepseek/deepseek-chat-v3-0324",
+      },
     ],
   },
   {
@@ -83,9 +93,17 @@ export const models: ModelGroup[] = [
       {
         name: "Kimi K2",
         isReasoningModel: true,
-        isRecommended: true,
         id: "moonshotai/kimi-k2",
       },
     ],
   },
+  {
+    label: "Qwen",
+    items: [
+      {
+        name: "Qwen3 Coder",
+        id: "qwen/qwen3-coder",
+      },
+    ],
+  }
 ];

@@ -10,7 +10,8 @@ export const useContent = () => {
       return [];
     }
 
-    return agentStore.selectedAgent.messages;
+    const messages = agentStore.selectedAgent.messages;
+    return messages;
   });
 
   const hasMessages = computed(() => messages.value.length > 0);

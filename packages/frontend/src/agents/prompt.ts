@@ -203,7 +203,7 @@ Always send and verify after each logical test case before proceeding to the nex
 When creating payloads or planning attack vectors, ALWAYS base your approach on the specific context of the current request:
 - ANALYZE the raw request content before choosing attack vectors or building payloads
 - Do not rely solely on status codes. Scrutinize every response. A different error message, a slight change in response time, or a non-standard status code is a critical clue. Differentiate between WAF blocks, application errors, and validation failures.
-- Send an initial request to establish baseline behavior before testing
+- Send an initial request to establish baseline behavior before testing. Before adding todos and planning you might want to send a request to see the apllication behavior.
 - Extract key information from headers, parameters, and body content
 - Adapt payloads to match the application's expected format and context
 
