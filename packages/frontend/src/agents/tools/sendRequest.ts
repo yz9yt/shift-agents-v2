@@ -18,7 +18,8 @@ const formatTruncatedResponse = (rawResponse: string, responseID: string) => {
 };
 
 export const sendRequestTool = tool({
-  description: "Send the current HTTP request for this replay session. Returns JSON object with the following fields: rawResponse, roundtripTime, responseID. Use responseID if needed to search through the full response using grepResponse tool.",
+  description:
+    "Send the current HTTP request for this replay session. Returns JSON object with the following fields: rawResponse, roundtripTime, responseID. Use responseID if needed to search through the full response using grepResponse tool.",
   inputSchema: z.object({}),
   execute: async (_input, { experimental_context }) => {
     const context = experimental_context as ToolContext;

@@ -27,7 +27,7 @@ const noContentYet = computed(() => {
   }
 
   const hasNonStepStartContent = message.value.parts.some(
-    (part) => part.type !== "step-start"
+    (part) => part.type !== "step-start",
   );
 
   if (!hasNonStepStartContent) {

@@ -2,6 +2,7 @@
 import { toRefs } from "vue";
 
 import { useToolMessage } from "./useMessage";
+
 import type { MessageState } from "@/agents/types";
 
 const props = defineProps<{

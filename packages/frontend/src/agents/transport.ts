@@ -38,7 +38,10 @@ import { useConfigStore } from "@/stores/config";
 import { getReplaySession } from "@/utils";
 
 export class ClientSideChatTransport implements ChatTransport<UIMessage> {
-  constructor(private toolContext: ToolContext, private systemPrompt: string) {}
+  constructor(
+    private toolContext: ToolContext,
+    private systemPrompt: string,
+  ) {}
 
   async sendMessages(
     options: {
@@ -48,13 +51,13 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
     } & {
       trigger: "submit-message" | "submit-tool-result" | "regenerate-message";
       messageId?: string;
-    } & ChatRequestOptions
+    } & ChatRequestOptions,
   ): Promise<ReadableStream<UIMessageChunk>> {
     const { abortSignal, messages } = options;
 
     const initialSession = await getReplaySession(
       this.toolContext.sdk,
-      this.toolContext.replaySession.id
+      this.toolContext.replaySession.id,
     );
     if (initialSession.kind === "Error") {
       throw new Error(initialSession.error);
@@ -144,7 +147,7 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
               "[Shift Agents] Error: " + errorText,
               {
                 variant: "error",
-              }
+              },
             );
 
             console.error(error);
@@ -181,7 +184,7 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
               return {};
             },
             sendReasoning: true,
-          })
+          }),
         );
       },
     });
@@ -216,7 +219,7 @@ The HTTP request you are analyzing:
   if (allTodos.length > 0) {
     const pendingTodos = allTodos.filter((todo) => todo.status === "pending");
     const completedTodos = allTodos.filter(
-      (todo) => todo.status === "completed"
+      (todo) => todo.status === "completed",
     );
 
     contextContent += `<todos>

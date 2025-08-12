@@ -1,7 +1,7 @@
 import { computed, ref, type Ref } from "vue";
 
-import { useAgentsStore } from "@/stores/agents";
 import type { MessageState } from "@/agents/types";
+import { useAgentsStore } from "@/stores/agents";
 
 type ToolState =
   | "input-streaming"

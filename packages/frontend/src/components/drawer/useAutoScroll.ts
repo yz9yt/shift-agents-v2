@@ -8,14 +8,14 @@ import {
 } from "vue";
 
 export const useAutoScroll = (
-  containerRef: Ref<HTMLElement | null | undefined>,
+  containerRef: Ref<HTMLElement | undefined>,
   sources: Array<WatchSource<unknown>>,
   options?: {
     always?: boolean;
     smooth?: boolean;
     observeDeep?: boolean;
     bottomBufferPx?: number;
-  }
+  },
 ) => {
   const cfg = {
     always: false,
@@ -33,7 +33,7 @@ export const useAutoScroll = (
 
   const getEl = () => {
     const el = containerRef.value;
-    if (el == null) return undefined;
+    if (el === undefined) return undefined;
     return el;
   };
 
@@ -107,7 +107,7 @@ export const useAutoScroll = (
   watch(
     () => containerRef.value,
     (el, _prev, onCleanup) => {
-      if (el == null) return;
+      if (el === undefined) return;
       attachObservers();
       onCleanup(() => {
         mutationObserver?.disconnect();
@@ -115,7 +115,7 @@ export const useAutoScroll = (
         detachScrollListener?.();
       });
     },
-    { immediate: false }
+    { immediate: false },
   );
 
   watch(
@@ -124,6 +124,6 @@ export const useAutoScroll = (
       await nextTick();
       scrollToBottom(false);
     },
-    { deep: true, immediate: true }
+    { deep: true, immediate: true },
   );
 };

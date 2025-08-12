@@ -1,9 +1,4 @@
-import {
-  computed,
-  ref,
-  type Ref,
-  watch,
-} from "vue";
+import { computed, ref, type Ref, watch } from "vue";
 
 import type { MessageState } from "@/agents/types";
 
@@ -22,7 +17,7 @@ export const useReasoning = (args: {
   const isReasoning = computed(
     () =>
       args.messageState.value === "streaming" &&
-      args.state.value === "streaming"
+      args.state.value === "streaming",
   );
 
   const reasoningText = computed(() => {
@@ -31,7 +26,7 @@ export const useReasoning = (args: {
   });
 
   const hasContent = computed(
-    () => args.content.value !== undefined && args.content.value.length > 0
+    () => args.content.value !== undefined && args.content.value.length > 0,
   );
 
   watch(
@@ -41,7 +36,7 @@ export const useReasoning = (args: {
         showReasoning.value = false;
       }
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   return {

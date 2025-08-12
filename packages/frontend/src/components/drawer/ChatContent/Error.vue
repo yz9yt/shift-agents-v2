@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useAgentsStore } from "@/stores/agents";
 import { useContent } from "./useContent";
+
+import { useAgentsStore } from "@/stores/agents";
 
 const { error } = useContent();
 const agentsStore = useAgentsStore();

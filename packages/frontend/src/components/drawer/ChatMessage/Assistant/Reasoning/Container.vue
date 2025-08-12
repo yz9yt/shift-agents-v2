@@ -28,7 +28,7 @@ const {
 useAutoScroll(
   contentContainer,
   [() => (isReasoning.value ? content.value : undefined)],
-  { smooth: true, always: true }
+  { smooth: true, always: true },
 );
 </script>
 
@@ -61,10 +61,7 @@ useAutoScroll(
           :class="showReasoning ? 'fa-chevron-down' : 'fa-chevron-right'"
         ></i>
       </button>
-      <div
-        v-else
-        class="flex items-center text-surface-300 text-sm font-mono"
-      >
+      <div v-else class="flex items-center text-surface-300 text-sm font-mono">
         <span>{{ reasoningText }}</span>
       </div>
 

@@ -49,7 +49,7 @@ export const models: ModelGroup[] = [
       {
         name: "GPT OOS 120B",
         id: "openai/gpt-oss-120b",
-      }
+      },
     ],
   },
   {
@@ -105,5 +105,5 @@ export const models: ModelGroup[] = [
         id: "qwen/qwen3-coder",
       },
     ],
-  }
+  },
 ];
