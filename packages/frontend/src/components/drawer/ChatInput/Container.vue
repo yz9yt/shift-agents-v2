@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import Button from "primevue/button";
-import Select from "primevue/select";
-import { computed, onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 
+import { ModelSelector } from "./ModelSelector";
+import { PromptSelector } from "./PromptSelector";
 import { useChat } from "./useChat";
-
-import { useAgentStore } from "@/stores/agent";
-import { useConfigStore } from "@/stores/config";
 
 const {
   abortMessage,
@@ -18,17 +16,7 @@ const {
   handleKeydown,
 } = useChat();
 
-const configStore = useConfigStore();
-const agentStore = useAgentStore();
 const textareaRef = ref<HTMLTextAreaElement>();
-
-const promptOptions = computed(() => {
-  const options = [
-    { id: undefined, title: "None" },
-    ...configStore.customPrompts,
-  ];
-  return options;
-});
 
 onMounted(() => {
   textareaRef.value?.focus();
@@ -47,7 +35,7 @@ watch(
 
 <template>
   <div
-    class="p-4 bg-surface-900 h-40 flex flex-col gap-2 border-t border-surface-700"
+    class="bg-surface-900 h-52 flex flex-col gap-4 border-t border-surface-700 p-4"
   >
     <textarea
       ref="textareaRef"
@@ -58,7 +46,7 @@ watch(
         'text-surface-200': isAgentIdle,
         'text-surface-400': !isAgentIdle,
       }"
-      class="h-30 border-0 outline-none font-mono resize-none bg-transparent flex-1 text-sm focus:outline-none focus:ring-0 overflow-y-auto scrollbar-hide"
+      class="h-30 border-0 outline-none font-mono resize-none bg-transparent flex-1 text-base focus:outline-none focus:ring-0 overflow-y-auto scrollbar-hide"
       style="scrollbar-width: none; -ms-overflow-style: none"
       spellcheck="false"
       autocomplete="off"
@@ -69,64 +57,11 @@ watch(
 
     <div class="flex justify-between gap-2 items-center">
       <div class="flex gap-2">
-        <Select
-          v-model="configStore.model"
-          :options="configStore.models"
-          option-label="name"
-          option-value="id"
-          option-group-label="label"
-          option-group-children="items"
-          filter
-          filter-placeholder="Search models..."
-          class="text-sm font-mono w-50"
-        >
-          <template #option="slotProps">
-            <div class="flex items-center justify-between w-full">
-              <span>{{ slotProps.option.name }}</span>
-              <div class="flex items-center gap-2">
-                <i
-                  v-if="slotProps.option.reasoningModel"
-                  class="fas fa-brain text-blue-400 text-xs"
-                  title="This model supports reasoning"
-                />
-                <i
-                  v-if="slotProps.option.isRecommended"
-                  class="fas fa-star text-secondary-400 text-xs"
-                  title="This model is recommended"
-                />
-              </div>
-            </div>
-          </template>
-        </Select>
-
-        <Select
-          v-if="agentStore.selectedAgent && promptOptions.length > 1"
-          v-model="agentStore.selectedAgent.selectedPromptId"
-          :options="promptOptions"
-          option-label="title"
-          option-value="id"
-          placeholder="Select prompt"
-          class="text-sm font-mono"
-        />
+        <ModelSelector />
       </div>
 
       <div class="flex items-center gap-2">
-        <Button
-          v-if="configStore.selectedModel?.reasoningModel"
-          severity="tertiary"
-          icon="fas fa-brain"
-          disabled
-          :pt="{
-            root: {
-              class:
-                'bg-secondary-400/20 text-secondary-400 py-1 px-1.5 flex items-center justify-center rounded-md h-8 w-8 opacity-75',
-            },
-            icon: {
-              class: 'text-sm',
-            },
-          }"
-        />
-
+        <PromptSelector v-if="isAgentIdle" />
         <Button
           v-if="isAgentIdle"
           severity="tertiary"

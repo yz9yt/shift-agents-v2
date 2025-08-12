@@ -1,9 +1,10 @@
 import { Classic } from "@caido/primevue";
 import PrimeVue from "primevue/config";
-import Tooltip from 'primevue/tooltip';
+import Tooltip from "primevue/tooltip";
 import { type App, createApp } from "vue";
 
 import { Drawer } from "@/components/drawer";
+import { onLocationChange } from "@/dom";
 import { SDKPlugin } from "@/plugins/sdk";
 import { type FrontendSDK } from "@/types";
 
@@ -12,10 +13,12 @@ export const useDrawerManager = (sdk: FrontendSDK) => {
   let unsubscribe: (() => void) | undefined = undefined;
 
   const start = () => {
-    // @ts-expect-error temporary workaround for missing onPageChange type
-    unsubscribe = sdk.navigation.onPageChange((page) => {
-      console.log("onPageChange", page);
-      if (page === "#/replay") {
+    if (location.hash === "#/replay") {
+      inject();
+    }
+
+    unsubscribe = onLocationChange(({ newHash }) => {
+      if (newHash === "#/replay") {
         inject();
       } else {
         remove();
@@ -56,7 +59,7 @@ export const useDrawerManager = (sdk: FrontendSDK) => {
         unstyled: true,
         pt: Classic,
       });
-      app.directive('tooltip', Tooltip);
+      app.directive("tooltip", Tooltip);
     }
     app.mount(container);
   };

@@ -1,42 +1,51 @@
-import { computed, toRefs } from "vue";
+import { computed } from "vue";
 
-import { useChat } from "../../ChatInput/useChat";
+import type { CustomUIMessage } from "@/agents/types";
+import { useAgentsStore } from "@/stores/agents";
+import { useUIStore } from "@/stores/ui";
 
-import type { UIMessage } from "@/engine/types/agent";
-import { useAgentStore } from "@/stores/agent";
+type MessagePartLike = { type: string; text?: string };
 
-export const useUserMessage = (props: {
-  message: UIMessage & { kind: "user" };
-}) => {
-  const { message } = toRefs(props);
-  const agentStore = useAgentStore();
-  const { editMessage } = useChat();
+export const useUserMessage = () => {
+  const agentStore = useAgentsStore();
+  const uiStore = useUIStore();
 
   const selectedAgent = computed(() => agentStore.selectedAgent);
 
-  const isLastUserMessage = computed(() => {
-    if (!selectedAgent.value) return false;
-
-    const uiMessages = selectedAgent.value.uiMessages;
-    const userMessages = uiMessages.filter((msg) => msg.kind === "user");
-    const lastUserMessage = userMessages[userMessages.length - 1];
-
-    return lastUserMessage?.id === message.value.id;
-  });
-
   const isGenerating = computed(() => {
-    return (
-      selectedAgent.value?.currentStatus !== "idle" && isLastUserMessage.value
-    );
+    return selectedAgent.value?.status === "streaming";
   });
 
-  const handleMessageClick = () => {
-    if (isGenerating.value) return;
-    editMessage(message.value.id, message.value.content);
+  const handleMessageClick = async (
+    message: CustomUIMessage & { role: "user" },
+  ) => {
+    const agent = selectedAgent.value;
+    const agentId = agentStore.selectedId;
+    if (!agent || agentId === undefined) {
+      return;
+    }
+
+    await agentStore.abortSelectedAgent();
+
+    const index = agent.messages.findIndex((m) => m.id === message.id);
+    if (index === -1) {
+      return;
+    }
+
+    const text = (message.parts as MessagePartLike[])
+      .filter((p) => p.type === "text" && p.text !== undefined)
+      .map((p) => p.text as string)
+      .join("");
+
+    //TODO: figure out if there is a cleaner way, it breaks randomly if we dont do this
+    setTimeout(() => {
+      agent.messages = agent.messages.slice(0, index);
+    }, 100);
+
+    uiStore.setInput(agentId, text);
   };
 
   return {
-    isLastUserMessage,
     isGenerating,
     handleMessageClick,
   };

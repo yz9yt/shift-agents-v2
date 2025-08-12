@@ -1,26 +1,41 @@
 <script setup lang="ts">
+import { toRefs } from "vue";
+
 import { useToolMessage } from "./useMessage";
 
-import type { UIMessage } from "@/engine/types/agent";
+import type { MessageState } from "@/agents/types";
 
 const props = defineProps<{
-  message: UIMessage & { kind: "tool" };
+  toolName: string;
+  state:
+    | "input-streaming"
+    | "input-available"
+    | "output-available"
+    | "output-error";
+  output: unknown;
+  messageState: MessageState | undefined;
 }>();
 
+const { toolName, state, output, messageState } = toRefs(props);
+
 const {
-  showDetails,
   isProcessing,
-  formatToolCalls,
+  formatToolCall,
   toolDetails,
-  toolIcon,
+  showDetails,
   toggleDetails,
-} = useToolMessage(props);
+  toolIcon,
+} = useToolMessage({ toolName, state, output, messageState });
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 text-surface-300 px-2">
-    <div class="flex items-center gap-2 hover:text-surface-200">
-      <i :class="toolIcon" class="text-sm w-4 text-left" />
+  <div class="flex flex-col gap-2 text-surface-300 py-1">
+    <div class="group flex items-center gap-2 hover:text-surface-200">
+      <i
+        v-if="toolIcon"
+        :class="toolIcon"
+        class="text-sm text-surface-200 w-4"
+      />
       <span
         class="text-sm font-mono font-thin flex items-center gap-1 justify-between w-full overflow-hidden text-ellipsis text-nowrap"
         :class="[
@@ -29,10 +44,10 @@ const {
         ]"
         @click="toggleDetails"
       >
-        {{ formatToolCalls }}
+        {{ formatToolCall }}
         <i
           v-if="toolDetails"
-          class="text-sm w-4"
+          class="text-sm w-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           :class="showDetails ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"
         />
       </span>
@@ -45,43 +60,3 @@ const {
     </div>
   </div>
 </template>
-
-<style scoped>
-.shimmer {
-  display: inline-block;
-  color: white;
-  background: #acacac linear-gradient(to left, #acacac, #ffffff 50%, #acacac);
-  background-position: -4rem top;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -webkit-animation: shimmer 2.2s infinite;
-  animation: shimmer 2.2s infinite;
-  background-size: 4rem 100%;
-}
-
-@-webkit-keyframes shimmer {
-  0% {
-    background-position: -4rem top;
-  }
-  70% {
-    background-position: 12rem top;
-  }
-  100% {
-    background-position: 12rem top;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -4rem top;
-  }
-  70% {
-    background-position: 12rem top;
-  }
-  100% {
-    background-position: 12rem top;
-  }
-}
-</style>

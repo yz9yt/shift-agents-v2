@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import None from "./None.vue";
+import Error from "./Error.vue";
+import NoMessages from "./NoMessages.vue";
+import NoSelection from "./NoSelection.vue";
 import Success from "./Success.vue";
 import { useContent } from "./useContent";
 
-import BadState from "@/components/drawer/ChatContent/BadState.vue";
-
-const { hasMessages, hasSelectedAgent } = useContent();
+const { hasMessages, hasSelectedAgent, error } = useContent();
 </script>
 
 <template>
-  <BadState v-if="!hasSelectedAgent" />
-  <None v-else-if="!hasMessages" />
+  <NoSelection v-if="!hasSelectedAgent" />
+  <NoMessages v-else-if="!hasMessages" />
+  <Error v-else-if="error" />
   <Success v-else />
 </template>

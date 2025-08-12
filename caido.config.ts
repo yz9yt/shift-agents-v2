@@ -1,11 +1,13 @@
-import { defineConfig } from '@caido-community/dev';
-import vue from '@vitejs/plugin-vue';
+import { defineConfig } from "@caido-community/dev";
+import vue from "@vitejs/plugin-vue";
 import tailwindcss from "tailwindcss";
 // @ts-expect-error no declared types at this time
 import tailwindPrimeui from "tailwindcss-primeui";
 import tailwindCaido from "@caido/tailwindcss";
 import path from "path";
 import prefixwrap from "postcss-prefixwrap";
+// @ts-expect-error no types
+import tailwindConfig from "./packages/frontend/tailwind.config.js";
 
 const id = "shift-agents";
 export default defineConfig({
@@ -20,15 +22,15 @@ export default defineConfig({
   },
   plugins: [
     {
-      kind: 'frontend',
+      kind: "frontend",
       id: "frontend",
-      root: 'packages/frontend',
+      root: "packages/frontend",
       vite: {
         plugins: [vue()],
         build: {
           rollupOptions: {
             external: [
-              '@caido/frontend-sdk',
+              "@caido/frontend-sdk",
               "@codemirror/state",
               "@codemirror/view",
               "@codemirror/autocomplete",
@@ -38,9 +40,9 @@ export default defineConfig({
               "@codemirror/language",
               "@lezer/common",
               "@lezer/highlight",
-              "@lezer/lr"
-            ]
-          }
+              "@lezer/lr",
+            ],
+          },
         },
         resolve: {
           alias: [
@@ -53,34 +55,29 @@ export default defineConfig({
         css: {
           postcss: {
             plugins: [
-              // This plugin wraps the root element in a unique ID
-              // This is necessary to prevent styling conflicts between plugins
               prefixwrap(`#plugin--${id}`),
 
               tailwindcss({
+                ...tailwindConfig,
                 corePlugins: {
+                  ...tailwindConfig.corePlugins,
                   preflight: false,
                 },
                 content: [
-                  './packages/frontend/src/**/*.{vue,ts}',
-                  './node_modules/@caido/primevue/dist/primevue.mjs'
+                  ...tailwindConfig.content,
+                  "./packages/frontend/src/**/*.{vue,ts}",
+                  "./node_modules/@caido/primevue/dist/primevue.mjs",
                 ],
-                // Check the [data-mode="dark"] attribute on the <html> element to determine the mode
-                // This attribute is set in the Caido core application
-                darkMode: ["selector", '[data-mode="dark"]'],
                 plugins: [
-
-                  // This plugin injects the necessary Tailwind classes for PrimeVue components
+                  ...(tailwindConfig.plugins || []),
                   tailwindPrimeui,
-
-                  // This plugin injects the necessary Tailwind classes for the Caido theme
                   tailwindCaido,
                 ],
-              })
-            ]
-          }
-        }
-      }
-    }
-  ]
+              }),
+            ],
+          },
+        },
+      },
+    },
+  ],
 });

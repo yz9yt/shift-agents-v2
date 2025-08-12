@@ -1,7 +1,7 @@
 import { Classic } from "@caido/primevue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
-import Tooltip from 'primevue/tooltip';
+import Tooltip from "primevue/tooltip";
 import { createApp } from "vue";
 
 import { SDKPlugin } from "./plugins/sdk";
@@ -10,7 +10,7 @@ import type { FrontendSDK } from "./types";
 import App from "./views/App.vue";
 
 import { createDOMManager } from "@/dom";
-import { useAgentStore } from "@/stores/agent";
+import { useAgentsStore } from "@/stores/agents";
 import { useUIStore } from "@/stores/ui";
 
 export const init = (sdk: FrontendSDK) => {
@@ -21,7 +21,7 @@ export const init = (sdk: FrontendSDK) => {
     pt: Classic,
   });
 
-  app.directive('tooltip', Tooltip);
+  app.directive("tooltip", Tooltip);
 
   const pinia = createPinia();
   app.use(pinia);
@@ -59,55 +59,12 @@ export const init = (sdk: FrontendSDK) => {
 
   sdk.shortcuts.register("shift-agents:toggle-drawer", ["shift", "meta", "i"]);
 
-  // TEMPORARY WORKAROUND FOR MISSING ONPAGECHANGE TYPE
-
-  const pageChangeSubscribers = new Set<(page: string) => void>();
-
-  // @ts-expect-error temporary workaround for missing onPageChange type
-  sdk.navigation.onPageChange = (callback: (page: string) => void) => {
-    pageChangeSubscribers.add(callback);
-    return () => {
-      pageChangeSubscribers.delete(callback);
-    };
-  };
-
-  // @ts-expect-error temporary workaround for missing onPageChange type
-  sdk.navigation.addPageChangeListener = (callback: (page: string) => void) => {
-    pageChangeSubscribers.add(callback);
-    return () => {
-      pageChangeSubscribers.delete(callback);
-    };
-  };
-
-  // @ts-expect-error temporary workaround for missing onPageChange type
-  sdk.navigation.removePageChangeListener = (
-    callback: (page: string) => void,
-  ) => {
-    pageChangeSubscribers.delete(callback);
-  };
-
-  let currentPage: string | undefined = undefined;
-  setInterval(() => {
-    const newPage = window.location.hash;
-    if (currentPage !== newPage) {
-      currentPage = newPage;
-      // Notify all subscribers
-      pageChangeSubscribers.forEach((callback) => {
-        try {
-          callback(newPage);
-        } catch (error) {
-          console.error("Error in page change callback:", error);
-        }
-      });
-    }
-  }, 50);
-
   const domManager = createDOMManager(sdk);
   domManager.drawer.start();
   domManager.session.start();
 
   domManager.session.onSelected((sessionId) => {
-    const agentStore = useAgentStore();
+    const agentStore = useAgentsStore();
     if (sessionId !== undefined) {
       agentStore.selectAgent(sessionId);
     }

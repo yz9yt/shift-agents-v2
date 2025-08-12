@@ -16,7 +16,7 @@ export const useForm = () => {
   };
 
   const validateApiKey = async () => {
-    if (!openRouterApiKey.value?.trim()) {
+    if (!openRouterApiKey.value) {
       sdk.window.showToast("Please enter an API key", { variant: "error" });
       return;
     }
@@ -26,7 +26,7 @@ export const useForm = () => {
       const response = await fetch("https://openrouter.ai/api/v1/credits", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${openRouterApiKey.value.trim()}`,
+          Authorization: `Bearer ${openRouterApiKey.value}`,
           "Content-Type": "application/json",
         },
       });

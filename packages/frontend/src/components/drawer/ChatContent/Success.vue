@@ -1,45 +1,35 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue";
+import { ref } from "vue";
 
 import { ChatMessage } from "../ChatMessage";
+import { useAutoScroll } from "../useAutoScroll";
 
 import { useContent } from "./useContent";
+
 import { useUIStore } from "@/stores/ui";
 
 const { messages, agentStatus } = useContent();
 const scrollContainer = ref<HTMLElement | undefined>();
 const uiStore = useUIStore();
 
-watch(
-  [messages, agentStatus, uiStore.drawerVisible],
-  async () => {
-    if (!scrollContainer.value) {
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainer.value;
-    const isScrolledToBottom = scrollHeight - clientHeight <= scrollTop + 1;
-
-    if (isScrolledToBottom) {
-      await nextTick();
-      scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
-    }
-  },
-  {
-    deep: true,
-  },
-);
+useAutoScroll(scrollContainer, [
+  messages,
+  agentStatus,
+  () => uiStore.drawerVisible,
+]);
 </script>
 
 <template>
-  <div
-    ref="scrollContainer"
-    class="flex-1 overflow-y-auto px-4 pb-2 flex flex-col gap-2 h-full"
-  >
-    <ChatMessage
-      v-for="message in messages"
-      :key="message.id"
-      :message="message"
-    />
+  <div class="flex flex-col h-full relative overflow-auto">
+    <div
+      ref="scrollContainer"
+      class="flex-1 overflow-y-auto px-2 pb-2 flex flex-col gap-2"
+    >
+      <ChatMessage
+        v-for="message in messages"
+        :key="message.id"
+        :message="message"
+      />
+    </div>
   </div>
 </template>

@@ -1,16 +1,16 @@
 import { computed } from "vue";
 
-import { useAgentStore } from "@/stores/agent";
+import { useAgentsStore } from "@/stores/agents";
 
 export const useTodos = () => {
-  const agentStore = useAgentStore();
+  const agentStore = useAgentsStore();
 
   const todos = computed(() => {
-    if (!agentStore.selectedAgent) {
+    if (!agentStore.selectedToolContext) {
       return [];
     }
 
-    return agentStore.selectedAgent.todoManager.getTodos();
+    return agentStore.selectedToolContext.todoManager.getTodos();
   });
 
   const hasTodos = computed(() => todos.value.length > 0);
