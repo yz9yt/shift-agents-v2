@@ -1,6 +1,6 @@
 {
-  "name": "shift-agents",
-  "version": "1.0.0",
+  "name": "shift-agents-V2",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "typecheck": "pnpm -r typecheck",
