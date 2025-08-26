@@ -1,3 +1,5 @@
+// modified by Albert.C Date 2025-08-22 Version 0.01
+
 import { defineConfig } from "@caido-community/dev";
 import vue from "@vitejs/plugin-vue";
 import tailwindcss from "tailwindcss";
@@ -9,12 +11,12 @@ import prefixwrap from "postcss-prefixwrap";
 // @ts-expect-error no types
 import tailwindConfig from "./packages/frontend/tailwind.config.js";
 
-const id = "shift-agents";
+const id = "shift-agents-v2";
 export default defineConfig({
   id,
-  name: "Shift Agents",
-  description: "Delegate your work to Shift Agents",
-  version: "1.0.0",
+  name: "Shift Agents v2",
+  description: "Shift Agents v2: Delegate your work to a new generation of Shift Agents",
+  version: "2.0.0",
   author: {
     name: "Caido Labs Inc.",
     email: "dev@caido.io",
@@ -56,7 +58,6 @@ export default defineConfig({
           postcss: {
             plugins: [
               prefixwrap(`#plugin--${id}`),
-
               tailwindcss({
                 ...tailwindConfig,
                 corePlugins: {
