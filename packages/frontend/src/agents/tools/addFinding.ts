@@ -1,3 +1,4 @@
+// modified by Albert.C Date 2025-08-22 Version 0.01
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -28,6 +29,14 @@ export const addFindingTool = tool({
         description: input.markdown,
         reporter: "Shift Agent",
       });
+
+      // Automatically complete the todo related to this finding
+      context.todoManager.getPendingTodos().forEach(todo => {
+        if (input.markdown.includes(todo.content)) {
+          context.todoManager.completeTodo(todo.id);
+        }
+      });
+      
 
       return { message: "Finding added" };
     } catch (error) {

@@ -17,7 +17,11 @@ const restart = () => {
   >
     <i class="fas fa-exclamation-triangle text-red-500 text-4xl"></i>
     <h3 class="text-lg font-semibold text-surface-200">Error Occurred</h3>
-    <span class="text-surface-400 text-sm whitespace-pre-wrap select-text py-2">
+    <span v-if="error?.message && error.message.includes('Too many consecutive API failures')"
+          class="text-surface-400 text-sm whitespace-pre-wrap select-text py-2">
+      The agent stopped automatically due to too many failed attempts to connect to the API. Please check your OpenRouter API key and network connection.
+    </span>
+    <span v-else class="text-surface-400 text-sm whitespace-pre-wrap select-text py-2">
       {{ error }}
     </span>
     <button

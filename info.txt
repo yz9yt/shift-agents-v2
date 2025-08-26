@@ -1,0 +1,46 @@
+Shift Agents v2: Technical Documentation
+1. Overview
+This document details the modifications and new functionalities implemented in the Shift Agents v2 plugin for Caido. The primary goal of this refactoring is to enhance agent autonomy, efficiency in using AI models, and user experience. The new architecture is centered on a model orchestration system, a robust request controller, and an autonomous operation mode. All changes are versioned with the format Version 0.05 to provide a clear history for the development team.
+
+2. Architectural and Code Structure Changes
+Significant changes have been made to the project structure to accommodate the new functionalities. The main areas affected are detailed below.
+
+packages/frontend/src/agents/
+types/config.ts: The configuration now includes the OrchestrationMode type, which defines model selection modes ("Automatic", "Economy", "Manual"). The PluginStorage interface has been updated to store the chosen mode and the manual model sequence (manualModelSequence).
+
+todos.ts: The function completeTodoByContent(content: string) was added to enable the agent to automatically mark tasks as completed based on their content, streamlining the workflow when a finding is reported.
+
+transport.ts: This file is the core of the new logic. The ClientSideChatTransport now implements:
+
+Model Orchestrator Logic: Dynamically selects a model from a predefined sequence (for "Automatic" and "Economy" modes) or from the user-defined manual sequence.
+
+Request Controller: Implements a throttling delay between API calls (throttleDelay) and a "circuit breaker" that stops the agent after a specified number of consecutive failures (maxFailures).
+
+prompt.ts: The BASE_SYSTEM_PROMPT has been updated with detailed instructions on how the agent should use new tools and operate in "Auto Mode".
+
+tools/:
+
+New Tools: revertRequest.ts and getHttpHistory.ts were added to allow the agent to undo request changes and search through Caido's traffic history.
+
+addFinding.ts: This tool's logic was modified to interact with the TodoManager and automatically mark related tasks as completed upon reporting a finding.
+
+packages/frontend/src/stores/
+config/store.ts: The store was refactored to manage the new orchestration mode, manualModelSequence, and controllerConfig. The loadSettings function is now more resilient, providing default values to prevent the undefined error on new installations.
+
+agents.ts: An errorCount property was added to track consecutive API failures for the "circuit breaker" functionality.
+
+errorLog.ts: A new Pinia store was created to log and track agent errors, which is used by transport.ts for debugging.
+
+packages/frontend/src/components/settings/
+Container.vue: Refactored to use a TabView component for organizing the UI with tabs for "General Settings", "Custom Prompts", "Documentation", and "Error Log".
+
+openrouter/Container.vue: The settings UI was redesigned to use a SelectButton for choosing the orchestration mode, with conditional rendering for the manual model sequence.
+
+prompts/Container.vue: The functionality to edit and delete default prompts has been enabled, and the import logic has been fixed to correctly process JSON files.
+
+Documentation.vue y ErrorLog.vue: New components created for a detailed documentation section and an error log viewer.
+
+packages/frontend/src/components/drawer/ChatInput/
+Container.vue: The chat UI was redesigned to be more responsive. The model selector was removed, and the <textarea> was made resizable with a fixed initial height to improve usability. A toggle for "Auto Mode" was also added.
+
+ModelSelector/useSelector.ts: The logic was adjusted to ensure that the model selector displays the current model based on the orchestration mode, with defensive coding to handle empty model sequences.

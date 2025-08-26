@@ -1,3 +1,5 @@
+// modified by Albert.C Date 2025-08-22 Version 0.01
+
 import type { Chat } from "@ai-sdk/vue";
 import { defineStore } from "pinia";
 import { computed, markRaw, ref, shallowRef, watch } from "vue";
@@ -9,6 +11,7 @@ import { useSDK } from "@/plugins/sdk";
 type AgentEntry = {
   chat: Chat<CustomUIMessage>;
   context: ToolContext;
+  errorCount: number; // Counter for consecutive API failures
 };
 
 export const useAgentsStore = defineStore("stores.agents", () => {
@@ -30,6 +33,7 @@ export const useAgentsStore = defineStore("stores.agents", () => {
     const entry: AgentEntry = {
       chat: markRaw(chat),
       context: toolContext,
+      errorCount: 0,
     };
 
     agents.value.set(replaySessionId, entry);
@@ -42,13 +46,31 @@ export const useAgentsStore = defineStore("stores.agents", () => {
     }
     selectedId.value = replaySessionId;
   }
-
+  
   function getAgent(replaySessionId: string) {
     return agents.value.get(replaySessionId)?.chat;
   }
 
   function getToolContext(replaySessionId: string) {
     return agents.value.get(replaySessionId)?.context;
+  }
+  
+  function getAgentErrorCount(replaySessionId: string) {
+    return agents.value.get(replaySessionId)?.errorCount ?? 0;
+  }
+  
+  function incrementAgentErrorCount(replaySessionId: string) {
+    const agentEntry = agents.value.get(replaySessionId);
+    if (agentEntry) {
+      agentEntry.errorCount++;
+    }
+  }
+  
+  function resetAgentErrorCount(replaySessionId: string) {
+    const agentEntry = agents.value.get(replaySessionId);
+    if (agentEntry) {
+      agentEntry.errorCount = 0;
+    }
   }
 
   async function abortSelectedAgent() {
@@ -69,12 +91,10 @@ export const useAgentsStore = defineStore("stores.agents", () => {
     return getToolContext(selectedId.value);
   });
 
-  // TODO: Temporary workaround for abort error, seems to be a bug in the ai-sdk
   const error = computed(() => selectedAgent.value?.error);
   watch(error, (error) => {
     if (selectedId.value === undefined) return;
 
-    // recover from abort error
     if (error?.message !== undefined && error.message.includes("abort")) {
       const agent = getAgent(selectedId.value);
       if (agent !== undefined) {
@@ -99,5 +119,8 @@ export const useAgentsStore = defineStore("stores.agents", () => {
     selectedId,
     selectAgent,
     abortSelectedAgent,
+    getAgentErrorCount,
+    incrementAgentErrorCount,
+    resetAgentErrorCount
   };
 });

@@ -1,3 +1,4 @@
+// modified by Albert.C Date 2025-08-22 Version 0.01
 import { computed } from "vue";
 
 import { useSDK } from "@/plugins/sdk";
@@ -10,6 +11,13 @@ export const useChat = () => {
   const uiStore = useUIStore();
   const configStore = useConfigStore();
   const sdk = useSDK();
+
+  const autoMode = computed({
+    get: () => configStore.autoModeConfig.enabled,
+    set: (value: boolean) => {
+      configStore.updateAutoModeConfig({ enabled: value });
+    },
+  });
 
   const inputMessage = computed({
     get: () => uiStore.getInput(agentStore.selectedId ?? ""),
@@ -27,7 +35,7 @@ export const useChat = () => {
   );
 
   const canSendMessage = computed(() => {
-    return isAgentIdle.value && inputMessage.value.trim() !== "";
+    return isAgentIdle.value && (inputMessage.value.trim() !== "" || autoMode.value);
   });
 
   const messages = computed(() => {
@@ -68,8 +76,10 @@ export const useChat = () => {
       return;
     }
 
-    const message = inputMessage.value.trim();
-    inputMessage.value = "";
+    const message = autoMode.value ? "Start automated security assessment" : inputMessage.value.trim();
+    if (!autoMode.value) {
+      inputMessage.value = "";
+    }
     sendMessage(message);
   };
 
@@ -122,5 +132,6 @@ export const useChat = () => {
     clearInputMessage,
     handleSend,
     handleKeydown,
+    autoMode
   };
 };

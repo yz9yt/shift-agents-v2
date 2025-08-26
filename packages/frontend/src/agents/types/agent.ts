@@ -1,3 +1,4 @@
+// modified by Albert.C Date 2025-08-22 Version 0.01
 import { type UIMessage } from "ai";
 import { z } from "zod";
 
@@ -20,6 +21,8 @@ export type ReplaySession = {
     SNI: string;
   };
   updateRequestRaw: (updater: (draft: string) => string) => boolean;
+  requestHistory: string[]; // Add a request history
+  revertRequestRaw: () => boolean; // Add a function to revert the raw request
 };
 
 // This is metadata of the entire message, not just the part

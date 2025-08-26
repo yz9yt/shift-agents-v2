@@ -1,3 +1,4 @@
+// modified by Albert.C Date 2025-08-22 Version 0.01
 import { type CustomPrompt } from "@/agents/types";
 
 // https://hacktricks.boitatech.com.br/pentesting-web/open-redirect
@@ -83,6 +84,16 @@ new URL("https://example.com/@evil.com").hostname
 \`\`\`
 `;
 
+const controlPromptContent = `
+## Control Agent Verification
+- Before reporting any finding, always perform a final verification step.
+- Re-run the exploit with a slightly modified payload or under different conditions to confirm the result.
+- Check the HTTP response headers and body for explicit confirmation of the vulnerability.
+- If the vulnerability is a client-side issue like XSS, check if the payload is actually rendered in the response body without being encoded.
+- Use the grepResponse tool to search for the payload in the response to confirm its presence.
+- Acknowledge that the verification step has been completed before adding the finding.
+`;
+
 export const defaultCustomPrompts: CustomPrompt[] = [
   {
     id: "1",
@@ -121,14 +132,6 @@ case-insensitive filtering on 'onerror'. let me try other events
 input: <img src=x onload=alert(1)>
 output: <img src=x >
 they're blocking common events. time to get creative with lesser-known events
-
-input: <img src=x onmouseover=alert(1)>
-output: <img src=x >
-still no luck, they're catching mouse events too. let's try a different tag and event combo to see if the filter is tag-specific
-
-input: <svg onload=alert(1)>
-output: <svg >
-svg tags aren't encoded, but the event is stripped. curious. maybe they’re only filtering specific attributes. let’s try a data URI to sneak in some JavaScript
 
 input: <img src="javascript:alert(1)">
 output: <img src="javascript:alert(1)">
@@ -363,6 +366,12 @@ There it is. The database executed the pg_sleep(5) function, causing a 5-second 
     id: "5",
     title: "URL Bypass Techniques",
     content: urlBypassTechniques,
+    isDefault: true,
+  },
+  {
+    id: "6",
+    title: "Control Agent Verification",
+    content: controlPromptContent,
     isDefault: true,
   },
 ];

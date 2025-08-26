@@ -1,3 +1,4 @@
+// modified by Albert.C Date 2025-08-22 Version 0.01
 import { Classic } from "@caido/primevue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
@@ -34,15 +35,15 @@ export const init = (sdk: FrontendSDK) => {
     width: "100%",
   });
 
-  root.id = `plugin--shift-agents`;
+  root.id = `plugin--shift-agents-v2`;
 
   app.mount(root);
 
-  sdk.navigation.addPage("/shift-agents", {
+  sdk.navigation.addPage("/shift-agents-v2", {
     body: root,
   });
 
-  sdk.sidebar.registerItem("Shift Agents", "/shift-agents", {
+  sdk.sidebar.registerItem("Shift Agents v2", "/shift-agents-v2", {
     icon: "fas fa-robot",
   });
 
@@ -52,12 +53,12 @@ export const init = (sdk: FrontendSDK) => {
     onClick: () => useUIStore().toggleDrawer(),
   });
 
-  sdk.commands.register("shift-agents:toggle-drawer", {
-    name: "Toggle Shift Agents Drawer",
+  sdk.commands.register("shift-agents-v2:toggle-drawer", {
+    name: "Toggle Shift Agents v2 Drawer",
     run: () => useUIStore().toggleDrawer(),
   });
 
-  sdk.shortcuts.register("shift-agents:toggle-drawer", ["shift", "meta", "i"]);
+  sdk.shortcuts.register("shift-agents-v2:toggle-drawer", ["shift", "meta", "i"]);
 
   const domManager = createDOMManager(sdk);
   domManager.drawer.start();

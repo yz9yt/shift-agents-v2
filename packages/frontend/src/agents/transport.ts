@@ -1,3 +1,4 @@
+// modified by Albert.C Date 2025-08-22 Version 0.03
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import {
   type ChatRequestOptions,
@@ -28,6 +29,8 @@ import {
   setRequestQueryTool,
   setRequestRawTool,
   updateTodoTool,
+  revertRequestTool,
+  getHttpHistoryTool,
 } from "@/agents/tools";
 import {
   type CustomUIMessage,
@@ -35,8 +38,10 @@ import {
   type ToolContext,
 } from "@/agents/types";
 import { markdownJoinerTransform } from "@/agents/utils/markdownJoiner";
+import { useAgentsStore } from "@/stores/agents";
 import { useConfigStore } from "@/stores/config";
 import { useUIStore } from "@/stores/ui";
+import { useErrorLogStore } from "@/stores/errorLog";
 import { getReplaySession } from "@/utils";
 
 export class ClientSideChatTransport implements ChatTransport<UIMessage> {
@@ -71,8 +76,37 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
 
     const prompt = convertToModelMessages(messages);
     const configStore = useConfigStore();
+    const agentsStore = useAgentsStore();
+    const errorLogStore = useErrorLogStore();
 
-    const openrouter = createOpenRouter({
+    // Model Orchestrator logic
+    let currentModelIndex = 0;
+    let modelSequence: string[];
+    
+    switch (configStore.orchestrationMode) {
+      case 'Automatic':
+        modelSequence = configStore.models.flatMap(group => group.items).filter(item => item.isRecommended).map(item => item.id);
+        break;
+      case 'Economy':
+        modelSequence = configStore.models.flatMap(group => group.items).filter(item => item.id.includes("lite") || item.id.includes("mini") || item.id.includes("free")).map(item => item.id);
+        break;
+      case 'Manual':
+      default:
+        modelSequence = configStore.manualModelSequence.length > 0
+          ? configStore.manualModelSequence
+          : ["anthropic/claude-sonnet-4"];
+        break;
+    }
+
+    // Request Controller (Circuit Breaker)
+    const failureCount = agentsStore.getAgentErrorCount(options.chatId);
+    if (failureCount >= configStore.controllerConfig.maxFailures) {
+      throw new Error(
+        "Agent stopped: Too many consecutive API failures. Please check your API key or connection."
+      );
+    }
+
+    const modelProvider = createOpenRouter({
       apiKey: configStore.openRouterApiKey,
       extraBody: {
         parallel_tool_calls: false,
@@ -83,11 +117,13 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
       },
     });
 
-    const model = openrouter(configStore.model);
     const stream = createUIMessageStream<CustomUIMessage>({
-      execute: ({ writer }) => {
+      execute: async ({ writer }) => {
+        // Request Controller (Throttling)
+        await new Promise(resolve => setTimeout(resolve, configStore.controllerConfig.throttleDelay));
+
         const result = streamText({
-          model,
+          model: modelProvider(modelSequence[currentModelIndex]),
           system: buildSystemPrompt(this.toolContext.replaySession.id),
           messages: prompt,
           abortSignal: abortSignal,
@@ -108,11 +144,17 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
             grepResponse: grepResponseTool,
             addTodo: addTodoTool,
             addFinding: addFindingTool,
+            revertRequest: revertRequestTool,
+            getHttpHistory: getHttpHistoryTool,
           },
           onFinish: () => {
             this.toolContext.todoManager.clearTodos();
+            agentsStore.resetAgentErrorCount(options.chatId);
           },
           prepareStep: (step) => {
+            // Cycle through the model sequence for each step
+            currentModelIndex = (currentModelIndex + 1) % modelSequence.length;
+            
             return {
               messages: [
                 ...step.messages,
@@ -132,7 +174,6 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
             const errorText =
               error instanceof Error ? error.message : String(error);
 
-            // TODO: Temporary workaround for abort error, seems to be a bug in the ai-sdk
             if (errorText.includes("abort")) {
               return;
             }
@@ -150,6 +191,8 @@ export class ClientSideChatTransport implements ChatTransport<UIMessage> {
             );
 
             console.error(error);
+            agentsStore.incrementAgentErrorCount(options.chatId);
+            errorLogStore.addError(options.chatId, errorText);
           },
         });
 

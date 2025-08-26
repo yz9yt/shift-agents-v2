@@ -1,3 +1,4 @@
+// modified by Albert.C Date 2025-08-22 Version 0.06
 <script setup lang="ts">
 import Button from "primevue/button";
 import Column from "primevue/column";
@@ -26,8 +27,6 @@ const openCreateDialog = () => {
 };
 
 const openEditDialog = (prompt: CustomPrompt) => {
-  if (prompt.isDefault !== undefined) return;
-
   editingPrompt.value = prompt;
   promptTitle.value = prompt.title;
   promptContent.value = prompt.content;
@@ -63,9 +62,38 @@ const savePrompt = async () => {
   closeDialog();
 };
 
-const deletePrompt = async (id: string, isDefault?: boolean) => {
-  if (isDefault !== undefined) return;
+const deletePrompt = async (id: string) => {
   await configStore.deleteCustomPrompt(id);
+};
+
+const importPrompts = async (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const content = e.target?.result;
+      if (typeof content === 'string') {
+        const importedPrompts = JSON.parse(content) as CustomPrompt[];
+        configStore.customPrompts = importedPrompts;
+        await configStore.saveSettings();
+      }
+    } catch (error) {
+      console.error("Failed to import prompts:", error);
+    }
+  };
+  reader.readAsText(file);
+};
+
+const exportPrompts = () => {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(configStore.customPrompts, null, 2));
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", "shift-agents-prompts.json");
+  document.body.appendChild(downloadAnchorNode);
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
 };
 </script>
 
@@ -78,12 +106,32 @@ const deletePrompt = async (id: string, isDefault?: boolean) => {
           Define reusable prompts for your AI interactions
         </p>
       </div>
-      <Button
-        icon="fas fa-plus"
-        label="Add Prompt"
-        size="small"
-        @click="openCreateDialog"
-      />
+      <div class="flex gap-2">
+        <label for="file-input">
+          <Button
+            icon="fas fa-upload"
+            label="Import"
+            size="small"
+            severity="secondary"
+            outlined
+          />
+        </label>
+        <input id="file-input" type="file" class="hidden" @change="importPrompts" accept="application/json" />
+        <Button
+          icon="fas fa-download"
+          label="Export"
+          size="small"
+          severity="secondary"
+          outlined
+          @click="exportPrompts"
+        />
+        <Button
+          icon="fas fa-plus"
+          label="Add Prompt"
+          size="small"
+          @click="openCreateDialog"
+        />
+      </div>
     </div>
 
     <div class="flex-1 overflow-hidden">
@@ -144,7 +192,6 @@ const deletePrompt = async (id: string, isDefault?: boolean) => {
                   size="small"
                   severity="secondary"
                   outlined
-                  :disabled="data.isDefault"
                   @click="openEditDialog(data)"
                 />
                 <Button
@@ -152,8 +199,7 @@ const deletePrompt = async (id: string, isDefault?: boolean) => {
                   size="small"
                   severity="danger"
                   outlined
-                  :disabled="data.isDefault"
-                  @click="deletePrompt(data.id, data.isDefault)"
+                  @click="deletePrompt(data.id)"
                 />
               </div>
             </template>
