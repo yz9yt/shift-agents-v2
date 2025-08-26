@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Shift Agents v2
 
 ## Overview
@@ -152,4 +151,4 @@ Upload the \`dist/plugin_package.zip\` in **Caido** via:
 ---
 
 ✅ **Shift Agents v2 brings automation, control, and flexibility to Caido like never before.**
->>>>>>> 6b496d502ca12081020c682ea98831bfe0e9b3c2
+
