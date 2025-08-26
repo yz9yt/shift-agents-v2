@@ -18,7 +18,7 @@ export default defineConfig({
   description: "Shift Agents v2: Delegate your work to a new generation of Shift Agents",
   version: "2.0.0",
   author: {
-    name: "Caido Labs Inc.",
+    name: "Caido Labs·Reimagined @yz9yt",
     email: "dev@caido.io",
     url: "https://caido.io",
   },
